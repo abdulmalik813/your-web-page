@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "description": "Your Web Page",
-  "license": "MIT",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
     "export-css": "node scripts/export-css.js",
