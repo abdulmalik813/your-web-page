@@ -65,7 +65,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: null;
   globals: {
@@ -119,9 +119,9 @@ export interface UserAuthOperations {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: number;
+  id: string;
   title: string;
-  author?: (number | null) | User;
+  author?: (string | null) | User;
   hero: {
     layout: 'fullscreen' | 'with-image' | 'text-only';
     heroTitle?: string | null;
@@ -143,11 +143,11 @@ export interface Page {
             reference?:
               | ({
                   relationTo: 'pages';
-                  value: number | Page;
+                  value: string | Page;
                 } | null)
               | ({
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 } | null);
             url?: string | null;
             newTab?: boolean | null;
@@ -159,27 +159,27 @@ export interface Page {
                 reference?:
                   | ({
                       relationTo: 'pages';
-                      value: number | Page;
+                      value: string | Page;
                     } | null)
                   | ({
                       relationTo: 'posts';
-                      value: number | Post;
+                      value: string | Post;
                     } | null);
                 url?: string | null;
                 newTab?: boolean | null;
-                icon?: (number | null) | Icon;
+                icon?: (string | null) | Icon;
                 axis?: ('before' | 'after') | null;
-                iconStyles?: (number | Style)[] | null;
+                iconStyles?: (string | Style)[] | null;
                 id?: string | null;
               }[]
             | null;
           buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
           buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-          listStyle?: (number | Style)[] | null;
-          styles?: (number | Style)[] | null;
-          icon?: (number | null) | Icon;
+          listStyle?: (string | Style)[] | null;
+          styles?: (string | Style)[] | null;
+          icon?: (string | null) | Icon;
           axis?: ('before' | 'after') | null;
-          iconStyles?: (number | Style)[] | null;
+          iconStyles?: (string | Style)[] | null;
         };
         id?: string | null;
       }[];
@@ -200,24 +200,24 @@ export interface Page {
         [k: string]: unknown;
       } | null;
       footer?: string | null;
-      cardStyles?: (number | Style)[] | null;
-      titleStyles?: (number | Style)[] | null;
-      actionStyles?: (number | Style)[] | null;
-      descriptionStyles?: (number | Style)[] | null;
-      cardContentStyles?: (number | Style)[] | null;
-      footerStyles?: (number | Style)[] | null;
+      cardStyles?: (string | Style)[] | null;
+      titleStyles?: (string | Style)[] | null;
+      actionStyles?: (string | Style)[] | null;
+      descriptionStyles?: (string | Style)[] | null;
+      cardContentStyles?: (string | Style)[] | null;
+      footerStyles?: (string | Style)[] | null;
     };
-    backgroundStyles?: (number | Style)[] | null;
-    media?: (number | null) | Media;
-    wrapperStyles?: (number | Style)[] | null;
-    contentStyles?: (number | Style)[] | null;
-    fullscreenStyles?: (number | Style)[] | null;
+    backgroundStyles?: (string | Style)[] | null;
+    media?: (string | null) | Media;
+    wrapperStyles?: (string | Style)[] | null;
+    contentStyles?: (string | Style)[] | null;
+    fullscreenStyles?: (string | Style)[] | null;
     /**
      * Styles applied to the entire hero section
      */
-    containerStyles?: (number | Style)[] | null;
-    heroTitleStyles?: (number | Style)[] | null;
-    heroDescriptionStyles?: (number | Style)[] | null;
+    containerStyles?: (string | Style)[] | null;
+    heroTitleStyles?: (string | Style)[] | null;
+    heroDescriptionStyles?: (string | Style)[] | null;
     enableCarousel?: boolean | null;
     slides?:
       | {
@@ -238,11 +238,11 @@ export interface Page {
                   reference?:
                     | ({
                         relationTo: 'pages';
-                        value: number | Page;
+                        value: string | Page;
                       } | null)
                     | ({
                         relationTo: 'posts';
-                        value: number | Post;
+                        value: string | Post;
                       } | null);
                   url?: string | null;
                   newTab?: boolean | null;
@@ -254,27 +254,27 @@ export interface Page {
                       reference?:
                         | ({
                             relationTo: 'pages';
-                            value: number | Page;
+                            value: string | Page;
                           } | null)
                         | ({
                             relationTo: 'posts';
-                            value: number | Post;
+                            value: string | Post;
                           } | null);
                       url?: string | null;
                       newTab?: boolean | null;
-                      icon?: (number | null) | Icon;
+                      icon?: (string | null) | Icon;
                       axis?: ('before' | 'after') | null;
-                      iconStyles?: (number | Style)[] | null;
+                      iconStyles?: (string | Style)[] | null;
                       id?: string | null;
                     }[]
                   | null;
                 buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
                 buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-                listStyle?: (number | Style)[] | null;
-                styles?: (number | Style)[] | null;
-                icon?: (number | null) | Icon;
+                listStyle?: (string | Style)[] | null;
+                styles?: (string | Style)[] | null;
+                icon?: (string | null) | Icon;
                 axis?: ('before' | 'after') | null;
-                iconStyles?: (number | Style)[] | null;
+                iconStyles?: (string | Style)[] | null;
               };
               id?: string | null;
             }[];
@@ -295,16 +295,16 @@ export interface Page {
               [k: string]: unknown;
             } | null;
             footer?: string | null;
-            cardStyles?: (number | Style)[] | null;
-            titleStyles?: (number | Style)[] | null;
-            actionStyles?: (number | Style)[] | null;
-            descriptionStyles?: (number | Style)[] | null;
-            cardContentStyles?: (number | Style)[] | null;
-            footerStyles?: (number | Style)[] | null;
+            cardStyles?: (string | Style)[] | null;
+            titleStyles?: (string | Style)[] | null;
+            actionStyles?: (string | Style)[] | null;
+            descriptionStyles?: (string | Style)[] | null;
+            cardContentStyles?: (string | Style)[] | null;
+            footerStyles?: (string | Style)[] | null;
           };
-          media?: (number | null) | Media;
-          wrapperStyles?: (number | Style)[] | null;
-          contentStyles?: (number | Style)[] | null;
+          media?: (string | null) | Media;
+          wrapperStyles?: (string | Style)[] | null;
+          contentStyles?: (string | Style)[] | null;
           id?: string | null;
         }[]
       | null;
@@ -314,7 +314,7 @@ export interface Page {
         grid?:
           | {
               gridSize: 'full' | 'three-quarters' | 'two-thirds' | 'half' | 'one-third' | 'one-quarter';
-              gridStyles?: (number | Style)[] | null;
+              gridStyles?: (string | Style)[] | null;
               blocks?:
                 | (
                     | ContentBlock
@@ -339,7 +339,7 @@ export interface Page {
           | null;
         container?: boolean | null;
         gapSize: 'none' | 'small' | 'medium' | 'large' | 'xlarge';
-        styles?: (number | Style)[] | null;
+        styles?: (string | Style)[] | null;
         id?: string | null;
       }[]
     | null;
@@ -348,7 +348,7 @@ export interface Page {
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
-    image?: (number | null) | Media;
+    image?: (string | null) | Media;
     description?: string | null;
   };
   publishedAt?: string | null;
@@ -366,7 +366,7 @@ export interface Page {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -392,10 +392,10 @@ export interface User {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title: string;
-  author?: (number | null) | User;
-  categories?: (number | Category)[] | null;
+  author?: (string | null) | User;
+  categories?: (string | Category)[] | null;
   readingTime: number;
   hero: {
     layout: 'fullscreen' | 'with-image' | 'text-only';
@@ -418,11 +418,11 @@ export interface Post {
             reference?:
               | ({
                   relationTo: 'pages';
-                  value: number | Page;
+                  value: string | Page;
                 } | null)
               | ({
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 } | null);
             url?: string | null;
             newTab?: boolean | null;
@@ -434,27 +434,27 @@ export interface Post {
                 reference?:
                   | ({
                       relationTo: 'pages';
-                      value: number | Page;
+                      value: string | Page;
                     } | null)
                   | ({
                       relationTo: 'posts';
-                      value: number | Post;
+                      value: string | Post;
                     } | null);
                 url?: string | null;
                 newTab?: boolean | null;
-                icon?: (number | null) | Icon;
+                icon?: (string | null) | Icon;
                 axis?: ('before' | 'after') | null;
-                iconStyles?: (number | Style)[] | null;
+                iconStyles?: (string | Style)[] | null;
                 id?: string | null;
               }[]
             | null;
           buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
           buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-          listStyle?: (number | Style)[] | null;
-          styles?: (number | Style)[] | null;
-          icon?: (number | null) | Icon;
+          listStyle?: (string | Style)[] | null;
+          styles?: (string | Style)[] | null;
+          icon?: (string | null) | Icon;
           axis?: ('before' | 'after') | null;
-          iconStyles?: (number | Style)[] | null;
+          iconStyles?: (string | Style)[] | null;
         };
         id?: string | null;
       }[];
@@ -475,24 +475,24 @@ export interface Post {
         [k: string]: unknown;
       } | null;
       footer?: string | null;
-      cardStyles?: (number | Style)[] | null;
-      titleStyles?: (number | Style)[] | null;
-      actionStyles?: (number | Style)[] | null;
-      descriptionStyles?: (number | Style)[] | null;
-      cardContentStyles?: (number | Style)[] | null;
-      footerStyles?: (number | Style)[] | null;
+      cardStyles?: (string | Style)[] | null;
+      titleStyles?: (string | Style)[] | null;
+      actionStyles?: (string | Style)[] | null;
+      descriptionStyles?: (string | Style)[] | null;
+      cardContentStyles?: (string | Style)[] | null;
+      footerStyles?: (string | Style)[] | null;
     };
-    backgroundStyles?: (number | Style)[] | null;
-    media?: (number | null) | Media;
-    wrapperStyles?: (number | Style)[] | null;
-    contentStyles?: (number | Style)[] | null;
-    fullscreenStyles?: (number | Style)[] | null;
+    backgroundStyles?: (string | Style)[] | null;
+    media?: (string | null) | Media;
+    wrapperStyles?: (string | Style)[] | null;
+    contentStyles?: (string | Style)[] | null;
+    fullscreenStyles?: (string | Style)[] | null;
     /**
      * Styles applied to the entire hero section
      */
-    containerStyles?: (number | Style)[] | null;
-    heroTitleStyles?: (number | Style)[] | null;
-    heroDescriptionStyles?: (number | Style)[] | null;
+    containerStyles?: (string | Style)[] | null;
+    heroTitleStyles?: (string | Style)[] | null;
+    heroDescriptionStyles?: (string | Style)[] | null;
     enableCarousel?: boolean | null;
     slides?:
       | {
@@ -513,11 +513,11 @@ export interface Post {
                   reference?:
                     | ({
                         relationTo: 'pages';
-                        value: number | Page;
+                        value: string | Page;
                       } | null)
                     | ({
                         relationTo: 'posts';
-                        value: number | Post;
+                        value: string | Post;
                       } | null);
                   url?: string | null;
                   newTab?: boolean | null;
@@ -529,27 +529,27 @@ export interface Post {
                       reference?:
                         | ({
                             relationTo: 'pages';
-                            value: number | Page;
+                            value: string | Page;
                           } | null)
                         | ({
                             relationTo: 'posts';
-                            value: number | Post;
+                            value: string | Post;
                           } | null);
                       url?: string | null;
                       newTab?: boolean | null;
-                      icon?: (number | null) | Icon;
+                      icon?: (string | null) | Icon;
                       axis?: ('before' | 'after') | null;
-                      iconStyles?: (number | Style)[] | null;
+                      iconStyles?: (string | Style)[] | null;
                       id?: string | null;
                     }[]
                   | null;
                 buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
                 buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-                listStyle?: (number | Style)[] | null;
-                styles?: (number | Style)[] | null;
-                icon?: (number | null) | Icon;
+                listStyle?: (string | Style)[] | null;
+                styles?: (string | Style)[] | null;
+                icon?: (string | null) | Icon;
                 axis?: ('before' | 'after') | null;
-                iconStyles?: (number | Style)[] | null;
+                iconStyles?: (string | Style)[] | null;
               };
               id?: string | null;
             }[];
@@ -570,16 +570,16 @@ export interface Post {
               [k: string]: unknown;
             } | null;
             footer?: string | null;
-            cardStyles?: (number | Style)[] | null;
-            titleStyles?: (number | Style)[] | null;
-            actionStyles?: (number | Style)[] | null;
-            descriptionStyles?: (number | Style)[] | null;
-            cardContentStyles?: (number | Style)[] | null;
-            footerStyles?: (number | Style)[] | null;
+            cardStyles?: (string | Style)[] | null;
+            titleStyles?: (string | Style)[] | null;
+            actionStyles?: (string | Style)[] | null;
+            descriptionStyles?: (string | Style)[] | null;
+            cardContentStyles?: (string | Style)[] | null;
+            footerStyles?: (string | Style)[] | null;
           };
-          media?: (number | null) | Media;
-          wrapperStyles?: (number | Style)[] | null;
-          contentStyles?: (number | Style)[] | null;
+          media?: (string | null) | Media;
+          wrapperStyles?: (string | Style)[] | null;
+          contentStyles?: (string | Style)[] | null;
           id?: string | null;
         }[]
       | null;
@@ -589,7 +589,7 @@ export interface Post {
         grid?:
           | {
               gridSize: 'full' | 'three-quarters' | 'two-thirds' | 'half' | 'one-third' | 'one-quarter';
-              gridStyles?: (number | Style)[] | null;
+              gridStyles?: (string | Style)[] | null;
               blocks?:
                 | (
                     | ContentBlock
@@ -615,7 +615,7 @@ export interface Post {
           | null;
         container?: boolean | null;
         gapSize: 'none' | 'small' | 'medium' | 'large' | 'xlarge';
-        styles?: (number | Style)[] | null;
+        styles?: (string | Style)[] | null;
         id?: string | null;
       }[]
     | null;
@@ -624,7 +624,7 @@ export interface Post {
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
-    image?: (number | null) | Media;
+    image?: (string | null) | Media;
     description?: string | null;
   };
   publishedAt?: string | null;
@@ -642,7 +642,7 @@ export interface Post {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: number;
+  id: string;
   name: string;
   description?: string | null;
   color?: ('default' | 'secondary' | 'destructive' | 'outline') | null;
@@ -659,7 +659,7 @@ export interface Category {
  * via the `definition` "icons".
  */
 export interface Icon {
-  id: number;
+  id: string;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -669,7 +669,7 @@ export interface Icon {
  * via the `definition` "styles".
  */
 export interface Style {
-  id: number;
+  id: string;
   alias: string;
   tailwind?: boolean | null;
   /**
@@ -688,7 +688,7 @@ export interface Style {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   alt?: string | null;
   caption?: string | null;
   creditText?: string | null;
@@ -699,7 +699,7 @@ export interface Media {
   /**
    * Upload a thumbnail image for this video
    */
-  videoThumbnail?: (number | null) | Thumbnail;
+  videoThumbnail?: (string | null) | Thumbnail;
   prefix?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -776,7 +776,7 @@ export interface Media {
  * via the `definition` "thumbnails".
  */
 export interface Thumbnail {
-  id: number;
+  id: string;
   alt: string;
   prefix?: string | null;
   updatedAt: string;
@@ -854,7 +854,7 @@ export interface Thumbnail {
  * via the `definition` "ContentBlock".
  */
 export interface ContentBlock {
-  contentStyles?: (number | Style)[] | null;
+  contentStyles?: (string | Style)[] | null;
   content?: {
     root: {
       type: string;
@@ -896,11 +896,11 @@ export interface CallToActionBlock {
           reference?:
             | ({
                 relationTo: 'pages';
-                value: number | Page;
+                value: string | Page;
               } | null)
             | ({
                 relationTo: 'posts';
-                value: number | Post;
+                value: string | Post;
               } | null);
           url?: string | null;
           newTab?: boolean | null;
@@ -912,27 +912,27 @@ export interface CallToActionBlock {
               reference?:
                 | ({
                     relationTo: 'pages';
-                    value: number | Page;
+                    value: string | Page;
                   } | null)
                 | ({
                     relationTo: 'posts';
-                    value: number | Post;
+                    value: string | Post;
                   } | null);
               url?: string | null;
               newTab?: boolean | null;
-              icon?: (number | null) | Icon;
+              icon?: (string | null) | Icon;
               axis?: ('before' | 'after') | null;
-              iconStyles?: (number | Style)[] | null;
+              iconStyles?: (string | Style)[] | null;
               id?: string | null;
             }[]
           | null;
         buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
         buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-        listStyle?: (number | Style)[] | null;
-        styles?: (number | Style)[] | null;
-        icon?: (number | null) | Icon;
+        listStyle?: (string | Style)[] | null;
+        styles?: (string | Style)[] | null;
+        icon?: (string | null) | Icon;
         axis?: ('before' | 'after') | null;
-        iconStyles?: (number | Style)[] | null;
+        iconStyles?: (string | Style)[] | null;
       };
       id?: string | null;
     }[];
@@ -953,17 +953,17 @@ export interface CallToActionBlock {
       [k: string]: unknown;
     } | null;
     footer?: string | null;
-    cardStyles?: (number | Style)[] | null;
-    titleStyles?: (number | Style)[] | null;
-    actionStyles?: (number | Style)[] | null;
-    descriptionStyles?: (number | Style)[] | null;
-    cardContentStyles?: (number | Style)[] | null;
-    footerStyles?: (number | Style)[] | null;
+    cardStyles?: (string | Style)[] | null;
+    titleStyles?: (string | Style)[] | null;
+    actionStyles?: (string | Style)[] | null;
+    descriptionStyles?: (string | Style)[] | null;
+    cardContentStyles?: (string | Style)[] | null;
+    footerStyles?: (string | Style)[] | null;
   };
-  backgroundStyles?: (number | Style)[] | null;
-  media?: (number | null) | Media;
-  wrapperStyles?: (number | Style)[] | null;
-  contentStyles?: (number | Style)[] | null;
+  backgroundStyles?: (string | Style)[] | null;
+  media?: (string | null) | Media;
+  wrapperStyles?: (string | Style)[] | null;
+  contentStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'callToActionBlock';
@@ -989,11 +989,11 @@ export interface CardBlock {
         reference?:
           | ({
               relationTo: 'pages';
-              value: number | Page;
+              value: string | Page;
             } | null)
           | ({
               relationTo: 'posts';
-              value: number | Post;
+              value: string | Post;
             } | null);
         url?: string | null;
         newTab?: boolean | null;
@@ -1005,27 +1005,27 @@ export interface CardBlock {
             reference?:
               | ({
                   relationTo: 'pages';
-                  value: number | Page;
+                  value: string | Page;
                 } | null)
               | ({
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 } | null);
             url?: string | null;
             newTab?: boolean | null;
-            icon?: (number | null) | Icon;
+            icon?: (string | null) | Icon;
             axis?: ('before' | 'after') | null;
-            iconStyles?: (number | Style)[] | null;
+            iconStyles?: (string | Style)[] | null;
             id?: string | null;
           }[]
         | null;
       buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
       buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-      listStyle?: (number | Style)[] | null;
-      styles?: (number | Style)[] | null;
-      icon?: (number | null) | Icon;
+      listStyle?: (string | Style)[] | null;
+      styles?: (string | Style)[] | null;
+      icon?: (string | null) | Icon;
       axis?: ('before' | 'after') | null;
-      iconStyles?: (number | Style)[] | null;
+      iconStyles?: (string | Style)[] | null;
     };
     id?: string | null;
   }[];
@@ -1046,12 +1046,12 @@ export interface CardBlock {
     [k: string]: unknown;
   } | null;
   footer?: string | null;
-  cardStyles?: (number | Style)[] | null;
-  titleStyles?: (number | Style)[] | null;
-  actionStyles?: (number | Style)[] | null;
-  descriptionStyles?: (number | Style)[] | null;
-  cardContentStyles?: (number | Style)[] | null;
-  footerStyles?: (number | Style)[] | null;
+  cardStyles?: (string | Style)[] | null;
+  titleStyles?: (string | Style)[] | null;
+  actionStyles?: (string | Style)[] | null;
+  descriptionStyles?: (string | Style)[] | null;
+  cardContentStyles?: (string | Style)[] | null;
+  footerStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'cardBlock';
@@ -1078,12 +1078,12 @@ export interface TabBlock {
       };
       [k: string]: unknown;
     };
-    titleStyles?: (number | Style)[] | null;
-    contentStyles?: (number | Style)[] | null;
+    titleStyles?: (string | Style)[] | null;
+    contentStyles?: (string | Style)[] | null;
     id?: string | null;
   }[];
-  tabStyles?: (number | Style)[] | null;
-  tabListStyles?: (number | Style)[] | null;
+  tabStyles?: (string | Style)[] | null;
+  tabListStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'tabBlock';
@@ -1110,18 +1110,18 @@ export interface AccordionBlock {
       };
       [k: string]: unknown;
     };
-    triggerStyles?: (number | Style)[] | null;
-    contentStyles?: (number | Style)[] | null;
+    triggerStyles?: (string | Style)[] | null;
+    contentStyles?: (string | Style)[] | null;
     id?: string | null;
   }[];
   /**
    * Styles for the entire accordion container
    */
-  accordionStyles?: (number | Style)[] | null;
+  accordionStyles?: (string | Style)[] | null;
   /**
    * Styles applied to all accordion items
    */
-  accordionItemStyles?: (number | Style)[] | null;
+  accordionItemStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'accordionBlock';
@@ -1151,7 +1151,7 @@ export interface DividerBlock {
    * Flip the divider upside down
    */
   flip?: boolean | null;
-  dividerStyles?: (number | Style)[] | null;
+  dividerStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'dividerBlock';
@@ -1161,7 +1161,7 @@ export interface DividerBlock {
  * via the `definition` "FormBlock".
  */
 export interface FormBlock {
-  form: number | Form;
+  form: string | Form;
   enableDescription?: boolean | null;
   description?: {
     root: {
@@ -1178,9 +1178,9 @@ export interface FormBlock {
     };
     [k: string]: unknown;
   } | null;
-  cardStyles?: (number | Style)[] | null;
-  titleStyles?: (number | Style)[] | null;
-  descriptionStyles?: (number | Style)[] | null;
+  cardStyles?: (string | Style)[] | null;
+  titleStyles?: (string | Style)[] | null;
+  descriptionStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'formBlock';
@@ -1190,7 +1190,7 @@ export interface FormBlock {
  * via the `definition` "forms".
  */
 export interface Form {
-  id: number;
+  id: string;
   title: string;
   fields?:
     | (
@@ -1304,9 +1304,6 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: {
     root: {
@@ -1326,9 +1323,6 @@ export interface Form {
   redirect?: {
     url: string;
   };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
   emails?:
     | {
         emailTo?: string | null;
@@ -1337,9 +1331,6 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
         message?: {
           root: {
             type: string;
@@ -1408,28 +1399,28 @@ export interface TableBlock {
         };
         [k: string]: unknown;
       };
-      cellStyles?: (number | Style)[] | null;
+      cellStyles?: (string | Style)[] | null;
       id?: string | null;
     }[];
-    rowStyles?: (number | Style)[] | null;
+    rowStyles?: (string | Style)[] | null;
     id?: string | null;
   }[];
   /**
    * Styles for the entire table container
    */
-  tableStyles?: (number | Style)[] | null;
+  tableStyles?: (string | Style)[] | null;
   /**
    * Styles applied to the table header
    */
-  headerStyles?: (number | Style)[] | null;
+  headerStyles?: (string | Style)[] | null;
   /**
    * Styles applied to the table body
    */
-  bodyStyles?: (number | Style)[] | null;
+  bodyStyles?: (string | Style)[] | null;
   /**
    * Styles applied to the table caption
    */
-  captionStyles?: (number | Style)[] | null;
+  captionStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'tableBlock';
@@ -1439,8 +1430,8 @@ export interface TableBlock {
  * via the `definition` "LastModifiedBlock".
  */
 export interface LastModifiedBlock {
-  cardStyles?: (number | Style)[] | null;
-  cardContentStyles?: (number | Style)[] | null;
+  cardStyles?: (string | Style)[] | null;
+  cardContentStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'lastModifiedBlock';
@@ -1450,7 +1441,7 @@ export interface LastModifiedBlock {
  * via the `definition` "imageCarouselBlock".
  */
 export interface ImageCarouselBlock {
-  medias?: (number | Media)[] | null;
+  medias?: (string | Media)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'imageCarouselBlock';
@@ -1462,8 +1453,8 @@ export interface ImageCarouselBlock {
 export interface TestimonialBlock {
   type?: ('carousel' | 'grid') | null;
   title?: string | null;
-  titleStyles?: (number | Style)[] | null;
-  testimonials: (number | Testimonial)[];
+  titleStyles?: (string | Style)[] | null;
+  testimonials: (string | Testimonial)[];
   nav?: {
     label?: string | null;
     appearance?: ('link' | 'button' | 'dropdown') | null;
@@ -1472,11 +1463,11 @@ export interface TestimonialBlock {
       reference?:
         | ({
             relationTo: 'pages';
-            value: number | Page;
+            value: string | Page;
           } | null)
         | ({
             relationTo: 'posts';
-            value: number | Post;
+            value: string | Post;
           } | null);
       url?: string | null;
       newTab?: boolean | null;
@@ -1488,27 +1479,27 @@ export interface TestimonialBlock {
           reference?:
             | ({
                 relationTo: 'pages';
-                value: number | Page;
+                value: string | Page;
               } | null)
             | ({
                 relationTo: 'posts';
-                value: number | Post;
+                value: string | Post;
               } | null);
           url?: string | null;
           newTab?: boolean | null;
-          icon?: (number | null) | Icon;
+          icon?: (string | null) | Icon;
           axis?: ('before' | 'after') | null;
-          iconStyles?: (number | Style)[] | null;
+          iconStyles?: (string | Style)[] | null;
           id?: string | null;
         }[]
       | null;
     buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
     buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-    listStyle?: (number | Style)[] | null;
-    styles?: (number | Style)[] | null;
-    icon?: (number | null) | Icon;
+    listStyle?: (string | Style)[] | null;
+    styles?: (string | Style)[] | null;
+    icon?: (string | null) | Icon;
     axis?: ('before' | 'after') | null;
-    iconStyles?: (number | Style)[] | null;
+    iconStyles?: (string | Style)[] | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -1519,12 +1510,12 @@ export interface TestimonialBlock {
  * via the `definition` "testimonials".
  */
 export interface Testimonial {
-  id: number;
+  id: string;
   type: 'individual' | 'company';
   name: string;
   position?: string | null;
   company?: string | null;
-  avatar?: (number | null) | Media;
+  avatar?: (string | null) | Media;
   content: string;
   rating?: number | null;
   updatedAt: string;
@@ -1537,7 +1528,7 @@ export interface Testimonial {
 export interface GalleryBlock {
   format: 'grid' | 'carousel' | 'focus';
   title?: string | null;
-  titleStyles?: (number | Style)[] | null;
+  titleStyles?: (string | Style)[] | null;
   nav?: {
     label?: string | null;
     appearance?: ('link' | 'button' | 'dropdown') | null;
@@ -1546,11 +1537,11 @@ export interface GalleryBlock {
       reference?:
         | ({
             relationTo: 'pages';
-            value: number | Page;
+            value: string | Page;
           } | null)
         | ({
             relationTo: 'posts';
-            value: number | Post;
+            value: string | Post;
           } | null);
       url?: string | null;
       newTab?: boolean | null;
@@ -1562,31 +1553,31 @@ export interface GalleryBlock {
           reference?:
             | ({
                 relationTo: 'pages';
-                value: number | Page;
+                value: string | Page;
               } | null)
             | ({
                 relationTo: 'posts';
-                value: number | Post;
+                value: string | Post;
               } | null);
           url?: string | null;
           newTab?: boolean | null;
-          icon?: (number | null) | Icon;
+          icon?: (string | null) | Icon;
           axis?: ('before' | 'after') | null;
-          iconStyles?: (number | Style)[] | null;
+          iconStyles?: (string | Style)[] | null;
           id?: string | null;
         }[]
       | null;
     buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
     buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-    listStyle?: (number | Style)[] | null;
-    styles?: (number | Style)[] | null;
-    icon?: (number | null) | Icon;
+    listStyle?: (string | Style)[] | null;
+    styles?: (string | Style)[] | null;
+    icon?: (string | null) | Icon;
     axis?: ('before' | 'after') | null;
-    iconStyles?: (number | Style)[] | null;
+    iconStyles?: (string | Style)[] | null;
   };
   gallery?:
     | {
-        image: number | Media;
+        image: string | Media;
         id?: string | null;
       }[]
     | null;
@@ -1601,7 +1592,7 @@ export interface GalleryBlock {
 export interface HeadingBlock {
   headingTag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
   headingText: string;
-  headingStyles?: (number | Style)[] | null;
+  headingStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'headingBlock';
@@ -1613,11 +1604,11 @@ export interface HeadingBlock {
 export interface ContactCardBlock {
   heading: string;
   description?: string | null;
-  cardStyles?: (number | Style)[] | null;
-  headingStyles?: (number | Style)[] | null;
-  descriptionStyles?: (number | Style)[] | null;
-  contentStyles?: (number | Style)[] | null;
-  linkStyles?: (number | Style)[] | null;
+  cardStyles?: (string | Style)[] | null;
+  headingStyles?: (string | Style)[] | null;
+  descriptionStyles?: (string | Style)[] | null;
+  contentStyles?: (string | Style)[] | null;
+  linkStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'contactCardBlock';
@@ -1627,11 +1618,11 @@ export interface ContactCardBlock {
  * via the `definition` "faqBlock".
  */
 export interface FaqBlock {
-  accordionStyles?: (number | Style)[] | null;
-  itemStyles?: (number | Style)[] | null;
-  questionStyles?: (number | Style)[] | null;
-  answerStyles?: (number | Style)[] | null;
-  faq?: (number | Faq)[] | null;
+  accordionStyles?: (string | Style)[] | null;
+  itemStyles?: (string | Style)[] | null;
+  questionStyles?: (string | Style)[] | null;
+  answerStyles?: (string | Style)[] | null;
+  faq?: (string | Faq)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'faqBlock';
@@ -1641,7 +1632,7 @@ export interface FaqBlock {
  * via the `definition` "faqs".
  */
 export interface Faq {
-  id: number;
+  id: string;
   question: string;
   answer: string;
   updatedAt: string;
@@ -1655,10 +1646,10 @@ export interface RecentPostsBlock {
   enableTitle?: boolean | null;
   numberOfPosts: number;
   title?: string | null;
-  cardStyles?: (number | Style)[] | null;
-  titleStyles?: (number | Style)[] | null;
-  contentStyles?: (number | Style)[] | null;
-  linkStyles?: (number | Style)[] | null;
+  cardStyles?: (string | Style)[] | null;
+  titleStyles?: (string | Style)[] | null;
+  contentStyles?: (string | Style)[] | null;
+  linkStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'recentPostsBlock';
@@ -1668,7 +1659,8 @@ export interface RecentPostsBlock {
  * via the `definition` "font-files".
  */
 export interface FontFile {
-  id: number;
+  id: string;
+  fontId: string;
   prefix?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1687,18 +1679,18 @@ export interface FontFile {
  * via the `definition` "redirects".
  */
 export interface Redirect {
-  id: number;
+  id: string;
   from: string;
   to?: {
     type?: ('reference' | 'postListingPage' | 'custom') | null;
     reference?:
       | ({
           relationTo: 'pages';
-          value: number | Page;
+          value: string | Page;
         } | null)
       | ({
           relationTo: 'posts';
-          value: number | Post;
+          value: string | Post;
         } | null);
     url?: string | null;
   };
@@ -1712,12 +1704,12 @@ export interface Redirect {
  * via the `definition` "search".
  */
 export interface Search {
-  id: number;
+  id: string;
   title?: string | null;
   priority?: number | null;
   doc: {
     relationTo: 'posts';
-    value: number | Post;
+    value: string | Post;
   };
   description?: string | null;
   updatedAt: string;
@@ -1728,8 +1720,8 @@ export interface Search {
  * via the `definition` "form-submissions".
  */
 export interface FormSubmission {
-  id: number;
-  form: number | Form;
+  id: string;
+  form: string | Form;
   submissionData?:
     | {
         field: string;
@@ -1745,7 +1737,7 @@ export interface FormSubmission {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -1762,7 +1754,7 @@ export interface PayloadKv {
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
-  id: number;
+  id: string;
   /**
    * Input data provided to the job
    */
@@ -1854,72 +1846,72 @@ export interface PayloadJob {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'pages';
-        value: number | Page;
+        value: string | Page;
       } | null)
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'thumbnails';
-        value: number | Thumbnail;
+        value: string | Thumbnail;
       } | null)
     | ({
         relationTo: 'styles';
-        value: number | Style;
+        value: string | Style;
       } | null)
     | ({
         relationTo: 'icons';
-        value: number | Icon;
+        value: string | Icon;
       } | null)
     | ({
         relationTo: 'testimonials';
-        value: number | Testimonial;
+        value: string | Testimonial;
       } | null)
     | ({
         relationTo: 'faqs';
-        value: number | Faq;
+        value: string | Faq;
       } | null)
     | ({
         relationTo: 'font-files';
-        value: number | FontFile;
+        value: string | FontFile;
       } | null)
     | ({
         relationTo: 'redirects';
-        value: number | Redirect;
+        value: string | Redirect;
       } | null)
     | ({
         relationTo: 'search';
-        value: number | Search;
+        value: string | Search;
       } | null)
     | ({
         relationTo: 'forms';
-        value: number | Form;
+        value: string | Form;
       } | null)
     | ({
         relationTo: 'form-submissions';
-        value: number | FormSubmission;
+        value: string | FormSubmission;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -1929,10 +1921,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -1952,7 +1944,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -3047,6 +3039,7 @@ export interface FaqsSelect<T extends boolean = true> {
  * via the `definition` "font-files_select".
  */
 export interface FontFilesSelect<T extends boolean = true> {
+  fontId?: T;
   prefix?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -3315,7 +3308,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "navigationBar".
  */
 export interface NavigationBar {
-  id: number;
+  id: string;
   navigation?:
     | {
         nav?: {
@@ -3326,11 +3319,11 @@ export interface NavigationBar {
             reference?:
               | ({
                   relationTo: 'pages';
-                  value: number | Page;
+                  value: string | Page;
                 } | null)
               | ({
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 } | null);
             url?: string | null;
             newTab?: boolean | null;
@@ -3342,27 +3335,27 @@ export interface NavigationBar {
                 reference?:
                   | ({
                       relationTo: 'pages';
-                      value: number | Page;
+                      value: string | Page;
                     } | null)
                   | ({
                       relationTo: 'posts';
-                      value: number | Post;
+                      value: string | Post;
                     } | null);
                 url?: string | null;
                 newTab?: boolean | null;
-                icon?: (number | null) | Icon;
+                icon?: (string | null) | Icon;
                 axis?: ('before' | 'after') | null;
-                iconStyles?: (number | Style)[] | null;
+                iconStyles?: (string | Style)[] | null;
                 id?: string | null;
               }[]
             | null;
           buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
           buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-          listStyle?: (number | Style)[] | null;
-          styles?: (number | Style)[] | null;
-          icon?: (number | null) | Icon;
+          listStyle?: (string | Style)[] | null;
+          styles?: (string | Style)[] | null;
+          icon?: (string | null) | Icon;
           axis?: ('before' | 'after') | null;
-          iconStyles?: (number | Style)[] | null;
+          iconStyles?: (string | Style)[] | null;
         };
         id?: string | null;
       }[]
@@ -3377,11 +3370,11 @@ export interface NavigationBar {
             reference?:
               | ({
                   relationTo: 'pages';
-                  value: number | Page;
+                  value: string | Page;
                 } | null)
               | ({
                   relationTo: 'posts';
-                  value: number | Post;
+                  value: string | Post;
                 } | null);
             url?: string | null;
             newTab?: boolean | null;
@@ -3393,27 +3386,27 @@ export interface NavigationBar {
                 reference?:
                   | ({
                       relationTo: 'pages';
-                      value: number | Page;
+                      value: string | Page;
                     } | null)
                   | ({
                       relationTo: 'posts';
-                      value: number | Post;
+                      value: string | Post;
                     } | null);
                 url?: string | null;
                 newTab?: boolean | null;
-                icon?: (number | null) | Icon;
+                icon?: (string | null) | Icon;
                 axis?: ('before' | 'after') | null;
-                iconStyles?: (number | Style)[] | null;
+                iconStyles?: (string | Style)[] | null;
                 id?: string | null;
               }[]
             | null;
           buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
           buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-          listStyle?: (number | Style)[] | null;
-          styles?: (number | Style)[] | null;
-          icon?: (number | null) | Icon;
+          listStyle?: (string | Style)[] | null;
+          styles?: (string | Style)[] | null;
+          icon?: (string | null) | Icon;
           axis?: ('before' | 'after') | null;
-          iconStyles?: (number | Style)[] | null;
+          iconStyles?: (string | Style)[] | null;
         };
         id?: string | null;
       }[]
@@ -3435,12 +3428,12 @@ export interface NavigationBar {
       };
       [k: string]: unknown;
     } | null;
-    bannerStyles?: (number | Style)[] | null;
-    contentStyles?: (number | Style)[] | null;
+    bannerStyles?: (string | Style)[] | null;
+    contentStyles?: (string | Style)[] | null;
   };
-  logoStyles?: (number | Style)[] | null;
+  logoStyles?: (string | Style)[] | null;
   useTitleWithLogo?: boolean | null;
-  titleStyles?: (number | Style)[] | null;
+  titleStyles?: (string | Style)[] | null;
   hideWhenIdle?: boolean | null;
   idleTimeout?: number | null;
   _status?: ('draft' | 'published') | null;
@@ -3452,7 +3445,7 @@ export interface NavigationBar {
  * via the `definition` "footer".
  */
 export interface Footer {
-  id: number;
+  id: string;
   tagLine?: {
     root: {
       type: string;
@@ -3483,11 +3476,11 @@ export interface Footer {
                         reference?:
                           | ({
                               relationTo: 'pages';
-                              value: number | Page;
+                              value: string | Page;
                             } | null)
                           | ({
                               relationTo: 'posts';
-                              value: number | Post;
+                              value: string | Post;
                             } | null);
                         url?: string | null;
                         newTab?: boolean | null;
@@ -3499,27 +3492,27 @@ export interface Footer {
                             reference?:
                               | ({
                                   relationTo: 'pages';
-                                  value: number | Page;
+                                  value: string | Page;
                                 } | null)
                               | ({
                                   relationTo: 'posts';
-                                  value: number | Post;
+                                  value: string | Post;
                                 } | null);
                             url?: string | null;
                             newTab?: boolean | null;
-                            icon?: (number | null) | Icon;
+                            icon?: (string | null) | Icon;
                             axis?: ('before' | 'after') | null;
-                            iconStyles?: (number | Style)[] | null;
+                            iconStyles?: (string | Style)[] | null;
                             id?: string | null;
                           }[]
                         | null;
                       buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
                       buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-                      listStyle?: (number | Style)[] | null;
-                      styles?: (number | Style)[] | null;
-                      icon?: (number | null) | Icon;
+                      listStyle?: (string | Style)[] | null;
+                      styles?: (string | Style)[] | null;
+                      icon?: (string | null) | Icon;
                       axis?: ('before' | 'after') | null;
-                      iconStyles?: (number | Style)[] | null;
+                      iconStyles?: (string | Style)[] | null;
                     };
                     id?: string | null;
                   }[]
@@ -3533,21 +3526,21 @@ export interface Footer {
   /**
    * Styles for the logo
    */
-  logoStyles?: (number | Style)[] | null;
+  logoStyles?: (string | Style)[] | null;
   useLabelWithLogo?: boolean | null;
-  labelStyles?: (number | Style)[] | null;
+  labelStyles?: (string | Style)[] | null;
   /**
    * Styles for the tagline text
    */
-  tagLineStyles?: (number | Style)[] | null;
+  tagLineStyles?: (string | Style)[] | null;
   /**
    * Styles for column group labels
    */
-  groupLabelStyles?: (number | Style)[] | null;
+  groupLabelStyles?: (string | Style)[] | null;
   /**
    * Styles for footer links
    */
-  linkStyles?: (number | Style)[] | null;
+  linkStyles?: (string | Style)[] | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -3557,15 +3550,15 @@ export interface Footer {
  * via the `definition` "settings".
  */
 export interface Setting {
-  id: number;
-  logo: number | Media;
-  logoDark?: (number | null) | Media;
+  id: string;
+  logo: string | Media;
+  logoDark?: (string | null) | Media;
   appTitle: string;
   appDescription: string;
-  fallbackImage: number | Media;
-  favIcon: number | Media;
-  favIconSvg?: (number | null) | Media;
-  favIconPng?: (number | null) | Media;
+  fallbackImage: string | Media;
+  favIcon: string | Media;
+  favIconSvg?: (string | null) | Media;
+  favIconPng?: (string | null) | Media;
   locale: string;
   googleVerification?: string | null;
   googleAnalyticsId?: string | null;
@@ -3605,7 +3598,7 @@ export interface Setting {
   postSlug?: string | null;
   postMetaTitle?: string | null;
   postMetaDescription?: string | null;
-  postMetaImage?: (number | null) | Media;
+  postMetaImage?: (string | null) | Media;
   default: {
     family: string;
     fontData?:
@@ -3647,7 +3640,7 @@ export interface Setting {
  * via the `definition` "social".
  */
 export interface Social {
-  id: number;
+  id: string;
   facebook?: string | null;
   instagram?: string | null;
   x?: string | null;
@@ -3930,14 +3923,14 @@ export interface TaskSchedulePublish {
     doc?:
       | ({
           relationTo: 'pages';
-          value: number | Page;
+          value: string | Page;
         } | null)
       | ({
           relationTo: 'posts';
-          value: number | Post;
+          value: string | Post;
         } | null);
     global?: ('navigationBar' | 'footer' | 'settings') | null;
-    user?: (number | null) | User;
+    user?: (string | null) | User;
   };
   output?: unknown;
 }
@@ -3946,9 +3939,9 @@ export interface TaskSchedulePublish {
  * via the `definition` "mediaBlock".
  */
 export interface MediaBlock {
-  media?: (number | null) | Media;
-  wrapperStyles?: (number | Style)[] | null;
-  contentStyles?: (number | Style)[] | null;
+  media?: (string | null) | Media;
+  wrapperStyles?: (string | Style)[] | null;
+  contentStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaBlock';
@@ -3966,11 +3959,11 @@ export interface NavigationBlock {
       reference?:
         | ({
             relationTo: 'pages';
-            value: number | Page;
+            value: string | Page;
           } | null)
         | ({
             relationTo: 'posts';
-            value: number | Post;
+            value: string | Post;
           } | null);
       url?: string | null;
       newTab?: boolean | null;
@@ -3982,27 +3975,27 @@ export interface NavigationBlock {
           reference?:
             | ({
                 relationTo: 'pages';
-                value: number | Page;
+                value: string | Page;
               } | null)
             | ({
                 relationTo: 'posts';
-                value: number | Post;
+                value: string | Post;
               } | null);
           url?: string | null;
           newTab?: boolean | null;
-          icon?: (number | null) | Icon;
+          icon?: (string | null) | Icon;
           axis?: ('before' | 'after') | null;
-          iconStyles?: (number | Style)[] | null;
+          iconStyles?: (string | Style)[] | null;
           id?: string | null;
         }[]
       | null;
     buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
     buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-    listStyle?: (number | Style)[] | null;
-    styles?: (number | Style)[] | null;
-    icon?: (number | null) | Icon;
+    listStyle?: (string | Style)[] | null;
+    styles?: (string | Style)[] | null;
+    icon?: (string | null) | Icon;
     axis?: ('before' | 'after') | null;
-    iconStyles?: (number | Style)[] | null;
+    iconStyles?: (string | Style)[] | null;
   };
   id?: string | null;
   blockName?: string | null;
@@ -4013,9 +4006,9 @@ export interface NavigationBlock {
  * via the `definition` "IconBlock".
  */
 export interface IconBlock {
-  icon?: (number | null) | Icon;
+  icon?: (string | null) | Icon;
   axis?: ('before' | 'after') | null;
-  iconStyles?: (number | Style)[] | null;
+  iconStyles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'iconBlock';

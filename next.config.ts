@@ -41,10 +41,10 @@ const nextConfig: NextConfig = {
         pathname: '/api/media/file/**',
       },
       {
-        pathname: '/thumbnails/file/**',
+        pathname: '/api/thumbnails/file/**',
       },
       {
-        pathname: '/font-files/file/**',
+        pathname: '/api/font-files/file/**',
       },
     ],
     formats: ['image/avif', 'image/webp'],

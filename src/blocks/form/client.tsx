@@ -31,7 +31,7 @@ export function FormBlockClient({
   renderedDescription?: React.ReactNode
   renderedConfirmation?: React.ReactNode
 }) {
-  const payloadForm = typeof formBlock.form === 'number' ? null : formBlock.form
+  const payloadForm = typeof formBlock.form === 'string' ? null : formBlock.form
   const router = useRouter()
 
   const fields: FieldType[] = payloadForm ? NormalizedFields(formBlock) : []

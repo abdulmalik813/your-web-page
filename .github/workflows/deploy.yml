@@ -36,8 +36,8 @@ jobs:
       #     context: .
       #     push: true
       #     tags: |
-      #       ghcr.io/nighttech-services/heartculture-catalyst:latest
-      #       ghcr.io/nighttech-services/heartculture-catalyst:${{ steps.version.outputs.tag }}
+      #       ghcr.io/nighttech-services/your-web-page-catalyst:latest
+      #       ghcr.io/nighttech-services/your-web-page-catalyst:${{ steps.version.outputs.tag }}
       #     build-args: |
       #       NEXT_PUBLIC_SERVER_URL=${{ secrets.NEXT_PUBLIC_SERVER_URL }}
       #       PAYLOAD_SECRET=${{ secrets.PAYLOAD_SECRET }}
@@ -54,4 +54,4 @@ jobs:
       #       -H "Authorization: Bearer ${{ secrets.DOKPLOY_TOKEN }}" \
       #       -H "Content-Type: application/json" \
       #       -H "x-github-event: registry_package" \
-      #       -d '{"registry_package": {"package_version": {"package_url": "ghcr.io/nighttech-services/heartculture-catalyst:latest"}}}'
+      #       -d '{"registry_package": {"package_version": {"package_url": "ghcr.io/nighttech-services/your-web-page-catalyst:latest"}}}'

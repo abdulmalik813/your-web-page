@@ -1,27 +1,32 @@
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:16-alpine
-    container_name: heartculture-postgres
+  # Single-node MongoDB replica set for local Payload transactions
+  mongodb:
+    image: mongo:8.0
+    container_name: your-web-page-mongodb
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: payload
-      POSTGRES_PASSWORD: payload
-      POSTGRES_DB: payload
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     ports:
-      - "5432:5432"
+      - "127.0.0.1:27017:27017"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mongodb_data:/data/db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U payload"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "--eval",
+          "try { const status = rs.status(); quit(status.ok === 1 && status.myState === 1 ? 0 : 1) } catch (error) { rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'mongodb:27017'}]}); quit(1) }",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 10s
 
   # MinIO (S3-compatible storage for development)
   minio:
     image: minio/minio:latest
-    container_name: heartculture-minio
+    container_name: your-web-page-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
@@ -41,22 +46,22 @@ services:
   # MinIO Client - Create bucket on startup
   minio-client:
     image: minio/mc:latest
-    container_name: heartculture-minio-client
+    container_name: your-web-page-minio-client
     depends_on:
       minio:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc config host add myminio http://minio:9000 minioadmin minioadmin;
-      /usr/bin/mc mb myminio/heartculture-media --ignore-existing;
-      /usr/bin/mc anonymous set download myminio/heartculture-media;
+      /usr/bin/mc mb myminio/your-web-page-media --ignore-existing;
+      /usr/bin/mc anonymous set download myminio/your-web-page-media;
       exit 0;
       "
 
   # Alternative MinIO Console UI (optional, better UI than default)
   minio-console:
     image: ghcr.io/georgmangold/console:latest
-    container_name: heartculture-minio-console
+    container_name: your-web-page-minio-console
     restart: unless-stopped
     environment:
       CONSOLE_MINIO_SERVER: http://minio:9000
@@ -69,7 +74,7 @@ services:
       - full  # Only start with: docker-compose --profile full up
 
 volumes:
-  postgres_data:
+  mongodb_data:
     driver: local
   minio_data:
     driver: local

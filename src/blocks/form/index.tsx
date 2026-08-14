@@ -7,7 +7,7 @@ export async function FormBlockUI({
   pageContext,
   ...formBlock
 }: FormBlockType & { pageContext: PageContext }) {
-  const payloadForm = typeof formBlock.form === 'number' ? null : formBlock.form
+  const payloadForm = typeof formBlock.form === 'string' ? null : formBlock.form
 
   const descriptionContent =
     formBlock?.enableDescription && formBlock.description ? (

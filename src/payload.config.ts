@@ -1,6 +1,6 @@
-import { postgresAdapter } from '@payloadcms/db-postgres'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import path from 'path'
-import { buildConfig, PayloadRequest, TaskConfig } from 'payload'
+import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 import { Users } from '@/collections/users'
@@ -91,11 +91,8 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  db: postgresAdapter({
-    pool: {
-      connectionString: DATABASE_URI,
-      max: 10, 
-    },
+  db: mongooseAdapter({
+    url: DATABASE_URI,
   }),
   sharp,
   serverURL: getServerSideURL(),

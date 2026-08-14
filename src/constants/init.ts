@@ -24,8 +24,8 @@ export const ENVRIONMMENT = process.env.NODE_ENV
 
 // Email
 export const EMAIL = {
-  FROM_ADDRESS: process.env.EMAIL_FROM_ADDRESS || 'noreply@nighttechservices.com',
-  FROM_NAME: process.env.EMAIL_FROM_NAME || 'No Reply',
+  FROM_ADDRESS: process.env.EMAIL_FROM_ADDRESS || 'noreply@yourwebpage.ca',
+  FROM_NAME: process.env.EMAIL_FROM_NAME || 'Your Web Page (No Reply)',
   RESEND_API_KEY: process.env.RESEND_API_KEY || '',
   SMTP_HOST: process.env.SMTP_HOST || '',
   SMTP_PORT: Number(process.env.SMTP_PORT || 587),

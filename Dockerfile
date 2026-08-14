@@ -8,9 +8,9 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@11.21.0 --activate
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY scripts ./scripts
 COPY src/app/(frontend)/theme.css ./src/app/(frontend)/theme.css
 RUN pnpm install --frozen-lockfile
@@ -20,7 +20,7 @@ FROM base AS builder
 WORKDIR /app
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@11.21.0 --activate
 
 # Declare build arguments
 ARG NEXT_PUBLIC_SERVER_URL

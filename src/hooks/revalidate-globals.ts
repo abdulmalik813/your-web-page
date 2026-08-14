@@ -31,6 +31,7 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
             tailwind: false,
             stylesheet: '',
           },
+          req,
         })
       }
     }
@@ -49,6 +50,7 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
     await req.payload.delete({
       collection: 'styles',
       id: style.id,
+      req,
     })
   }
 

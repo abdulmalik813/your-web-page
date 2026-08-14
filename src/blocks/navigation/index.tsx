@@ -69,7 +69,7 @@ function LinkWithIcon({
             : 'flex items-center gap-2'
           : '',
       )}
-      prefetch={!isExternal}
+      prefetch={isExternal ? false : null}
     >
       {iconPlacement !== 'after' && renderIcon()}
       <span className={joinStyles('wrap-break-word', 'whitespace-normal')}>{label}</span>

@@ -19,6 +19,13 @@ export const FontFiles: CollectionConfig = {
     {
       name: 'filename',
       type: 'text',
+      index: true,
+    },
+    {
+      name: 'fontId',
+      type: 'text',
+      required: true,
+      index: true,
     },
   ],
   upload: {

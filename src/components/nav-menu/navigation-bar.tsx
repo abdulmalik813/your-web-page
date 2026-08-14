@@ -1,5 +1,5 @@
 import { getCachedGlobal } from '@/lib/get-globals'
-import { NavigationBar, Setting, Style } from '@/payload-types'
+import { NavigationBar, Setting } from '@/payload-types'
 import Link from 'next/link'
 import { Menu } from 'lucide-react'
 import {
@@ -62,10 +62,10 @@ function LogoLink({
 }: {
   lightLogo: any
   darkLogo: any
-  logoStyles?: (number | Style)[] | null | undefined
+  logoStyles?: NavigationBar['logoStyles']
   useTitleWithLogo?: boolean | null
   appTitle?: string | null
-  titleStyles?: (number | Style)[] | null | undefined
+  titleStyles?: NavigationBar['titleStyles']
   pageContext: PageContext
 }) {
   return (

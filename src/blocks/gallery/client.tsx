@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { X } from 'lucide-react'
 import type { GalleryBlock, Media as MediaType } from '@/payload-types'
 import { cn } from '@/lib/utils'
@@ -25,7 +25,7 @@ interface GalleryBlockClientProps {
 
 export function GalleryBlockClient({ galleryBlock, pageContext }: GalleryBlockClientProps) {
   const [selectedImage, setSelectedImage] = useState<number | null>(null)
-  const autoplayPlugin = useRef(
+  const [autoplayPlugin] = useState(() =>
     Autoplay({
       delay: 4000,
       stopOnInteraction: true,
@@ -109,7 +109,7 @@ export function GalleryBlockClient({ galleryBlock, pageContext }: GalleryBlockCl
         <div className="relative">
           <Carousel
             className="w-full"
-            plugins={[autoplayPlugin.current]}
+            plugins={[autoplayPlugin]}
             opts={{
               loop: true,
               align: 'center',

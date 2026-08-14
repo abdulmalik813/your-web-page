@@ -3,7 +3,7 @@ import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import z from 'zod'
 
 export function NormalizedFields({ form }: FormBlock): FieldType[] {
-  if (typeof form === "number") return []
+  if (typeof form === "string") return []
 
   const normalizedFields = form?.fields?.map((field) => {
     const name = "name" in field ? (field.name || "") : ""

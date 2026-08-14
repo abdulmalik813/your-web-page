@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useField } from '@payloadcms/ui'
 import { getServerSideURL } from '@/lib/get-url'
 
@@ -213,9 +213,7 @@ export function FontFamilySearchField({ path }: { path: string }) {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [allFonts, setAllFonts] = useState<GoogleFont[]>([])
-  const [filteredFonts, setFilteredFonts] = useState<GoogleFont[]>([])
   const [isLoadingFonts, setIsLoadingFonts] = useState(false)
-  const [showResults, setShowResults] = useState(false)
   const [selectedFont, setSelectedFont] = useState<GoogleFont | null>(null)
   const [selectedWeight, setSelectedWeight] = useState<number | null>(null)
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null)
@@ -256,25 +254,20 @@ export function FontFamilySearchField({ path }: { path: string }) {
     }
   }, [searchTerm, allFonts.length, fontsCache])
 
-  useEffect(() => {
-    if (!searchTerm) {
-      setFilteredFonts([])
-      setShowResults(false)
-      return
-    }
-
-    const filtered = allFonts
-      .filter((font) => font.family.toLowerCase().includes(searchTerm.toLowerCase()))
-      .slice(0, 50)
-
-    setFilteredFonts(filtered)
-    setShowResults(true)
-  }, [searchTerm, allFonts])
+  const filteredFonts = useMemo(
+    () =>
+      searchTerm
+        ? allFonts
+            .filter((font) => font.family.toLowerCase().includes(searchTerm.toLowerCase()))
+            .slice(0, 50)
+        : [],
+    [searchTerm, allFonts],
+  )
+  const showResults = Boolean(searchTerm)
 
   const handleFontSelect = (font: GoogleFont) => {
     setSelectedFont(font)
     setSearchTerm('')
-    setShowResults(false)
     setSelectedWeight(font.variable ? 400 : font.weights[0] || null)
     setSelectedStyle(font.styles[0] || null)
     setSelectedSubset(font.defSubset)
@@ -303,6 +296,8 @@ export function FontFamilySearchField({ path }: { path: string }) {
       }
 
       const cssResponse = await fetch(cssUrl)
+      let fontCSS: string
+
       if (!cssResponse.ok) {
         cssUrl = selectedFont.variable
           ? `https://cdn.jsdelivr.net/npm/@fontsource-variable/${selectedFont.id}@latest/index.css`
@@ -310,9 +305,9 @@ export function FontFamilySearchField({ path }: { path: string }) {
 
         const fallbackResponse = await fetch(cssUrl)
         if (!fallbackResponse.ok) throw new Error('Failed to fetch font CSS')
-        var fontCSS = await fallbackResponse.text()
+        fontCSS = await fallbackResponse.text()
       } else {
-        var fontCSS = await cssResponse.text()
+        fontCSS = await cssResponse.text()
       }
 
       setDownloadProgress(20)
@@ -388,8 +383,13 @@ export function FontFamilySearchField({ path }: { path: string }) {
 
             const formData = new FormData()
             formData.append('file', blob, filename)
-            formData.append('fontId', selectedFont.id)
-            formData.append('filename', filename)
+            formData.append(
+              '_payload',
+              JSON.stringify({
+                filename,
+                fontId: selectedFont.id,
+              }),
+            )
 
             const uploadResponse = await fetch('/api/font-files', {
               method: 'POST',
@@ -408,35 +408,10 @@ export function FontFamilySearchField({ path }: { path: string }) {
             fileUrl_uploaded = uploadResult.doc.url
           }
         } else {
-          setDownloadStatus(`Uploading ${filename} (${i + 1}/${fontFileUrls.length})...`)
-
-          const fullUrl = baseUrl + fileUrl.replace('./', '')
-          const response = await fetch(fullUrl)
-
-          if (!response.ok) throw new Error(`Failed to download ${filename}`)
-
-          const blob = await response.blob()
-
-          const formData = new FormData()
-          formData.append('file', blob, filename)
-          formData.append('fontId', selectedFont.id)
-          formData.append('filename', filename)
-
-          const uploadResponse = await fetch('/api/font-files', {
-            method: 'POST',
-            body: formData,
-            credentials: 'include',
-          })
-
-          if (!uploadResponse.ok) {
-            const errorData = await uploadResponse.json()
-            throw new Error(
-              `Failed to upload ${filename}: ${errorData.errors?.[0]?.message || 'Unknown error'}`,
-            )
-          }
-
-          const uploadResult = await uploadResponse.json()
-          fileUrl_uploaded = uploadResult.doc.url
+          const errorData = await checkResponse.json()
+          throw new Error(
+            `Failed to check ${filename}: ${errorData.errors?.[0]?.message || 'Unknown error'}`,
+          )
         }
 
         uploadedFontFiles.push({
@@ -511,7 +486,6 @@ export function FontFamilySearchField({ path }: { path: string }) {
             placeholder="Type to search fonts (e.g., 'Roboto', 'Inter')..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={() => searchTerm && setShowResults(true)}
             style={styles.input}
           />
 

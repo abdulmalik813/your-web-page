@@ -14,13 +14,11 @@ export function NavigationBarWrapper({
   hideWhenIdle,
   idleTimeout = 0,
 }: NavigationBarWrapperProps) {
-  const [isVisible, setIsVisible] = useState(true)
   const [isAtTop, setIsAtTop] = useState(true)
   const idleTimerRef = React.useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (!hideWhenIdle) {
-      setIsVisible(true)
       return
     }
 
@@ -30,7 +28,6 @@ export function NavigationBarWrapper({
     }
 
     const handleActivity = () => {
-      setIsVisible(true)
       const header = document.querySelector('header[role="navigation"]') as HTMLElement
       if (header) {
         header.style.opacity = '1'
@@ -41,7 +38,6 @@ export function NavigationBarWrapper({
 
       if (!isAtTop) {
         idleTimerRef.current = setTimeout(() => {
-          setIsVisible(false)
           const header = document.querySelector('header[role="navigation"]') as HTMLElement
           if (header) {
             header.style.opacity = '0'
@@ -56,7 +52,6 @@ export function NavigationBarWrapper({
       setIsAtTop(atTop)
       
       if (atTop) {
-        setIsVisible(true)
         const header = document.querySelector('header[role="navigation"]') as HTMLElement
         if (header) {
           header.style.opacity = '1'
