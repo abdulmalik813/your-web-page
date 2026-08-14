@@ -145,6 +145,8 @@ export const plugins: Plugin[] = [
     clientUploads: true,
     config: {
       forcePathStyle: true,
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
       credentials: {
         accessKeyId: S3.ACCESS_KEY_ID,
         secretAccessKey: S3.SECRET_ACCESS_KEY,
