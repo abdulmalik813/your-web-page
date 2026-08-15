@@ -22,6 +22,12 @@ COPY . .
 
 RUN pnpm run export-css
 
+# Cache-buster: forces the secret-mounted RUN below to always
+# re-execute instead of reusing a cached layer from a previous
+# build with different secret values. Pass a fresh value (e.g.
+# github.sha) via --build-arg from the workflow.
+ARG CACHEBUST=1
+
 RUN --mount=type=secret,id=NODE_ENV \
     --mount=type=secret,id=DATABASE_URI \
     --mount=type=secret,id=CRON_SECRET \
@@ -79,6 +85,8 @@ RUN --mount=type=secret,id=NODE_ENV \
       echo "ERROR: DATABASE_URI build secret is required."; \
       exit 1; \
     fi; \
+    \
+    echo "DB_HOST_CHECK: $(echo "$DATABASE_URI" | sed -E 's#.*@([^:/]+):.*#\1#')"; \
     \
     pnpm build
 

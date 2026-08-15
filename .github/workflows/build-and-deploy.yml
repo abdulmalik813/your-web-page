@@ -463,6 +463,9 @@ jobs:
           add-hosts: |
             host.docker.internal=host-gateway
 
+          build-args: |
+            CACHEBUST=${{ github.sha }}
+
           tags: |
             ${{ steps.image.outputs.name }}:latest
             ${{ steps.image.outputs.name }}:${{ github.sha }}
