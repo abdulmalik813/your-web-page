@@ -35,7 +35,7 @@ COPY . .
 # and scripts directory are available.
 RUN pnpm run export-css
 
-RUN --mount=type=secret,id=NODE_ENV \
+RUN --network=host --mount=type=secret,id=NODE_ENV \
     --mount=type=secret,id=DATABASE_URI \
     --mount=type=secret,id=CRON_SECRET \
     --mount=type=secret,id=NEXT_PUBLIC_SERVER_URL \
