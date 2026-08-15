@@ -5,8 +5,6 @@ on:
     branches:
       - main
 
-  workflow_dispatch:
-
 permissions:
   contents: read
 
@@ -27,6 +25,14 @@ jobs:
       TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
       TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
 
+      # Database target on VPS
+      DB_TARGET: your-web-page-payload-kavlug
+      DB_TARGET_PORT: "27017"
+      DB_NETWORK: dokploy-network
+
+      # Port exposed locally on the GitHub runner
+      DB_LOCAL_PORT: "27018"
+
     steps:
       # =========================================================
       # CHECKOUT
@@ -42,28 +48,33 @@ jobs:
 
       - name: Install cloudflared
         run: |
+          set -euo pipefail
+
           sudo curl -fsSL \
             https://github.com/cloudflare/cloudflared/releases/download/2026.5.1/cloudflared-linux-amd64 \
             -o /usr/local/bin/cloudflared
 
           sudo chmod +x /usr/local/bin/cloudflared
 
-          echo "Cloudflared:"
           cloudflared --version
 
 
       # =========================================================
-      # INSTALL SSH PRIVATE KEY
+      # INSTALL SSH KEY
       # =========================================================
 
       - name: Install SSH private key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
+          set -euo pipefail
+
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
 
-          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$SSH_PRIVATE_KEY" \
+            > "$HOME/.ssh/id_ed25519"
+
           chmod 600 "$HOME/.ssh/id_ed25519"
 
           echo "SSH private key installed."
@@ -75,6 +86,8 @@ jobs:
 
       - name: Configure SSH
         run: |
+          set -euo pipefail
+
           cat > "$HOME/.ssh/config" <<EOF
           Host production
             HostName ${SSH_HOST}
@@ -95,88 +108,240 @@ jobs:
       # VALIDATE CONFIG
       # =========================================================
 
-      - name: Validate connection configuration
+      - name: Validate configuration
         run: |
+          set -euo pipefail
+
           test -n "$SSH_HOST" || {
-            echo "ERROR: SSH_HOST is missing"
+            echo "ERROR: SSH_HOST missing"
             exit 1
           }
 
           test -n "$SSH_USER" || {
-            echo "ERROR: SSH_USER is missing"
+            echo "ERROR: SSH_USER missing"
             exit 1
           }
 
           test -n "$TUNNEL_SERVICE_TOKEN_ID" || {
-            echo "ERROR: CF_ACCESS_CLIENT_ID is missing"
+            echo "ERROR: CF_ACCESS_CLIENT_ID missing"
             exit 1
           }
 
           test -n "$TUNNEL_SERVICE_TOKEN_SECRET" || {
-            echo "ERROR: CF_ACCESS_CLIENT_SECRET is missing"
+            echo "ERROR: CF_ACCESS_CLIENT_SECRET missing"
             exit 1
           }
 
           test -s "$HOME/.ssh/id_ed25519" || {
-            echo "ERROR: SSH_PRIVATE_KEY is missing"
+            echo "ERROR: SSH_PRIVATE_KEY missing"
             exit 1
           }
 
-          echo "Connection configuration OK."
+          echo "Configuration OK."
 
 
       # =========================================================
       # TEST CLOUDFLARE + SSH
       # =========================================================
 
-      - name: Test Cloudflare SSH connection
+      - name: Test VPS connection
         run: |
+          set -euo pipefail
+
           ssh production '
             set -e
 
             echo "======================================"
             echo " GitHub Actions SSH SUCCESS"
             echo "======================================"
-            echo
-
-            echo "Hostname:"
-            hostname
 
             echo
-            echo "User:"
-            whoami
-
-            echo
-            echo "Kernel:"
-            uname -r
+            echo "Hostname: $(hostname)"
+            echo "User:     $(whoami)"
 
             echo
             echo "Docker:"
             docker --version
+
+            echo
+            echo "Tunnel helper:"
+            test -x /usr/local/bin/docker-tunnel-helper
+            echo "Available"
           '
 
 
       # =========================================================
-      # DATABASE TUNNEL
+      # CREATE SERVER-SIDE DATABASE PROXY
       # =========================================================
 
       - name: Prepare database tunnel
+        id: db
         run: |
-          echo "// TODO: ask VPS helper for database/container tunnel details"
+          set -euo pipefail
 
+          echo "======================================"
+          echo " PREPARE DATABASE TUNNEL"
+          echo "======================================"
 
-      - name: Open database SSH tunnel
-        run: |
-          echo "// TODO: open SSH local forward to returned VPS port"
+          RESULT="$(
+            ssh production \
+              "/usr/local/bin/docker-tunnel-helper prepare '$DB_TARGET' '$DB_TARGET_PORT' '$DB_NETWORK'"
+          )"
+
+          echo "$RESULT"
+
+          STATUS="$(
+            printf '%s\n' "$RESULT" |
+            sed -n 's/^STATUS=//p' |
+            head -n 1
+          )"
+
+          SESSION_ID="$(
+            printf '%s\n' "$RESULT" |
+            sed -n 's/^SESSION_ID=//p' |
+            head -n 1
+          )"
+
+          REMOTE_HOST="$(
+            printf '%s\n' "$RESULT" |
+            sed -n 's/^HOST=//p' |
+            head -n 1
+          )"
+
+          REMOTE_PORT="$(
+            printf '%s\n' "$RESULT" |
+            sed -n 's/^PORT=//p' |
+            head -n 1
+          )"
+
+          PROXY_NAME="$(
+            printf '%s\n' "$RESULT" |
+            sed -n 's/^PROXY_NAME=//p' |
+            head -n 1
+          )"
+
+          if [ "$STATUS" != "OK" ]; then
+            echo "ERROR: VPS tunnel helper did not return STATUS=OK"
+            exit 1
+          fi
+
+          test -n "$SESSION_ID"
+          test -n "$REMOTE_HOST"
+          test -n "$REMOTE_PORT"
+
+          case "$REMOTE_PORT" in
+            *[!0-9]*|'')
+              echo "ERROR: Invalid remote tunnel port"
+              exit 1
+              ;;
+          esac
+
+          echo
+          echo "Tunnel proxy created:"
+          echo "  Session: $SESSION_ID"
+          echo "  Proxy:   $PROXY_NAME"
+          echo "  VPS:     $REMOTE_HOST:$REMOTE_PORT"
+
+          # GitHub step outputs
+          echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
+          echo "remote_host=$REMOTE_HOST" >> "$GITHUB_OUTPUT"
+          echo "remote_port=$REMOTE_PORT" >> "$GITHUB_OUTPUT"
+          echo "proxy_name=$PROXY_NAME" >> "$GITHUB_OUTPUT"
+
+          # Also persist session ID for cleanup safety
+          printf '%s\n' "$SESSION_ID" > /tmp/db-tunnel-session
 
 
       # =========================================================
-      # DATABASE URL
+      # OPEN GITHUB RUNNER -> VPS SSH FORWARD
+      # =========================================================
+
+      - name: Open database SSH tunnel
+        id: db-forward
+        env:
+          REMOTE_HOST: ${{ steps.db.outputs.remote_host }}
+          REMOTE_PORT: ${{ steps.db.outputs.remote_port }}
+        run: |
+          set -euo pipefail
+
+          echo "======================================"
+          echo " OPEN SSH DATABASE FORWARD"
+          echo "======================================"
+
+          # Ensure local port is not already occupied
+          if nc -z 127.0.0.1 "$DB_LOCAL_PORT" 2>/dev/null; then
+            echo "ERROR: Local port $DB_LOCAL_PORT already in use"
+            exit 1
+          fi
+
+          ssh \
+            -N \
+            -o ExitOnForwardFailure=yes \
+            -L "${DB_LOCAL_PORT}:${REMOTE_HOST}:${REMOTE_PORT}" \
+            production &
+
+          SSH_PID=$!
+
+          printf '%s\n' "$SSH_PID" > /tmp/db-ssh-tunnel.pid
+
+          echo "SSH tunnel PID: $SSH_PID"
+
+          # Give SSH a moment to establish
+          sleep 3
+
+          if ! kill -0 "$SSH_PID" 2>/dev/null; then
+            echo "ERROR: SSH tunnel process exited"
+            exit 1
+          fi
+
+          # Confirm the complete path reaches Mongo
+          if ! nc -z -w 5 127.0.0.1 "$DB_LOCAL_PORT"; then
+            echo "ERROR: Database tunnel is not reachable"
+            exit 1
+          fi
+
+          echo
+          echo "Database tunnel ACTIVE"
+          echo
+          echo "GitHub runner:"
+          echo "  127.0.0.1:$DB_LOCAL_PORT"
+          echo
+          echo "VPS proxy:"
+          echo "  $REMOTE_HOST:$REMOTE_PORT"
+
+          echo "local_port=$DB_LOCAL_PORT" >> "$GITHUB_OUTPUT"
+
+
+      # =========================================================
+      # CONSTRUCT DATABASE URL
       # =========================================================
 
       - name: Construct database URL
         run: |
-          echo "// TODO: construct DATABASE_URI from tunnel details"
+          echo "======================================"
+          echo " DATABASE URL"
+          echo "======================================"
+
+          # TODO:
+          #
+          # Construct DATABASE_URI using:
+          #
+          # host:
+          #   127.0.0.1
+          #
+          # port:
+          #   $DB_LOCAL_PORT
+          #
+          # credentials:
+          #   production DB secrets
+          #
+          # Then write:
+          #
+          # echo "DATABASE_URI=..." >> "$GITHUB_ENV"
+          #
+          # DO NOT print the complete URI/password.
+
+          echo "// TODO: construct DATABASE_URI"
 
 
       # =========================================================
@@ -185,7 +350,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          echo "// TODO: setup pnpm and Node"
+          echo "======================================"
+          echo " INSTALL"
+          echo "======================================"
+
+          echo "// TODO: setup Node"
+          echo "// TODO: setup pnpm"
           echo "// TODO: pnpm install --frozen-lockfile"
 
 
@@ -195,6 +365,10 @@ jobs:
 
       - name: Build application
         run: |
+          echo "======================================"
+          echo " BUILD"
+          echo "======================================"
+
           echo "// TODO: pnpm build"
 
 
@@ -204,22 +378,118 @@ jobs:
 
       - name: Deploy application
         run: |
+          echo "======================================"
+          echo " DEPLOY"
+          echo "======================================"
+
           echo "// TODO: deploy application"
 
 
       # =========================================================
       # CLEANUP DATABASE TUNNEL
+      #
+      # ALWAYS RUN
       # =========================================================
 
       - name: Cleanup database tunnel
         if: always()
         run: |
-          echo "// TODO: stop SSH forward"
-          echo "// TODO: tell VPS helper to remove temporary proxy"
+          set +e
+
+          echo "======================================"
+          echo " DATABASE TUNNEL CLEANUP"
+          echo "======================================"
+
+          # -----------------------------------------------------
+          # 1. Stop GitHub runner's local SSH forward
+          # -----------------------------------------------------
+
+          if [ -f /tmp/db-ssh-tunnel.pid ]; then
+
+            SSH_PID="$(cat /tmp/db-ssh-tunnel.pid)"
+
+            echo "Stopping SSH tunnel PID: $SSH_PID"
+
+            if kill -0 "$SSH_PID" 2>/dev/null; then
+              kill "$SSH_PID" 2>/dev/null
+
+              sleep 1
+
+              if kill -0 "$SSH_PID" 2>/dev/null; then
+                echo "Force stopping SSH tunnel..."
+                kill -9 "$SSH_PID" 2>/dev/null
+              fi
+            fi
+
+            rm -f /tmp/db-ssh-tunnel.pid
+
+          else
+            echo "No local SSH tunnel process found."
+          fi
+
+
+          # -----------------------------------------------------
+          # 2. Tell VPS helper to destroy its Docker proxy
+          # -----------------------------------------------------
+
+          if [ -f /tmp/db-tunnel-session ]; then
+
+            SESSION_ID="$(cat /tmp/db-tunnel-session)"
+
+            echo
+            echo "Cleaning VPS session:"
+            echo "  $SESSION_ID"
+
+            CLEANUP_RESULT="$(
+              ssh production \
+                "/usr/local/bin/docker-tunnel-helper cleanup '$SESSION_ID'" \
+                2>&1
+            )"
+
+            CLEANUP_EXIT=$?
+
+            echo "$CLEANUP_RESULT"
+
+            if [ "$CLEANUP_EXIT" -ne 0 ]; then
+              echo "WARNING: VPS tunnel cleanup command failed."
+            fi
+
+            rm -f /tmp/db-tunnel-session
+
+          else
+            echo "No VPS tunnel session was created."
+          fi
+
+
+          echo
+          echo "Database tunnel cleanup complete."
 
 
       # =========================================================
-      # CLEANUP SSH
+      # VERIFY CLEANUP
+      # =========================================================
+
+      - name: Verify database tunnel cleanup
+        if: always()
+        run: |
+          set +e
+
+          echo "======================================"
+          echo " VERIFY TUNNEL CLEANUP"
+          echo "======================================"
+
+          echo
+          echo "Remaining VPS tunnel containers:"
+
+          ssh production \
+            "/usr/local/bin/docker-tunnel-helper list" \
+            || true
+
+
+      # =========================================================
+      # CLEANUP SSH CREDENTIALS
+      #
+      # MUST BE LAST
       # =========================================================
 
       - name: Cleanup SSH credentials
