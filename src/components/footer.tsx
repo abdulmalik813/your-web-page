@@ -33,7 +33,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
   }
 
   return (
-    <footer className="container mx-auto px-4 mt-auto bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <footer className="container mx-auto px-4 mt-auto bg-transparent">
       <div className="border-t" />
 
       <div className="py-6">

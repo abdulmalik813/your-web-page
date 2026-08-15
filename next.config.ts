@@ -65,9 +65,6 @@ const nextConfig: NextConfig = {
   turbopack: {
     resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.cts', '.cjs', '.mts', '.mjs', '.json'],
   },
-  experimental: {
-    turbopackServerFastRefresh: true,
-  },
   reactStrictMode: true,
 }
 

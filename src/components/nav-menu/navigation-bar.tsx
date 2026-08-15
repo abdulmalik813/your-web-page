@@ -1,5 +1,6 @@
 import { getCachedGlobal } from '@/lib/get-globals'
 import { NavigationBar, Setting } from '@/payload-types'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 import Link from 'next/link'
 import { Menu } from 'lucide-react'
 import {
@@ -207,8 +208,8 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
   const navBarData = (await getCachedGlobal('navigationBar', 1, pageContext.draft)) as NavigationBar
   const setting = (await getCachedGlobal('settings', 1, pageContext.draft)) as Setting
 
-  const lightLogo = setting.logo
-  const darkLogo = setting?.logoDark ?? setting.logo
+  const lightLogo = setting?.logo
+  const darkLogo = setting?.logoDark ?? setting?.logo
 
   if (typeof lightLogo !== 'object' || typeof darkLogo !== 'object') return null
 
@@ -219,10 +220,10 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
     >
       <Banner {...navBarData.banner} pageContext={pageContext} />
       <header
-        className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+        className="sticky top-0 z-50 w-full bg-transparent"
         role="navigation"
       >
-        <div className="flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 mx-auto py-4">
+        <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-4">
           <div className="flex items-center min-w-0 flex-shrink-0">
             <LogoLink
               lightLogo={lightLogo}
@@ -288,6 +289,7 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
           </nav>
 
           <div className="flex items-center gap-2 flex-shrink-0">
+            <ThemeToggle />
             {navBarData?.cta && navBarData.cta.length > 0 && (
               <div className="hidden sm:flex gap-2">
                 {navBarData.cta.map((ctaItem, index) => (
@@ -295,7 +297,7 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
                     key={ctaItem.id || index}
                     {...ctaItem}
                     pageContext={pageContext}
-                    className="text-sm h-9 px-4 rounded-lg transition-colors duration-200"
+                    className="text-base h-10 px-6 rounded-lg transition-colors duration-200"
                   />
                 ))}
               </div>

@@ -14,6 +14,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import Script from 'next/script'
 import NextTopLoader from 'nextjs-toploader'
+import { Toaster } from '@/components/ui/sonner'
 
 export async function generateMetadata(): Promise<Metadata> {
   const appData = await getAppSettings()
@@ -88,6 +89,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
         </ThemeProvider>
+        <Toaster />
         {setting.googleAnalyticsId && <GoogleAnalytics gaId={setting.googleAnalyticsId} />}
         {setting.microsoftClarityId && (
           <Script id="microsoft-clarity" strategy="afterInteractive">
