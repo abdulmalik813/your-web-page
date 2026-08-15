@@ -546,9 +546,10 @@ jobs:
 
           push: true
 
-          # Required because DATABASE_URI points to the
-          # SSH tunnel listening on the GitHub runner.
           network: host
+
+          allow: |
+            network.host
 
           tags: |
             ${{ steps.image.outputs.name }}:latest
