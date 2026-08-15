@@ -1,6 +1,10 @@
 name: Build and Deploy
 
 on:
+  push:
+    branches:
+      - main
+
   workflow_dispatch:
 
 permissions:
@@ -25,7 +29,15 @@ jobs:
 
     steps:
       # =========================================================
-      # PREPARE CLOUDFLARE
+      # CHECKOUT
+      # =========================================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+
+      # =========================================================
+      # INSTALL CLOUDFLARED
       # =========================================================
 
       - name: Install cloudflared
@@ -36,11 +48,12 @@ jobs:
 
           sudo chmod +x /usr/local/bin/cloudflared
 
+          echo "Cloudflared:"
           cloudflared --version
 
 
       # =========================================================
-      # PREPARE SSH KEY
+      # INSTALL SSH PRIVATE KEY
       # =========================================================
 
       - name: Install SSH private key
@@ -53,7 +66,7 @@ jobs:
           printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
           chmod 600 "$HOME/.ssh/id_ed25519"
 
-          echo "SSH key installed."
+          echo "SSH private key installed."
 
 
       # =========================================================
@@ -79,33 +92,33 @@ jobs:
 
 
       # =========================================================
-      # VALIDATE SECRETS
+      # VALIDATE CONFIG
       # =========================================================
 
       - name: Validate connection configuration
         run: |
           test -n "$SSH_HOST" || {
-            echo "SSH_HOST missing"
+            echo "ERROR: SSH_HOST is missing"
             exit 1
           }
 
           test -n "$SSH_USER" || {
-            echo "SSH_USER missing"
+            echo "ERROR: SSH_USER is missing"
             exit 1
           }
 
           test -n "$TUNNEL_SERVICE_TOKEN_ID" || {
-            echo "CF_ACCESS_CLIENT_ID missing"
+            echo "ERROR: CF_ACCESS_CLIENT_ID is missing"
             exit 1
           }
 
           test -n "$TUNNEL_SERVICE_TOKEN_SECRET" || {
-            echo "CF_ACCESS_CLIENT_SECRET missing"
+            echo "ERROR: CF_ACCESS_CLIENT_SECRET is missing"
             exit 1
           }
 
           test -s "$HOME/.ssh/id_ed25519" || {
-            echo "SSH_PRIVATE_KEY missing"
+            echo "ERROR: SSH_PRIVATE_KEY is missing"
             exit 1
           }
 
@@ -113,7 +126,7 @@ jobs:
 
 
       # =========================================================
-      # TEST SSH
+      # TEST CLOUDFLARE + SSH
       # =========================================================
 
       - name: Test Cloudflare SSH connection
@@ -126,9 +139,16 @@ jobs:
             echo "======================================"
             echo
 
-            echo "Hostname: $(hostname)"
-            echo "User:     $(whoami)"
-            echo "Kernel:   $(uname -r)"
+            echo "Hostname:"
+            hostname
+
+            echo
+            echo "User:"
+            whoami
+
+            echo
+            echo "Kernel:"
+            uname -r
 
             echo
             echo "Docker:"
@@ -137,92 +157,26 @@ jobs:
 
 
       # =========================================================
-      # PREPARE DATABASE TUNNEL
+      # DATABASE TUNNEL
       # =========================================================
 
       - name: Prepare database tunnel
-        id: db-tunnel
         run: |
-          echo "======================================"
-          echo " DATABASE TUNNEL"
-          echo "======================================"
-          echo
+          echo "// TODO: ask VPS helper for database/container tunnel details"
 
-          # TODO:
-          # Call the server-side helper, for example:
-          #
-          # ssh production \
-          #   "docker-tunnel-helper prepare <service-or-container> 27017"
-          #
-          # Expected output could be:
-          #
-          # SESSION_ID=abc123
-          # REMOTE_HOST=127.0.0.1
-          # REMOTE_PORT=39172
-          #
-          # Then parse those values and write them to GITHUB_OUTPUT.
-          #
-          # Example:
-          #
-          # echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
-          # echo "remote_host=$REMOTE_HOST" >> "$GITHUB_OUTPUT"
-          # echo "remote_port=$REMOTE_PORT" >> "$GITHUB_OUTPUT"
-
-          echo "// TODO: prepare temporary database proxy on VPS"
-
-
-      # =========================================================
-      # OPEN LOCAL SSH FORWARD
-      # =========================================================
 
       - name: Open database SSH tunnel
         run: |
-          echo "======================================"
-          echo " SSH DATABASE FORWARD"
-          echo "======================================"
-          echo
-
-          # TODO:
-          #
-          # ssh -fNT \
-          #   -L 27018:127.0.0.1:${{ steps.db-tunnel.outputs.remote_port }} \
-          #   production
-          #
-          # Then test:
-          #
-          # nc -zv 127.0.0.1 27018
-
-          echo "// TODO: open SSH -L tunnel to database"
+          echo "// TODO: open SSH local forward to returned VPS port"
 
 
       # =========================================================
-      # CONSTRUCT DATABASE URL
+      # DATABASE URL
       # =========================================================
 
       - name: Construct database URL
         run: |
-          echo "======================================"
-          echo " DATABASE URL"
-          echo "======================================"
-          echo
-
-          # TODO:
-          #
-          # DATABASE_URI="mongodb://..."
-          #
-          # echo "DATABASE_URI=$DATABASE_URI" >> "$GITHUB_ENV"
-          #
-          # Do not print the password or full URI.
-
-          echo "// TODO: construct DATABASE_URI from tunnel information"
-
-
-      # =========================================================
-      # CHECKOUT
-      # =========================================================
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
+          echo "// TODO: construct DATABASE_URI from tunnel details"
 
 
       # =========================================================
@@ -231,59 +185,25 @@ jobs:
 
       - name: Install dependencies
         run: |
-          echo "======================================"
-          echo " INSTALL"
-          echo "======================================"
-          echo
-
-          # TODO:
-          #
-          # - Setup pnpm
-          # - Setup Node
-          # - pnpm install --frozen-lockfile
-
-          echo "// TODO: install dependencies"
+          echo "// TODO: setup pnpm and Node"
+          echo "// TODO: pnpm install --frozen-lockfile"
 
 
       # =========================================================
       # BUILD
       # =========================================================
 
-      - name: Build
+      - name: Build application
         run: |
-          echo "======================================"
-          echo " BUILD"
-          echo "======================================"
-          echo
-
-          # TODO:
-          #
-          # pnpm build
-          #
-          # Build should use DATABASE_URI from GITHUB_ENV.
-
-          echo "// TODO: build application"
+          echo "// TODO: pnpm build"
 
 
       # =========================================================
       # DEPLOY
       # =========================================================
 
-      - name: Deploy
+      - name: Deploy application
         run: |
-          echo "======================================"
-          echo " DEPLOY"
-          echo "======================================"
-          echo
-
-          # TODO:
-          #
-          # Add real deployment logic here.
-          #
-          # Example:
-          #
-          # ssh production '...'
-
           echo "// TODO: deploy application"
 
 
@@ -294,23 +214,8 @@ jobs:
       - name: Cleanup database tunnel
         if: always()
         run: |
-          echo "======================================"
-          echo " DATABASE TUNNEL CLEANUP"
-          echo "======================================"
-          echo
-
-          # TODO:
-          #
-          # Kill local SSH forward if running.
-          #
-          # Then cleanup the VPS helper session:
-          #
-          # ssh production \
-          #   "docker-tunnel-helper cleanup ${{ steps.db-tunnel.outputs.session_id }}"
-          #
-          # This should remove the temporary proxy container.
-
-          echo "// TODO: cleanup temporary database tunnel"
+          echo "// TODO: stop SSH forward"
+          echo "// TODO: tell VPS helper to remove temporary proxy"
 
 
       # =========================================================
