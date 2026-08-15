@@ -20,121 +20,31 @@ env:
 
 jobs:
   build-and-deploy:
-    name: Build and Deploy
     runs-on: ubuntu-latest
     environment: prod
 
     steps:
-      # =========================================================
-      # LOAD SINGLE JSON SECRET
-      #
-      # GitHub environment secret:
-      #
-      # ENV
-      #
-      # Example:
-      #
-      # {
-      #   "SSH_HOST": "...",
-      #   "SSH_USER": "root",
-      #   "SSH_PRIVATE_KEY": "...",
-      #   "CF_ACCESS_CLIENT_ID": "...",
-      #   "CF_ACCESS_CLIENT_SECRET": "...",
-      #   "TUNNEL_TARGET_PORT_NETWORK": "target,27017,network",
-      #   "DATABASE_URI": "mongodb://user:pass@[DB_HOST]:[DB_PORT]/...",
-      #   "DOKPLOY_DEPLOY_URL": "...",
-      #   "NODE_ENV": "production",
-      #   "PAYLOAD_SECRET": "...",
-      #   ...
-      # }
-      # =========================================================
-
       - name: Load environment
         env:
           ENV_JSON: ${{ secrets.ENV }}
         run: |
           set -euo pipefail
 
-          if [ -z "$ENV_JSON" ]; then
+          [ -n "$ENV_JSON" ] || {
             echo "ERROR: ENV secret is missing."
             exit 1
-          fi
+          }
 
-          if ! printf '%s' "$ENV_JSON" \
-            | jq -e 'type == "object"' \
-            >/dev/null
-          then
-            echo "ERROR: ENV must contain a valid JSON object."
-            exit 1
-          fi
+          printf '%s' "$ENV_JSON" |
+            jq -e 'type == "object"' >/dev/null || {
+              echo "ERROR: ENV must be a valid JSON object."
+              exit 1
+            }
 
           printf '%s' "$ENV_JSON" > /tmp/source-env.json
           chmod 600 /tmp/source-env.json
 
-          # Export every JSON key for future workflow steps.
-          #
-          # Do NOT print values.
-          # Supports multiline values such as SSH_PRIVATE_KEY.
-
-          while IFS= read -r ENTRY; do
-
-            DECODED="$(
-              printf '%s' "$ENTRY" |
-              base64 --decode
-            )"
-
-            KEY="$(
-              printf '%s' "$DECODED" |
-              jq -r '.key'
-            )"
-
-            VALUE="$(
-              printf '%s' "$DECODED" |
-              jq -r '
-                if .value == null then
-                  ""
-                elif (.value | type) == "string" then
-                  .value
-                else
-                  (.value | tostring)
-                end
-              '
-            )"
-
-            if ! [[ "$KEY" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
-              echo "ERROR: ENV contains an invalid environment variable name."
-              exit 1
-            fi
-
-            DELIMITER="__ENV_${RANDOM}_${RANDOM}_${RANDOM}__"
-
-            {
-              echo "${KEY}<<${DELIMITER}"
-              printf '%s\n' "$VALUE"
-              echo "${DELIMITER}"
-            } >> "$GITHUB_ENV"
-
-          done < <(
-            printf '%s' "$ENV_JSON" |
-            jq -r 'to_entries[] | @base64'
-          )
-
-          echo "Environment loaded successfully."
-
-
-      # =========================================================
-      # CHECKOUT
-      # =========================================================
-
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-
-      # =========================================================
-      # VALIDATE ONLY REQUIRED WORKFLOW VALUES
-      #
-      # We intentionally do NOT validate SMTP/S3/etc.
-      # =========================================================
+          echo "Environment loaded."
 
       - name: Validate required configuration
         run: |
@@ -151,30 +61,25 @@ jobs:
             DOKPLOY_DEPLOY_URL
           )
 
-          for NAME in "${REQUIRED[@]}"; do
-
-            VALUE="${!NAME:-}"
+          for KEY in "${REQUIRED[@]}"; do
+            VALUE="$(jq -r --arg key "$KEY" '.[$key] // empty' /tmp/source-env.json)"
 
             if [ -z "$VALUE" ]; then
-              echo "ERROR: Required configuration is missing: $NAME"
+              echo "ERROR: Missing required configuration: $KEY"
               exit 1
             fi
-
           done
 
           echo "Required configuration valid."
 
-
-      # =========================================================
-      # INSTALL CLOUDFLARED
-      # =========================================================
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
       - name: Install cloudflared
         run: |
           set -euo pipefail
 
-          sudo curl \
-            -fsSL \
+          sudo curl -fsSL \
             https://github.com/cloudflare/cloudflared/releases/download/2026.5.1/cloudflared-linux-amd64 \
             -o /usr/local/bin/cloudflared
 
@@ -182,49 +87,20 @@ jobs:
 
           echo "cloudflared installed."
 
-
-      # =========================================================
-      # SSH KEY
-      # =========================================================
-
-      - name: Install SSH private key
+      - name: Configure SSH
         run: |
           set -euo pipefail
+
+          SSH_HOST="$(jq -r '.SSH_HOST' /tmp/source-env.json)"
+          SSH_USER="$(jq -r '.SSH_USER' /tmp/source-env.json)"
 
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
 
-          printf '%s\n' "$SSH_PRIVATE_KEY" \
+          jq -r '.SSH_PRIVATE_KEY' /tmp/source-env.json \
             > "$HOME/.ssh/id_ed25519"
 
           chmod 600 "$HOME/.ssh/id_ed25519"
-
-          echo "SSH key installed."
-
-
-      # =========================================================
-      # CLOUDFLARE SERVICE TOKEN
-      # =========================================================
-
-      - name: Configure Cloudflare authentication
-        run: |
-          set -euo pipefail
-
-          {
-            echo "TUNNEL_SERVICE_TOKEN_ID=$CF_ACCESS_CLIENT_ID"
-            echo "TUNNEL_SERVICE_TOKEN_SECRET=$CF_ACCESS_CLIENT_SECRET"
-          } >> "$GITHUB_ENV"
-
-          echo "Cloudflare authentication configured."
-
-
-      # =========================================================
-      # SSH CONFIG
-      # =========================================================
-
-      - name: Configure SSH
-        run: |
-          set -euo pipefail
 
           cat > "$HOME/.ssh/config" <<EOF
           Host production
@@ -243,39 +119,34 @@ jobs:
 
           echo "SSH configured."
 
-
-      # =========================================================
-      # TEST VPS
-      # =========================================================
-
       - name: Test VPS connection
         run: |
           set -euo pipefail
 
+          export TUNNEL_SERVICE_TOKEN_ID="$(
+            jq -r '.CF_ACCESS_CLIENT_ID' /tmp/source-env.json
+          )"
+
+          export TUNNEL_SERVICE_TOKEN_SECRET="$(
+            jq -r '.CF_ACCESS_CLIENT_SECRET' /tmp/source-env.json
+          )"
+
           ssh production '
             set -e
-
             test -x /usr/local/bin/docker-tunnel-helper
             docker info >/dev/null 2>&1
           '
 
           echo "VPS connection successful."
 
-
-      # =========================================================
-      # VALIDATE TUNNEL CONFIG
-      #
-      # EXACTLY:
-      #
-      # target,port,network
-      # =========================================================
-
       - name: Validate tunnel configuration
-        id: tunnel-config
+        id: tunnel
         run: |
           set -euo pipefail
 
-          VALUE="$TUNNEL_TARGET_PORT_NETWORK"
+          VALUE="$(
+            jq -r '.TUNNEL_TARGET_PORT_NETWORK' /tmp/source-env.json
+          )"
 
           COMMA_COUNT="$(
             printf '%s' "$VALUE" |
@@ -283,81 +154,56 @@ jobs:
             wc -c
           )"
 
-          if [ "$COMMA_COUNT" -ne 2 ]; then
-            echo "ERROR: Tunnel configuration must contain exactly 3 values."
-            echo "Expected format: target,port,network"
+          [ "$COMMA_COUNT" -eq 2 ] || {
+            echo "ERROR: Tunnel configuration must be target,port,network"
             exit 1
-          fi
+          }
 
-          IFS=',' read -r \
-            DB_TARGET \
-            DB_TARGET_PORT \
-            DB_NETWORK \
-            <<< "$VALUE"
+          IFS=',' read -r TARGET PORT NETWORK <<< "$VALUE"
 
-          DB_TARGET="$(printf '%s' "$DB_TARGET" | xargs)"
-          DB_TARGET_PORT="$(printf '%s' "$DB_TARGET_PORT" | xargs)"
-          DB_NETWORK="$(printf '%s' "$DB_NETWORK" | xargs)"
+          TARGET="$(printf '%s' "$TARGET" | xargs)"
+          PORT="$(printf '%s' "$PORT" | xargs)"
+          NETWORK="$(printf '%s' "$NETWORK" | xargs)"
 
-          if [ -z "$DB_TARGET" ]; then
-            echo "ERROR: Tunnel target is empty."
+          [ -n "$TARGET" ] || exit 1
+          [ -n "$PORT" ] || exit 1
+          [ -n "$NETWORK" ] || exit 1
+
+          [[ "$PORT" =~ ^[0-9]+$ ]] || {
+            echo "ERROR: Invalid tunnel port."
             exit 1
-          fi
+          }
 
-          if [ -z "$DB_TARGET_PORT" ]; then
-            echo "ERROR: Tunnel port is empty."
+          (( PORT >= 1 && PORT <= 65535 )) || {
+            echo "ERROR: Invalid tunnel port."
             exit 1
-          fi
+          }
 
-          if [ -z "$DB_NETWORK" ]; then
-            echo "ERROR: Tunnel network is empty."
-            exit 1
-          fi
+          [[ "$TARGET" =~ ^[A-Za-z0-9_.-]+$ ]] || exit 1
+          [[ "$NETWORK" =~ ^[A-Za-z0-9_.-]+$ ]] || exit 1
 
-          case "$DB_TARGET_PORT" in
-            *[!0-9]*|'')
-              echo "ERROR: Tunnel port must be numeric."
-              exit 1
-              ;;
-          esac
-
-          if [ "$DB_TARGET_PORT" -lt 1 ] || \
-             [ "$DB_TARGET_PORT" -gt 65535 ]; then
-            echo "ERROR: Tunnel port is outside the valid range."
-            exit 1
-          fi
-
-          if ! [[ "$DB_TARGET" =~ ^[A-Za-z0-9_.-]+$ ]]; then
-            echo "ERROR: Invalid tunnel target."
-            exit 1
-          fi
-
-          if ! [[ "$DB_NETWORK" =~ ^[A-Za-z0-9_.-]+$ ]]; then
-            echo "ERROR: Invalid tunnel network."
-            exit 1
-          fi
-
-          echo "target=$DB_TARGET" >> "$GITHUB_OUTPUT"
-          echo "port=$DB_TARGET_PORT" >> "$GITHUB_OUTPUT"
-          echo "network=$DB_NETWORK" >> "$GITHUB_OUTPUT"
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "port=$PORT" >> "$GITHUB_OUTPUT"
+          echo "network=$NETWORK" >> "$GITHUB_OUTPUT"
 
           echo "Tunnel configuration valid."
-
-
-      # =========================================================
-      # CREATE TEMPORARY VPS DATABASE PROXY
-      # =========================================================
 
       - name: Prepare database tunnel
         id: db
         env:
-          DB_TARGET: ${{ steps.tunnel-config.outputs.target }}
-          DB_TARGET_PORT: ${{ steps.tunnel-config.outputs.port }}
-          DB_NETWORK: ${{ steps.tunnel-config.outputs.network }}
+          DB_TARGET: ${{ steps.tunnel.outputs.target }}
+          DB_TARGET_PORT: ${{ steps.tunnel.outputs.port }}
+          DB_NETWORK: ${{ steps.tunnel.outputs.network }}
         run: |
           set -euo pipefail
 
-          echo "Preparing database tunnel..."
+          export TUNNEL_SERVICE_TOKEN_ID="$(
+            jq -r '.CF_ACCESS_CLIENT_ID' /tmp/source-env.json
+          )"
+
+          export TUNNEL_SERVICE_TOKEN_SECRET="$(
+            jq -r '.CF_ACCESS_CLIENT_SECRET' /tmp/source-env.json
+          )"
 
           set +e
 
@@ -371,10 +217,10 @@ jobs:
 
           set -e
 
-          if [ "$EXIT_CODE" -ne 0 ]; then
+          [ "$EXIT_CODE" -eq 0 ] || {
             echo "ERROR: Unable to prepare database tunnel."
             exit 1
-          fi
+          }
 
           STATUS="$(
             printf '%s\n' "$RESULT" |
@@ -400,44 +246,18 @@ jobs:
             head -1
           )"
 
-          if [ "$STATUS" != "OK" ]; then
-            echo "ERROR: Tunnel preparation failed."
-            exit 1
-          fi
+          [ "$STATUS" = "OK" ] || exit 1
+          [ -n "$SESSION_ID" ] || exit 1
+          [ -n "$REMOTE_HOST" ] || exit 1
+          [[ "$REMOTE_PORT" =~ ^[0-9]+$ ]] || exit 1
 
-          if [ -z "$SESSION_ID" ]; then
-            echo "ERROR: Tunnel session was not returned."
-            exit 1
-          fi
-
-          if [ -z "$REMOTE_HOST" ]; then
-            echo "ERROR: Tunnel host was not returned."
-            exit 1
-          fi
-
-          case "$REMOTE_PORT" in
-            *[!0-9]*|'')
-              echo "ERROR: Invalid tunnel response."
-              exit 1
-              ;;
-          esac
-
-          printf '%s\n' "$SESSION_ID" \
-            > /tmp/db-tunnel-session
-
+          printf '%s\n' "$SESSION_ID" > /tmp/db-tunnel-session
           chmod 600 /tmp/db-tunnel-session
 
           echo "remote_host=$REMOTE_HOST" >> "$GITHUB_OUTPUT"
           echo "remote_port=$REMOTE_PORT" >> "$GITHUB_OUTPUT"
 
-          echo "Database tunnel prepared successfully."
-
-
-      # =========================================================
-      # OPEN SSH FORWARD ON RUNNER
-      #
-      # Docker will reach this through host.docker.internal.
-      # =========================================================
+          echo "Database proxy prepared."
 
       - name: Open database SSH tunnel
         env:
@@ -446,15 +266,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          if nc \
-            -z \
-            127.0.0.1 \
-            "$DB_LOCAL_PORT" \
-            2>/dev/null
-          then
-            echo "ERROR: Local database port is already in use."
-            exit 1
-          fi
+          export TUNNEL_SERVICE_TOKEN_ID="$(
+            jq -r '.CF_ACCESS_CLIENT_ID' /tmp/source-env.json
+          )"
+
+          export TUNNEL_SERVICE_TOKEN_SECRET="$(
+            jq -r '.CF_ACCESS_CLIENT_SECRET' /tmp/source-env.json
+          )"
 
           ssh \
             -N \
@@ -467,89 +285,52 @@ jobs:
 
           SSH_PID=$!
 
-          printf '%s\n' "$SSH_PID" \
-            > /tmp/db-ssh-tunnel.pid
-
+          printf '%s\n' "$SSH_PID" > /tmp/db-ssh-tunnel.pid
           chmod 600 /tmp/db-ssh-tunnel.pid
 
           READY=0
 
           for _ in $(seq 1 30); do
-
-            if ! kill -0 "$SSH_PID" 2>/dev/null; then
-              echo "ERROR: Database SSH tunnel exited unexpectedly."
+            kill -0 "$SSH_PID" 2>/dev/null || {
+              echo "ERROR: SSH tunnel exited."
               exit 1
-            fi
+            }
 
-            if nc \
-              -z \
-              -w 1 \
-              127.0.0.1 \
-              "$DB_LOCAL_PORT" \
-              2>/dev/null
-            then
+            if nc -z -w 1 127.0.0.1 "$DB_LOCAL_PORT" 2>/dev/null; then
               READY=1
               break
             fi
 
             sleep 0.5
-
           done
 
-          if [ "$READY" -ne 1 ]; then
-            echo "ERROR: Database connection did not become ready."
+          [ "$READY" -eq 1 ] || {
+            echo "ERROR: Database tunnel unavailable."
             exit 1
-          fi
+          }
 
-          echo "Database connection established successfully."
-
-
-      # =========================================================
-      # PREPARE BUILD ENVIRONMENT
-      #
-      # 1. Copy all application env values automatically.
-      #
-      # 2. Remove CI-only secrets.
-      #
-      # 3. Rewrite DATABASE_URI:
-      #
-      #    [DB_HOST] -> host.docker.internal
-      #    [DB_PORT] -> 27018
-      # =========================================================
+          echo "Database tunnel established."
 
       - name: Prepare build environment
         run: |
           set -euo pipefail
 
-          DATABASE_URI_TEMPLATE="$DATABASE_URI"
+          DATABASE_URI="$(
+            jq -r '.DATABASE_URI' /tmp/source-env.json
+          )"
 
-          if [[ "$DATABASE_URI_TEMPLATE" != *"[DB_HOST]"* ]]; then
-            echo "ERROR: DATABASE_URI is missing [DB_HOST]."
+          [[ "$DATABASE_URI" == *"[DB_HOST]"* ]] || {
+            echo "ERROR: DATABASE_URI missing [DB_HOST]."
             exit 1
-          fi
+          }
 
-          if [[ "$DATABASE_URI_TEMPLATE" != *"[DB_PORT]"* ]]; then
-            echo "ERROR: DATABASE_URI is missing [DB_PORT]."
+          [[ "$DATABASE_URI" == *"[DB_PORT]"* ]] || {
+            echo "ERROR: DATABASE_URI missing [DB_PORT]."
             exit 1
-          fi
+          }
 
-          BUILD_DATABASE_URI="${DATABASE_URI_TEMPLATE//\[DB_HOST\]/host.docker.internal}"
+          BUILD_DATABASE_URI="${DATABASE_URI//\[DB_HOST\]/host.docker.internal}"
           BUILD_DATABASE_URI="${BUILD_DATABASE_URI//\[DB_PORT\]/$DB_LOCAL_PORT}"
-
-          if [[ "$BUILD_DATABASE_URI" == *"[DB_HOST]"* ]] || \
-             [[ "$BUILD_DATABASE_URI" == *"[DB_PORT]"* ]]; then
-            echo "ERROR: DATABASE_URI placeholders were not replaced."
-            exit 1
-          fi
-
-          # -----------------------------------------------------
-          # Build environment starts from the original ENV JSON.
-          #
-          # Remove CI-only values that the application does not
-          # need during pnpm build.
-          #
-          # Replace DATABASE_URI with the tunnel URI.
-          # -----------------------------------------------------
 
           jq \
             --arg databaseUri "$BUILD_DATABASE_URI" \
@@ -571,99 +352,53 @@ jobs:
 
           chmod 600 /tmp/build-env.json
 
-          echo "Build environment prepared successfully."
+          echo "Build environment prepared."
 
-
-      # =========================================================
-      # VERIFY REWRITTEN DATABASE URI
-      #
-      # Do not print credentials or URI.
-      # =========================================================
-
-      - name: Verify build database URI
+      - name: Verify build database configuration
         run: |
           set -euo pipefail
 
-          DATABASE_URI_VALUE="$(
-            jq -r '.DATABASE_URI // empty' \
-              /tmp/build-env.json
+          URI="$(
+            jq -r '.DATABASE_URI' /tmp/build-env.json
           )"
 
-          if [ -z "$DATABASE_URI_VALUE" ]; then
-            echo "ERROR: Build DATABASE_URI is missing."
-            exit 1
-          fi
-
-          DB_HOST="$(
-            printf '%s' "$DATABASE_URI_VALUE" |
+          HOST="$(
+            printf '%s' "$URI" |
             sed -E 's#^[^@]*@([^:/?]+).*#\1#'
           )"
 
-          DB_PORT="$(
-            printf '%s' "$DATABASE_URI_VALUE" |
+          PORT="$(
+            printf '%s' "$URI" |
             sed -E 's#^[^@]*@[^:]+:([0-9]+).*#\1#'
           )"
 
-          if [ "$DB_HOST" != "host.docker.internal" ]; then
-            echo "ERROR: Build DATABASE_URI contains the wrong host."
+          [ "$HOST" = "host.docker.internal" ] || {
+            echo "ERROR: Wrong build database host."
             exit 1
-          fi
+          }
 
-          if [ "$DB_PORT" != "$DB_LOCAL_PORT" ]; then
-            echo "ERROR: Build DATABASE_URI contains the wrong port."
+          [ "$PORT" = "$DB_LOCAL_PORT" ] || {
+            echo "ERROR: Wrong build database port."
             exit 1
-          fi
+          }
 
-          echo "Build database URI verified."
-
-
-      # =========================================================
-      # TEST RUNNER -> DATABASE
-      # =========================================================
-
-      - name: Test database tunnel
-        run: |
-          set -euo pipefail
-
-          if ! nc \
-            -z \
-            -w 5 \
-            127.0.0.1 \
-            "$DB_LOCAL_PORT"
-          then
-            echo "ERROR: Database tunnel is unavailable."
-            exit 1
-          fi
-
-          echo "Database tunnel test successful."
-
-
-      # =========================================================
-      # TEST DOCKER -> RUNNER -> DATABASE
-      # =========================================================
+          echo "Build database configuration verified."
 
       - name: Test Docker database access
         run: |
           set -euo pipefail
 
-          if ! docker run \
+          docker run \
             --rm \
             --add-host host.docker.internal:host-gateway \
             alpine:3.22 \
-            sh -c \
-            "nc -z -w 5 host.docker.internal '$DB_LOCAL_PORT'" \
-            >/dev/null 2>&1
-          then
-            echo "ERROR: Docker cannot reach database tunnel."
-            exit 1
-          fi
+            sh -c "nc -z -w 5 host.docker.internal '$DB_LOCAL_PORT'" \
+            >/dev/null 2>&1 || {
+              echo "ERROR: Docker cannot reach database."
+              exit 1
+            }
 
           echo "Docker database access successful."
-
-
-      # =========================================================
-      # GHCR LOGIN
-      # =========================================================
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4
@@ -672,31 +407,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-
-      # =========================================================
-      # IMAGE NAME
-      # =========================================================
-
       - name: Prepare image name
         id: image
         run: |
           set -euo pipefail
 
           IMAGE="$REGISTRY/$IMAGE_NAME"
-
-          IMAGE="$(
-            printf '%s' "$IMAGE" |
-            tr '[:upper:]' '[:lower:]'
-          )"
+          IMAGE="$(printf '%s' "$IMAGE" | tr '[:upper:]' '[:lower:]')"
 
           echo "name=$IMAGE" >> "$GITHUB_OUTPUT"
-
-
-      # =========================================================
-      # BUILD DOCKER IMAGE
-      #
-      # BUILD_ENV is the ONE BuildKit secret.
-      # =========================================================
 
       - name: Build Docker image
         env:
@@ -705,25 +424,15 @@ jobs:
           set -euo pipefail
 
           DOCKER_BUILDKIT=1 docker build \
-            --add-host \
-            host.docker.internal:host-gateway \
-            --secret \
-            id=BUILD_ENV,src=/tmp/build-env.json \
-            --build-arg \
-            CACHEBUST="${GITHUB_SHA}" \
-            --label \
-            "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
-            --label \
-            "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --add-host host.docker.internal:host-gateway \
+            --secret id=BUILD_ENV,src=/tmp/build-env.json \
+            --build-arg CACHEBUST="${GITHUB_SHA}" \
+            --label "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
             -t "${IMAGE}:latest" \
             -t "${IMAGE}:${GITHUB_SHA}" \
             -f Dockerfile \
             .
-
-
-      # =========================================================
-      # PUSH TO GHCR
-      # =========================================================
 
       - name: Push Docker image
         env:
@@ -734,18 +443,15 @@ jobs:
           docker push "${IMAGE}:latest"
           docker push "${IMAGE}:${GITHUB_SHA}"
 
-          echo "Docker image published successfully."
-
-
-      # =========================================================
-      # DOKPLOY
-      # =========================================================
+          echo "Image published."
 
       - name: Deploy to Dokploy
         run: |
           set -euo pipefail
 
-          echo "Triggering Dokploy deployment..."
+          DOKPLOY_DEPLOY_URL="$(
+            jq -r '.DOKPLOY_DEPLOY_URL' /tmp/source-env.json
+          )"
 
           curl \
             --fail-with-body \
@@ -755,99 +461,50 @@ jobs:
             "$DOKPLOY_DEPLOY_URL" \
             >/dev/null
 
-          echo "Dokploy deployment triggered successfully."
-
-
-      # =========================================================
-      # CLEANUP DATABASE TUNNEL
-      #
-      # ALWAYS RUNS
-      # =========================================================
+          echo "Dokploy deployment triggered."
 
       - name: Cleanup database tunnel
         if: always()
         run: |
           set +e
 
-          echo "Cleaning up database connection..."
+          export TUNNEL_SERVICE_TOKEN_ID="$(
+            jq -r '.CF_ACCESS_CLIENT_ID // empty' /tmp/source-env.json 2>/dev/null
+          )"
 
-          # -----------------------------------------------------
-          # Stop local SSH tunnel
-          # -----------------------------------------------------
+          export TUNNEL_SERVICE_TOKEN_SECRET="$(
+            jq -r '.CF_ACCESS_CLIENT_SECRET // empty' /tmp/source-env.json 2>/dev/null
+          )"
 
           if [ -f /tmp/db-ssh-tunnel.pid ]; then
+            SSH_PID="$(cat /tmp/db-ssh-tunnel.pid)"
 
-            SSH_PID="$(
-              cat /tmp/db-ssh-tunnel.pid
-            )"
-
-            if kill -0 "$SSH_PID" 2>/dev/null; then
-
-              kill "$SSH_PID" 2>/dev/null
-
-              for _ in $(seq 1 10); do
-
-                if ! kill -0 "$SSH_PID" 2>/dev/null; then
-                  break
-                fi
-
-                sleep 0.2
-
-              done
-
-              if kill -0 "$SSH_PID" 2>/dev/null; then
-                kill -9 "$SSH_PID" 2>/dev/null
-              fi
-
-            fi
+            kill "$SSH_PID" >/dev/null 2>&1 || true
+            sleep 1
+            kill -9 "$SSH_PID" >/dev/null 2>&1 || true
 
             rm -f /tmp/db-ssh-tunnel.pid
-
           fi
-
-
-          # -----------------------------------------------------
-          # Remove temporary VPS proxy
-          # -----------------------------------------------------
 
           if [ -f /tmp/db-tunnel-session ]; then
+            SESSION_ID="$(cat /tmp/db-tunnel-session)"
 
-            SESSION_ID="$(
-              cat /tmp/db-tunnel-session
-            )"
-
-            if ssh production \
+            ssh production \
               "/usr/local/bin/docker-tunnel-helper cleanup '$SESSION_ID'" \
-              >/dev/null 2>&1
-            then
-              echo "Remote database tunnel cleaned up."
-            else
-              echo "WARNING: Remote database tunnel cleanup failed."
-            fi
+              >/dev/null 2>&1 || true
 
             rm -f /tmp/db-tunnel-session
-
           fi
 
-
-          # -----------------------------------------------------
-          # Delete temporary env files
-          # -----------------------------------------------------
-
-          rm -f /tmp/source-env.json
           rm -f /tmp/build-env.json
 
           echo "Database cleanup complete."
 
-
-      # =========================================================
-      # SSH CLEANUP
-      # =========================================================
-
-      - name: Cleanup SSH credentials
+      - name: Cleanup credentials
         if: always()
         run: |
           rm -f "$HOME/.ssh/id_ed25519"
           rm -f "$HOME/.ssh/config"
+          rm -f /tmp/source-env.json
 
-          echo "SSH credentials removed."
+          echo "Credentials removed."

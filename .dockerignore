@@ -1,10 +1,38 @@
+# Dependencies
 node_modules
+
+# Next.js
 .next
+out
+
+# Git
 .git
 .github
-Dockerfile
-docker-compose.yml
-npm-debug.log*
-pnpm-debug.log*
+
+# Local/runtime environment files
 .env
 .env.*
+!.env.example
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose.yaml
+
+# Logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Tests / reports
+coverage
+test-results
+playwright-report
+blob-report
+playwright/.cache
+
+# Misc
+.DS_Store
+*.pem
+*.tsbuildinfo
