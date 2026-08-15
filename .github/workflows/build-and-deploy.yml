@@ -25,12 +25,14 @@ jobs:
       TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
       TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
 
-      # Database target on VPS
-      DB_TARGET: your-web-page-payload-kavlug
-      DB_TARGET_PORT: "27017"
-      DB_NETWORK: dokploy-network
+      # REQUIRED FORMAT:
+      # target,port,network
+      #
+      # Example:
+      # your-web-page-payload-abc123,27017,dokploy-network
+      TUNNEL_TARGET_PORT_NETWORK: ${{ secrets.TUNNEL_TARGET_PORT_NETWORK }}
 
-      # Port exposed locally on the GitHub runner
+      # Local port used only inside the GitHub runner
       DB_LOCAL_PORT: "27018"
 
     steps:
@@ -60,7 +62,7 @@ jobs:
 
 
       # =========================================================
-      # INSTALL SSH KEY
+      # INSTALL SSH PRIVATE KEY
       # =========================================================
 
       - name: Install SSH private key
@@ -105,7 +107,7 @@ jobs:
 
 
       # =========================================================
-      # VALIDATE CONFIG
+      # VALIDATE BASE CONFIGURATION
       # =========================================================
 
       - name: Validate configuration
@@ -113,31 +115,36 @@ jobs:
           set -euo pipefail
 
           test -n "$SSH_HOST" || {
-            echo "ERROR: SSH_HOST missing"
+            echo "ERROR: SSH_HOST is missing"
             exit 1
           }
 
           test -n "$SSH_USER" || {
-            echo "ERROR: SSH_USER missing"
+            echo "ERROR: SSH_USER is missing"
             exit 1
           }
 
           test -n "$TUNNEL_SERVICE_TOKEN_ID" || {
-            echo "ERROR: CF_ACCESS_CLIENT_ID missing"
+            echo "ERROR: CF_ACCESS_CLIENT_ID is missing"
             exit 1
           }
 
           test -n "$TUNNEL_SERVICE_TOKEN_SECRET" || {
-            echo "ERROR: CF_ACCESS_CLIENT_SECRET missing"
+            echo "ERROR: CF_ACCESS_CLIENT_SECRET is missing"
+            exit 1
+          }
+
+          test -n "$TUNNEL_TARGET_PORT_NETWORK" || {
+            echo "ERROR: TUNNEL_TARGET_PORT_NETWORK is missing"
             exit 1
           }
 
           test -s "$HOME/.ssh/id_ed25519" || {
-            echo "ERROR: SSH_PRIVATE_KEY missing"
+            echo "ERROR: SSH_PRIVATE_KEY is missing"
             exit 1
           }
 
-          echo "Configuration OK."
+          echo "Base configuration OK."
 
 
       # =========================================================
@@ -171,10 +178,144 @@ jobs:
 
 
       # =========================================================
+      # PARSE + VALIDATE TUNNEL SECRET
+      #
+      # MUST BE EXACTLY:
+      # target,port,network
+      # =========================================================
+
+      - name: Validate tunnel configuration
+        id: tunnel-config
+        run: |
+          set -euo pipefail
+
+          echo "======================================"
+          echo " VALIDATE TUNNEL CONFIGURATION"
+          echo "======================================"
+
+          VALUE="$TUNNEL_TARGET_PORT_NETWORK"
+
+          # -----------------------------------------------------
+          # Require EXACTLY 2 commas = exactly 3 fields
+          # -----------------------------------------------------
+
+          COMMA_COUNT="$(
+            printf '%s' "$VALUE" \
+              | tr -cd ',' \
+              | wc -c
+          )"
+
+          if [ "$COMMA_COUNT" -ne 2 ]; then
+            echo "ERROR: TUNNEL_TARGET_PORT_NETWORK must contain exactly 3 values."
+            echo "Expected format:"
+            echo "  target,port,network"
+            echo
+            echo "Expected exactly 2 commas."
+            echo "Found: $COMMA_COUNT"
+            exit 1
+          fi
+
+
+          # -----------------------------------------------------
+          # Parse exactly 3 values
+          # -----------------------------------------------------
+
+          IFS=',' read -r DB_TARGET DB_TARGET_PORT DB_NETWORK <<< "$VALUE"
+
+
+          # -----------------------------------------------------
+          # Trim surrounding whitespace
+          # -----------------------------------------------------
+
+          DB_TARGET="$(printf '%s' "$DB_TARGET" | xargs)"
+          DB_TARGET_PORT="$(printf '%s' "$DB_TARGET_PORT" | xargs)"
+          DB_NETWORK="$(printf '%s' "$DB_NETWORK" | xargs)"
+
+
+          # -----------------------------------------------------
+          # All 3 MUST exist
+          # -----------------------------------------------------
+
+          if [ -z "$DB_TARGET" ]; then
+            echo "ERROR: Tunnel target is empty."
+            exit 1
+          fi
+
+          if [ -z "$DB_TARGET_PORT" ]; then
+            echo "ERROR: Tunnel target port is empty."
+            exit 1
+          fi
+
+          if [ -z "$DB_NETWORK" ]; then
+            echo "ERROR: Tunnel network is empty."
+            exit 1
+          fi
+
+
+          # -----------------------------------------------------
+          # Port MUST be numeric
+          # -----------------------------------------------------
+
+          case "$DB_TARGET_PORT" in
+            *[!0-9]*|'')
+              echo "ERROR: Tunnel target port must be numeric."
+              exit 1
+              ;;
+          esac
+
+
+          # -----------------------------------------------------
+          # Port MUST be 1-65535
+          # -----------------------------------------------------
+
+          if [ "$DB_TARGET_PORT" -lt 1 ] || \
+             [ "$DB_TARGET_PORT" -gt 65535 ]; then
+            echo "ERROR: Tunnel target port must be between 1 and 65535."
+            exit 1
+          fi
+
+
+          # -----------------------------------------------------
+          # Names must contain only characters accepted by
+          # docker-tunnel-helper
+          # -----------------------------------------------------
+
+          if ! [[ "$DB_TARGET" =~ ^[A-Za-z0-9_.-]+$ ]]; then
+            echo "ERROR: Invalid tunnel target name."
+            exit 1
+          fi
+
+          if ! [[ "$DB_NETWORK" =~ ^[A-Za-z0-9_.-]+$ ]]; then
+            echo "ERROR: Invalid Docker network name."
+            exit 1
+          fi
+
+
+          # -----------------------------------------------------
+          # Save outputs
+          # -----------------------------------------------------
+
+          echo "target=$DB_TARGET" >> "$GITHUB_OUTPUT"
+          echo "port=$DB_TARGET_PORT" >> "$GITHUB_OUTPUT"
+          echo "network=$DB_NETWORK" >> "$GITHUB_OUTPUT"
+
+          echo
+          echo "Tunnel configuration valid."
+          echo "Target:  $DB_TARGET"
+          echo "Port:    $DB_TARGET_PORT"
+          echo "Network: $DB_NETWORK"
+
+
+      # =========================================================
       # CREATE SERVER-SIDE DATABASE PROXY
       # =========================================================
+
       - name: Prepare database tunnel
         id: db
+        env:
+          DB_TARGET: ${{ steps.tunnel-config.outputs.target }}
+          DB_TARGET_PORT: ${{ steps.tunnel-config.outputs.port }}
+          DB_NETWORK: ${{ steps.tunnel-config.outputs.network }}
         run: |
           set -euo pipefail
 
@@ -199,12 +340,17 @@ jobs:
           echo "--------------------------------------"
           printf '%s\n' "$RESULT"
           echo "--------------------------------------"
-          echo
 
           if [ "$EXIT_CODE" -ne 0 ]; then
+            echo
             echo "ERROR: docker-tunnel-helper failed with exit code $EXIT_CODE"
             exit "$EXIT_CODE"
           fi
+
+
+          # -----------------------------------------------------
+          # Parse helper response
+          # -----------------------------------------------------
 
           STATUS="$(
             printf '%s\n' "$RESULT" |
@@ -236,27 +382,167 @@ jobs:
             head -n 1
           )"
 
+
+          # -----------------------------------------------------
+          # Validate helper response
+          # -----------------------------------------------------
+
           if [ "$STATUS" != "OK" ]; then
-            echo "ERROR: Helper did not return STATUS=OK"
+            echo "ERROR: Tunnel helper did not return STATUS=OK."
             exit 1
           fi
 
-          test -n "$SESSION_ID"
-          test -n "$REMOTE_HOST"
-          test -n "$REMOTE_PORT"
+          test -n "$SESSION_ID" || {
+            echo "ERROR: Missing SESSION_ID"
+            exit 1
+          }
+
+          test -n "$REMOTE_HOST" || {
+            echo "ERROR: Missing HOST"
+            exit 1
+          }
+
+          test -n "$REMOTE_PORT" || {
+            echo "ERROR: Missing PORT"
+            exit 1
+          }
+
+          case "$REMOTE_PORT" in
+            *[!0-9]*|'')
+              echo "ERROR: Invalid remote proxy port."
+              exit 1
+              ;;
+          esac
+
+
+          # -----------------------------------------------------
+          # Persist BEFORE next step
+          #
+          # Cleanup uses this even if another step later fails.
+          # -----------------------------------------------------
+
+          printf '%s\n' "$SESSION_ID" \
+            > /tmp/db-tunnel-session
+
+
+          # -----------------------------------------------------
+          # GitHub outputs
+          # -----------------------------------------------------
 
           echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
           echo "remote_host=$REMOTE_HOST" >> "$GITHUB_OUTPUT"
           echo "remote_port=$REMOTE_PORT" >> "$GITHUB_OUTPUT"
           echo "proxy_name=$PROXY_NAME" >> "$GITHUB_OUTPUT"
 
-          printf '%s\n' "$SESSION_ID" > /tmp/db-tunnel-session
-
           echo
-          echo "Tunnel prepared successfully."
+          echo "Tunnel proxy created successfully."
           echo "Session: $SESSION_ID"
           echo "Proxy:   $PROXY_NAME"
-          echo "Remote:  $REMOTE_HOST:$REMOTE_PORT"
+          echo "VPS:     $REMOTE_HOST:$REMOTE_PORT"
+
+
+      # =========================================================
+      # OPEN GITHUB RUNNER -> VPS SSH FORWARD
+      # =========================================================
+
+      - name: Open database SSH tunnel
+        id: db-forward
+        env:
+          REMOTE_HOST: ${{ steps.db.outputs.remote_host }}
+          REMOTE_PORT: ${{ steps.db.outputs.remote_port }}
+        run: |
+          set -euo pipefail
+
+          echo "======================================"
+          echo " OPEN DATABASE SSH TUNNEL"
+          echo "======================================"
+
+          # -----------------------------------------------------
+          # Validate local port
+          # -----------------------------------------------------
+
+          case "$DB_LOCAL_PORT" in
+            *[!0-9]*|'')
+              echo "ERROR: DB_LOCAL_PORT must be numeric."
+              exit 1
+              ;;
+          esac
+
+          if [ "$DB_LOCAL_PORT" -lt 1 ] || \
+             [ "$DB_LOCAL_PORT" -gt 65535 ]; then
+            echo "ERROR: DB_LOCAL_PORT must be between 1 and 65535."
+            exit 1
+          fi
+
+
+          # -----------------------------------------------------
+          # Make sure local port is free
+          # -----------------------------------------------------
+
+          if nc -z 127.0.0.1 "$DB_LOCAL_PORT" 2>/dev/null; then
+            echo "ERROR: Local port $DB_LOCAL_PORT is already in use."
+            exit 1
+          fi
+
+
+          # -----------------------------------------------------
+          # Open SSH forward
+          # -----------------------------------------------------
+
+          ssh \
+            -N \
+            -o ExitOnForwardFailure=yes \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=3 \
+            -L "${DB_LOCAL_PORT}:${REMOTE_HOST}:${REMOTE_PORT}" \
+            production &
+
+          SSH_PID=$!
+
+          printf '%s\n' "$SSH_PID" \
+            > /tmp/db-ssh-tunnel.pid
+
+          echo "SSH tunnel PID: $SSH_PID"
+
+
+          # -----------------------------------------------------
+          # Wait for local tunnel
+          # -----------------------------------------------------
+
+          READY=0
+
+          for _ in $(seq 1 20); do
+
+            if ! kill -0 "$SSH_PID" 2>/dev/null; then
+              echo "ERROR: SSH tunnel process exited unexpectedly."
+              exit 1
+            fi
+
+            if nc -z -w 1 127.0.0.1 "$DB_LOCAL_PORT" 2>/dev/null; then
+              READY=1
+              break
+            fi
+
+            sleep 0.5
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "ERROR: Database tunnel did not become ready."
+            exit 1
+          fi
+
+
+          # -----------------------------------------------------
+          # Save output
+          # -----------------------------------------------------
+
+          echo "local_port=$DB_LOCAL_PORT" >> "$GITHUB_OUTPUT"
+
+          echo
+          echo "Database tunnel ACTIVE"
+          echo "Local endpoint:"
+          echo "  127.0.0.1:$DB_LOCAL_PORT"
+
 
       # =========================================================
       # CONSTRUCT DATABASE URL
@@ -272,20 +558,16 @@ jobs:
           #
           # Construct DATABASE_URI using:
           #
-          # host:
-          #   127.0.0.1
+          # 127.0.0.1
+          # $DB_LOCAL_PORT
           #
-          # port:
-          #   $DB_LOCAL_PORT
+          # Plus DB credentials.
           #
-          # credentials:
-          #   production DB secrets
-          #
-          # Then write:
+          # Then:
           #
           # echo "DATABASE_URI=..." >> "$GITHUB_ENV"
           #
-          # DO NOT print the complete URI/password.
+          # DO NOT print the complete connection string.
 
           echo "// TODO: construct DATABASE_URI"
 
@@ -334,7 +616,7 @@ jobs:
       # =========================================================
       # CLEANUP DATABASE TUNNEL
       #
-      # ALWAYS RUN
+      # ALWAYS RUNS
       # =========================================================
 
       - name: Cleanup database tunnel
@@ -347,24 +629,32 @@ jobs:
           echo "======================================"
 
           # -----------------------------------------------------
-          # 1. Stop GitHub runner's local SSH forward
+          # 1. Stop GitHub runner SSH tunnel
           # -----------------------------------------------------
 
           if [ -f /tmp/db-ssh-tunnel.pid ]; then
 
             SSH_PID="$(cat /tmp/db-ssh-tunnel.pid)"
 
-            echo "Stopping SSH tunnel PID: $SSH_PID"
+            echo "Stopping local SSH tunnel PID: $SSH_PID"
 
             if kill -0 "$SSH_PID" 2>/dev/null; then
+
               kill "$SSH_PID" 2>/dev/null
 
-              sleep 1
+              for _ in $(seq 1 10); do
+                if ! kill -0 "$SSH_PID" 2>/dev/null; then
+                  break
+                fi
+
+                sleep 0.2
+              done
 
               if kill -0 "$SSH_PID" 2>/dev/null; then
                 echo "Force stopping SSH tunnel..."
                 kill -9 "$SSH_PID" 2>/dev/null
               fi
+
             fi
 
             rm -f /tmp/db-ssh-tunnel.pid
@@ -375,7 +665,7 @@ jobs:
 
 
           # -----------------------------------------------------
-          # 2. Tell VPS helper to destroy its Docker proxy
+          # 2. Remove VPS Docker proxy using SAME helper
           # -----------------------------------------------------
 
           if [ -f /tmp/db-tunnel-session ]; then
@@ -394,10 +684,10 @@ jobs:
 
             CLEANUP_EXIT=$?
 
-            echo "$CLEANUP_RESULT"
+            printf '%s\n' "$CLEANUP_RESULT"
 
             if [ "$CLEANUP_EXIT" -ne 0 ]; then
-              echo "WARNING: VPS tunnel cleanup command failed."
+              echo "WARNING: VPS tunnel cleanup failed."
             fi
 
             rm -f /tmp/db-tunnel-session
@@ -423,9 +713,6 @@ jobs:
           echo "======================================"
           echo " VERIFY TUNNEL CLEANUP"
           echo "======================================"
-
-          echo
-          echo "Remaining VPS tunnel containers:"
 
           ssh production \
             "/usr/local/bin/docker-tunnel-helper list" \
