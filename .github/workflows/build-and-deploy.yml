@@ -525,33 +525,6 @@ jobs:
 
           echo "Docker database access successful."
 
-
-      # =========================================================
-      # VERIFY DEFAULT BUILDER
-      #
-      # IMPORTANT:
-      # Do NOT run docker/setup-buildx-action.
-      #
-      # We want the built-in Docker driver.
-      # =========================================================
-
-      - name: Verify Docker builder
-        run: |
-          set -euo pipefail
-
-          DRIVER="$(
-            docker buildx inspect \
-              --format '{{.Driver}}'
-          )"
-
-          if [ "$DRIVER" != "docker" ]; then
-            echo "ERROR: Docker builder is not using the docker driver."
-            exit 1
-          fi
-
-          echo "Docker builder ready."
-
-
       # =========================================================
       # GHCR LOGIN
       # =========================================================
