@@ -7,93 +7,86 @@ WORKDIR /app
 RUN corepack enable
 
 
-# =========================
+# ---------------------------------------------------------
 # Dependencies
-# =========================
+# ---------------------------------------------------------
 
 FROM base AS deps
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml ./
 
 RUN pnpm install --frozen-lockfile
 
 
-# =========================
-# Builder
-# =========================
+# ---------------------------------------------------------
+# Build
+# ---------------------------------------------------------
 
 FROM base AS builder
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ARG NODE_ENV
-ARG DATABASE_URI
-ARG CRON_SECRET
-ARG NEXT_PUBLIC_SERVER_URL
-ARG PAYLOAD_SECRET
-ARG PREVIEW_SECRET
-ARG RESEND_API_KEY
-ARG S3_ACCESS_KEY_ID
-ARG S3_SECRET_ACCESS_KEY
-ARG S3_BUCKET
-ARG S3_ENDPOINT
-ARG S3_REGION
-ARG TAILWIND_GENERATOR
-ARG USE_RESEND
-ARG IMAGE_HOSTS
-ARG EMAIL_FROM_ADDRESS
-ARG EMAIL_FROM_NAME
-ARG SMTP_HOST
-ARG SMTP_PORT
-ARG SMTP_USER
-ARG SMTP_PASS
-ARG SMTP_SECURE
-
-ENV NODE_ENV=$NODE_ENV \
-    DATABASE_URI=$DATABASE_URI \
-    CRON_SECRET=$CRON_SECRET \
-    NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL \
-    PAYLOAD_SECRET=$PAYLOAD_SECRET \
-    PREVIEW_SECRET=$PREVIEW_SECRET \
-    RESEND_API_KEY=$RESEND_API_KEY \
-    S3_ACCESS_KEY_ID=$S3_ACCESS_KEY_ID \
-    S3_SECRET_ACCESS_KEY=$S3_SECRET_ACCESS_KEY \
-    S3_BUCKET=$S3_BUCKET \
-    S3_ENDPOINT=$S3_ENDPOINT \
-    S3_REGION=$S3_REGION \
-    TAILWIND_GENERATOR=$TAILWIND_GENERATOR \
-    USE_RESEND=$USE_RESEND \
-    IMAGE_HOSTS=$IMAGE_HOSTS \
-    EMAIL_FROM_ADDRESS=$EMAIL_FROM_ADDRESS \
-    EMAIL_FROM_NAME=$EMAIL_FROM_NAME \
-    SMTP_HOST=$SMTP_HOST \
-    SMTP_PORT=$SMTP_PORT \
-    SMTP_USER=$SMTP_USER \
-    SMTP_PASS=$SMTP_PASS \
-    SMTP_SECURE=$SMTP_SECURE
-
-RUN pnpm build
+RUN --mount=type=secret,id=NODE_ENV \
+    --mount=type=secret,id=DATABASE_URI \
+    --mount=type=secret,id=CRON_SECRET \
+    --mount=type=secret,id=NEXT_PUBLIC_SERVER_URL \
+    --mount=type=secret,id=PAYLOAD_SECRET \
+    --mount=type=secret,id=PREVIEW_SECRET \
+    --mount=type=secret,id=RESEND_API_KEY \
+    --mount=type=secret,id=S3_ACCESS_KEY_ID \
+    --mount=type=secret,id=S3_SECRET_ACCESS_KEY \
+    --mount=type=secret,id=S3_BUCKET \
+    --mount=type=secret,id=S3_ENDPOINT \
+    --mount=type=secret,id=S3_REGION \
+    --mount=type=secret,id=TAILWIND_GENERATOR \
+    --mount=type=secret,id=USE_RESEND \
+    --mount=type=secret,id=IMAGE_HOSTS \
+    --mount=type=secret,id=EMAIL_FROM_ADDRESS \
+    --mount=type=secret,id=EMAIL_FROM_NAME \
+    --mount=type=secret,id=SMTP_HOST \
+    --mount=type=secret,id=SMTP_PORT \
+    --mount=type=secret,id=SMTP_USER \
+    --mount=type=secret,id=SMTP_PASS \
+    --mount=type=secret,id=SMTP_SECURE \
+    export NODE_ENV="$(cat /run/secrets/NODE_ENV)" && \
+    export DATABASE_URI="$(cat /run/secrets/DATABASE_URI)" && \
+    export CRON_SECRET="$(cat /run/secrets/CRON_SECRET)" && \
+    export NEXT_PUBLIC_SERVER_URL="$(cat /run/secrets/NEXT_PUBLIC_SERVER_URL)" && \
+    export PAYLOAD_SECRET="$(cat /run/secrets/PAYLOAD_SECRET)" && \
+    export PREVIEW_SECRET="$(cat /run/secrets/PREVIEW_SECRET)" && \
+    export RESEND_API_KEY="$(cat /run/secrets/RESEND_API_KEY)" && \
+    export S3_ACCESS_KEY_ID="$(cat /run/secrets/S3_ACCESS_KEY_ID)" && \
+    export S3_SECRET_ACCESS_KEY="$(cat /run/secrets/S3_SECRET_ACCESS_KEY)" && \
+    export S3_BUCKET="$(cat /run/secrets/S3_BUCKET)" && \
+    export S3_ENDPOINT="$(cat /run/secrets/S3_ENDPOINT)" && \
+    export S3_REGION="$(cat /run/secrets/S3_REGION)" && \
+    export TAILWIND_GENERATOR="$(cat /run/secrets/TAILWIND_GENERATOR)" && \
+    export USE_RESEND="$(cat /run/secrets/USE_RESEND)" && \
+    export IMAGE_HOSTS="$(cat /run/secrets/IMAGE_HOSTS)" && \
+    export EMAIL_FROM_ADDRESS="$(cat /run/secrets/EMAIL_FROM_ADDRESS)" && \
+    export EMAIL_FROM_NAME="$(cat /run/secrets/EMAIL_FROM_NAME)" && \
+    export SMTP_HOST="$(cat /run/secrets/SMTP_HOST)" && \
+    export SMTP_PORT="$(cat /run/secrets/SMTP_PORT)" && \
+    export SMTP_USER="$(cat /run/secrets/SMTP_USER)" && \
+    export SMTP_PASS="$(cat /run/secrets/SMTP_PASS)" && \
+    export SMTP_SECURE="$(cat /run/secrets/SMTP_SECURE)" && \
+    pnpm build
 
 
-# =========================
+# ---------------------------------------------------------
 # Production
-# =========================
+# ---------------------------------------------------------
 
-FROM base AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
+RUN corepack enable
+
 ENV NODE_ENV=production
 
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/next.config.* ./
-COPY --from=builder /app/payload.config.* ./
+COPY --from=builder /app ./
 
 EXPOSE 3000
 
