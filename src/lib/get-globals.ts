@@ -12,7 +12,7 @@ async function getGlobal(slug: Global, depth = 0, draft: boolean) {
   const global = await payload.findGlobal({
     slug,
     depth,
-    draft
+    draft,
   })
 
   return global
@@ -21,11 +21,7 @@ async function getGlobal(slug: Global, depth = 0, draft: boolean) {
 /**
  * Returns a unstable_cache function mapped with the cache tag for the slug
  */
-export const getCachedGlobal = (
-  slug: Global,
-  depth = 0,
-  draft = false
-) => {
+export const getCachedGlobal = (slug: Global, depth = 0, draft = false) => {
   return draft
     ? getGlobal(slug, depth, draft)
     : unstable_cache(async () => getGlobal(slug, depth, draft), [slug], {

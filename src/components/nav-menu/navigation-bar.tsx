@@ -75,16 +75,13 @@ function LogoLink({
         media={lightLogo}
         pageContext={pageContext}
         priority
-        className={joinStyles('dark:hidden transition-transform group-hover:scale-105', logoStyles)}
+        className={joinStyles('dark:hidden', logoStyles)}
       />
       <MediaBlockUI
         media={darkLogo}
         priority
         pageContext={pageContext}
-        className={joinStyles(
-          'hidden dark:block transition-transform group-hover:scale-105',
-          logoStyles,
-        )}
+        className={joinStyles('hidden dark:block', logoStyles)}
       />
       {useTitleWithLogo && appTitle && (
         <span className={joinStyles('text-lg font-semibold tracking-tight', titleStyles)}>

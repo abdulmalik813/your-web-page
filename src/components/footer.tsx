@@ -43,18 +43,12 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
               <MediaBlockUI
                 media={lightLogo}
                 priority
-                className={joinStyles(
-                  'dark:hidden transition-transform group-hover:scale-105',
-                  footerData.logoStyles,
-                )}
+                className={joinStyles('dark:hidden', footerData.logoStyles)}
                 pageContext={pageContext}
               />
               <MediaBlockUI
                 media={darkLogo}
-                className={joinStyles(
-                  'hidden dark:block transition-transform group-hover:scale-105',
-                  footerData.logoStyles,
-                )}
+                className={joinStyles('hidden dark:block', footerData.logoStyles)}
                 pageContext={pageContext}
               />
               {footerData.useLabelWithLogo && setting.appTitle && (

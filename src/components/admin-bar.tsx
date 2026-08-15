@@ -35,7 +35,7 @@ export async function AdminBar({ pageContext }: { pageContext: PageContext }) {
             <Button
               variant="ghost"
               size="sm"
-              className="gap-2 text-destructive hover:text-destructive/90"
+              className="gap-2"
               asChild
             >
               <a href={`/api/draft/disable?path=${encodeURIComponent(pageContext.slug || '')}`}>
@@ -47,7 +47,7 @@ export async function AdminBar({ pageContext }: { pageContext: PageContext }) {
             <Button
               variant="ghost"
               size="sm"
-              className="gap-2 text-primary hover:text-primary/90"
+              className="gap-2"
               asChild
             >
               <a href={generatePreviewPath(pageContext.slug || '')}>
