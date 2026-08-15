@@ -24,9 +24,9 @@ jobs:
     environment: prod
 
     env:
-      # ---------------------------------------------------------
-      # SSH / Cloudflare
-      # ---------------------------------------------------------
+      # =========================================================
+      # SSH / CLOUDFLARE
+      # =========================================================
 
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
@@ -34,39 +34,40 @@ jobs:
       TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
       TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
 
-      # ---------------------------------------------------------
-      # Database tunnel
+      # =========================================================
+      # DATABASE TUNNEL
       #
-      # Exactly:
+      # Required format:
       # target,port,network
-      # ---------------------------------------------------------
+      # =========================================================
 
       TUNNEL_TARGET_PORT_NETWORK: ${{ secrets.TUNNEL_TARGET_PORT_NETWORK }}
 
-      # Local listener on GitHub runner
       DB_LOCAL_PORT: "27018"
 
-      # ---------------------------------------------------------
-      # Database URI template
+      # =========================================================
+      # DATABASE URI TEMPLATE
       #
-      # Example:
-      # mongodb://user:pass@[DB_HOST]:[DB_PORT]/?authSource=admin
-      # ---------------------------------------------------------
+      # Must contain:
+      # [DB_HOST]
+      # [DB_PORT]
+      # =========================================================
 
       DATABASE_URI_TEMPLATE: ${{ secrets.DATABASE_URI }}
 
-      # ---------------------------------------------------------
-      # Docker build environment
+      # =========================================================
+      # BUILD ENVIRONMENT
       #
-      # These are OPTIONAL unless your application itself
-      # requires them during pnpm build.
-      # ---------------------------------------------------------
+      # These are optional from the workflow's perspective.
+      # =========================================================
 
       NODE_ENV: ${{ secrets.NODE_ENV }}
+
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
       NEXT_PUBLIC_SERVER_URL: ${{ secrets.NEXT_PUBLIC_SERVER_URL }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
       PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
+
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
 
       S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
@@ -77,6 +78,7 @@ jobs:
 
       TAILWIND_GENERATOR: ${{ secrets.TAILWIND_GENERATOR }}
       USE_RESEND: ${{ secrets.USE_RESEND }}
+
       IMAGE_HOSTS: ${{ secrets.IMAGE_HOSTS }}
 
       EMAIL_FROM_ADDRESS: ${{ secrets.EMAIL_FROM_ADDRESS }}
@@ -98,7 +100,7 @@ jobs:
 
 
       # =========================================================
-      # CLOUDFLARED
+      # INSTALL CLOUDFLARED
       # =========================================================
 
       - name: Install cloudflared
@@ -115,7 +117,7 @@ jobs:
 
 
       # =========================================================
-      # SSH KEY
+      # SSH PRIVATE KEY
       # =========================================================
 
       - name: Install SSH private key
@@ -206,7 +208,7 @@ jobs:
 
 
       # =========================================================
-      # TEST VPS
+      # TEST VPS CONNECTION
       # =========================================================
 
       - name: Test VPS connection
@@ -215,6 +217,7 @@ jobs:
 
           ssh production '
             set -e
+
             test -x /usr/local/bin/docker-tunnel-helper
             docker info >/dev/null 2>&1
           '
@@ -223,9 +226,9 @@ jobs:
 
 
       # =========================================================
-      # VALIDATE TUNNEL CONFIG
+      # PARSE + VALIDATE TUNNEL CONFIGURATION
       #
-      # Must contain EXACTLY:
+      # EXACTLY:
       # target,port,network
       # =========================================================
 
@@ -300,7 +303,7 @@ jobs:
 
 
       # =========================================================
-      # CREATE VPS DATABASE PROXY
+      # CREATE TEMPORARY VPS DATABASE PROXY
       # =========================================================
 
       - name: Prepare database tunnel
@@ -377,7 +380,6 @@ jobs:
               ;;
           esac
 
-          # Keep session ID privately for guaranteed cleanup.
           printf '%s\n' "$SESSION_ID" \
             > /tmp/db-tunnel-session
 
@@ -388,12 +390,9 @@ jobs:
 
 
       # =========================================================
-      # OPEN SSH FORWARD
+      # OPEN GITHUB RUNNER -> VPS SSH FORWARD
       #
-      # IMPORTANT:
-      # Bind 0.0.0.0 rather than only 127.0.0.1.
-      #
-      # This allows Docker's host gateway to reach the listener.
+      # Bind on 0.0.0.0 so Docker host-gateway can access it.
       # =========================================================
 
       - name: Open database SSH tunnel
@@ -448,17 +447,11 @@ jobs:
 
 
       # =========================================================
-      # DATABASE URI
+      # CONFIGURE DATABASE URI
       #
-      # IMPORTANT:
+      # Docker build will use:
       #
-      # Docker must use:
-      #
-      # host.docker.internal
-      #
-      # NOT:
-      #
-      # 127.0.0.1
+      # host.docker.internal:<port>
       # =========================================================
 
       - name: Configure database URI
@@ -480,7 +473,7 @@ jobs:
 
           if [[ "$DATABASE_URI" == *"[DB_HOST]"* ]] || \
              [[ "$DATABASE_URI" == *"[DB_PORT]"* ]]; then
-            echo "ERROR: Database placeholders were not replaced."
+            echo "ERROR: Database URI placeholders were not replaced."
             exit 1
           fi
 
@@ -496,7 +489,7 @@ jobs:
 
 
       # =========================================================
-      # TEST RUNNER-SIDE DATABASE PATH
+      # TEST RUNNER DATABASE TUNNEL
       # =========================================================
 
       - name: Test database tunnel
@@ -512,19 +505,59 @@ jobs:
 
 
       # =========================================================
-      # DOCKER BUILDX
+      # TEST DOCKER -> RUNNER HOST GATEWAY
+      #
+      # This catches the exact issue we were having BEFORE
+      # starting the expensive application build.
       # =========================================================
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Test Docker database access
+        run: |
+          set -euo pipefail
+
+          docker run \
+            --rm \
+            --add-host host.docker.internal:host-gateway \
+            alpine:3.22 \
+            sh -c \
+            "nc -z -w 5 host.docker.internal '$DB_LOCAL_PORT'" \
+            >/dev/null 2>&1
+
+          echo "Docker database access successful."
 
 
       # =========================================================
-      # LOGIN TO GHCR
+      # VERIFY DEFAULT BUILDER
+      #
+      # IMPORTANT:
+      # Do NOT run docker/setup-buildx-action.
+      #
+      # We want the built-in Docker driver.
+      # =========================================================
+
+      - name: Verify Docker builder
+        run: |
+          set -euo pipefail
+
+          DRIVER="$(
+            docker buildx inspect \
+              --format '{{.Driver}}'
+          )"
+
+          if [ "$DRIVER" != "docker" ]; then
+            echo "ERROR: Docker builder is not using the docker driver."
+            exit 1
+          fi
+
+          echo "Docker builder ready."
+
+
+      # =========================================================
+      # GHCR LOGIN
       # =========================================================
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -532,9 +565,7 @@ jobs:
 
 
       # =========================================================
-      # IMAGE NAME
-      #
-      # GHCR repository names need lowercase.
+      # PREPARE IMAGE NAME
       # =========================================================
 
       - name: Prepare image name
@@ -553,19 +584,17 @@ jobs:
 
 
       # =========================================================
-      # BUILD + PUSH
+      # BUILD + PUSH TO GHCR
       #
-      # host.docker.internal is mapped to Docker host gateway.
+      # NOTE:
+      # No setup-buildx-action.
+      # No GHA cache exporter.
       #
-      # Docker build therefore reaches:
-      #
-      # host.docker.internal:27018
-      #
-      # which reaches the SSH listener on GitHub runner.
+      # Uses Docker daemon's built-in BuildKit.
       # =========================================================
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
@@ -583,38 +612,33 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
 
-          secrets: |
-            NODE_ENV=${{ env.NODE_ENV }}
-            DATABASE_URI=${{ env.DATABASE_URI }}
-            CRON_SECRET=${{ env.CRON_SECRET }}
-            NEXT_PUBLIC_SERVER_URL=${{ env.NEXT_PUBLIC_SERVER_URL }}
-            PAYLOAD_SECRET=${{ env.PAYLOAD_SECRET }}
-            PREVIEW_SECRET=${{ env.PREVIEW_SECRET }}
-            RESEND_API_KEY=${{ env.RESEND_API_KEY }}
-            S3_ACCESS_KEY_ID=${{ env.S3_ACCESS_KEY_ID }}
-            S3_SECRET_ACCESS_KEY=${{ env.S3_SECRET_ACCESS_KEY }}
-            S3_BUCKET=${{ env.S3_BUCKET }}
-            S3_ENDPOINT=${{ env.S3_ENDPOINT }}
-            S3_REGION=${{ env.S3_REGION }}
-            TAILWIND_GENERATOR=${{ env.TAILWIND_GENERATOR }}
-            USE_RESEND=${{ env.USE_RESEND }}
-            IMAGE_HOSTS=${{ env.IMAGE_HOSTS }}
-            EMAIL_FROM_ADDRESS=${{ env.EMAIL_FROM_ADDRESS }}
-            EMAIL_FROM_NAME=${{ env.EMAIL_FROM_NAME }}
-            SMTP_HOST=${{ env.SMTP_HOST }}
-            SMTP_PORT=${{ env.SMTP_PORT }}
-            SMTP_USER=${{ env.SMTP_USER }}
-            SMTP_PASS=${{ env.SMTP_PASS }}
-            SMTP_SECURE=${{ env.SMTP_SECURE }}
-
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          secret-envs: |
+            NODE_ENV=NODE_ENV
+            DATABASE_URI=DATABASE_URI
+            CRON_SECRET=CRON_SECRET
+            NEXT_PUBLIC_SERVER_URL=NEXT_PUBLIC_SERVER_URL
+            PAYLOAD_SECRET=PAYLOAD_SECRET
+            PREVIEW_SECRET=PREVIEW_SECRET
+            RESEND_API_KEY=RESEND_API_KEY
+            S3_ACCESS_KEY_ID=S3_ACCESS_KEY_ID
+            S3_SECRET_ACCESS_KEY=S3_SECRET_ACCESS_KEY
+            S3_BUCKET=S3_BUCKET
+            S3_ENDPOINT=S3_ENDPOINT
+            S3_REGION=S3_REGION
+            TAILWIND_GENERATOR=TAILWIND_GENERATOR
+            USE_RESEND=USE_RESEND
+            IMAGE_HOSTS=IMAGE_HOSTS
+            EMAIL_FROM_ADDRESS=EMAIL_FROM_ADDRESS
+            EMAIL_FROM_NAME=EMAIL_FROM_NAME
+            SMTP_HOST=SMTP_HOST
+            SMTP_PORT=SMTP_PORT
+            SMTP_USER=SMTP_USER
+            SMTP_PASS=SMTP_PASS
+            SMTP_SECURE=SMTP_SECURE
 
 
       # =========================================================
-      # DEPLOY COMPLETE
-      #
-      # Current deployment target = GHCR.
+      # COMPLETE
       # =========================================================
 
       - name: Deployment complete
@@ -623,7 +647,7 @@ jobs:
 
 
       # =========================================================
-      # DATABASE CLEANUP
+      # DATABASE TUNNEL CLEANUP
       #
       # ALWAYS RUN
       # =========================================================
@@ -636,7 +660,7 @@ jobs:
           echo "Cleaning up database connection..."
 
           # -----------------------------------------------------
-          # Stop local GitHub SSH forward
+          # Stop local SSH tunnel
           # -----------------------------------------------------
 
           if [ -f /tmp/db-ssh-tunnel.pid ]; then
@@ -667,7 +691,7 @@ jobs:
 
 
           # -----------------------------------------------------
-          # Remove VPS proxy
+          # Remove remote VPS Docker proxy
           # -----------------------------------------------------
 
           if [ -f /tmp/db-tunnel-session ]; then
@@ -692,7 +716,7 @@ jobs:
       # =========================================================
       # SSH CLEANUP
       #
-      # MUST BE LAST
+      # MUST REMAIN LAST
       # =========================================================
 
       - name: Cleanup SSH credentials
