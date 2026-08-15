@@ -2,8 +2,8 @@
 
 import ReactDOM from 'react-dom'
 
-export function PreloadResources() {
-  ReactDOM.preload('/api/stylesheet', {
+export function PreloadResources({ href }: { href: string }) {
+  ReactDOM.preload(href, {
     as: 'style',
   })
 

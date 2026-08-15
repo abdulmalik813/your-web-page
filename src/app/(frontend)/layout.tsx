@@ -10,7 +10,6 @@ import { Metadata } from 'next'
 import { getAppSettings } from '@/constants/app'
 import { isFontData } from '@/lib/is-font-data'
 import { LivePreviewListener } from '@/components/live-preview-listener'
-import { Analytics } from '@vercel/analytics/next'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import Script from 'next/script'
 import NextTopLoader from 'nextjs-toploader'
@@ -58,6 +57,14 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 
   const setting = (await getCachedGlobal('settings', 1, isEnabled)) as Setting
 
+  // In draft mode, append updatedAt as a cache-buster so:
+  // 1. The URL differs from the production URL → no cross-contamination in browser cache
+  // 2. Every draft save changes updatedAt → URL changes → browser re-fetches immediately
+  // This makes live preview CSS changes reflect without a hard refresh.
+  const stylesheetHref = isEnabled
+    ? `/api/stylesheet?draft=1&t=${encodeURIComponent(setting?.updatedAt ?? '')}`
+    : '/api/stylesheet'
+
   const defaultFont = setting?.default
   const fontData =
     defaultFont?.fontData && isFontData(defaultFont.fontData) ? defaultFont.fontData : null
@@ -83,8 +90,8 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     >
       {isEnabled && <LivePreviewListener />}
       <body className="flex flex-col" suppressHydrationWarning>
-        <PreloadResources />
-        <link href="/api/stylesheet" rel="stylesheet" precedence="default" />
+        <PreloadResources href={stylesheetHref} />
+        <link href={stylesheetHref} rel="stylesheet" precedence="default" />
         <NextTopLoader color="hsl(var(--primary))" showSpinner={false} />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
@@ -102,7 +109,6 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
             `}
           </Script>
         )}
-        <Analytics />
       </body>
     </html>
   )
