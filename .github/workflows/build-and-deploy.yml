@@ -27,6 +27,8 @@ jobs:
 
       TUNNEL_TARGET_PORT_NETWORK: ${{ secrets.TUNNEL_TARGET_PORT_NETWORK }}
 
+      DATABASE_URI_TEMPLATE: ${{ secrets.DATABASE_URI }}
+
       DB_LOCAL_PORT: "27018"
 
     steps:
@@ -52,7 +54,7 @@ jobs:
 
           sudo chmod +x /usr/local/bin/cloudflared
 
-          cloudflared --version
+          echo "cloudflared installed."
 
 
       # =========================================================
@@ -73,7 +75,7 @@ jobs:
 
           chmod 600 "$HOME/.ssh/id_ed25519"
 
-          echo "SSH private key installed."
+          echo "SSH key installed."
 
 
       # =========================================================
@@ -133,6 +135,11 @@ jobs:
             exit 1
           }
 
+          test -n "$DATABASE_URI_TEMPLATE" || {
+            echo "ERROR: DATABASE_URI is missing."
+            exit 1
+          }
+
           test -s "$HOME/.ssh/id_ed25519" || {
             echo "ERROR: SSH_PRIVATE_KEY is missing."
             exit 1
@@ -153,7 +160,6 @@ jobs:
             set -e
 
             test -x /usr/local/bin/docker-tunnel-helper
-
             docker info >/dev/null 2>&1
 
             echo "SSH connection successful."
@@ -192,20 +198,20 @@ jobs:
           DB_TARGET_PORT="$(printf '%s' "$DB_TARGET_PORT" | xargs)"
           DB_NETWORK="$(printf '%s' "$DB_NETWORK" | xargs)"
 
-          if [ -z "$DB_TARGET" ]; then
+          [ -n "$DB_TARGET" ] || {
             echo "ERROR: Tunnel target is empty."
             exit 1
-          fi
+          }
 
-          if [ -z "$DB_TARGET_PORT" ]; then
+          [ -n "$DB_TARGET_PORT" ] || {
             echo "ERROR: Tunnel port is empty."
             exit 1
-          fi
+          }
 
-          if [ -z "$DB_NETWORK" ]; then
+          [ -n "$DB_NETWORK" ] || {
             echo "ERROR: Tunnel network is empty."
             exit 1
-          fi
+          }
 
           case "$DB_TARGET_PORT" in
             *[!0-9]*|'')
@@ -293,20 +299,20 @@ jobs:
               | head -n 1
           )"
 
-          if [ "$STATUS" != "OK" ]; then
+          [ "$STATUS" = "OK" ] || {
             echo "ERROR: Tunnel preparation failed."
             exit 1
-          fi
+          }
 
-          if [ -z "$SESSION_ID" ]; then
+          [ -n "$SESSION_ID" ] || {
             echo "ERROR: Tunnel session was not returned."
             exit 1
-          fi
+          }
 
-          if [ -z "$REMOTE_HOST" ]; then
+          [ -n "$REMOTE_HOST" ] || {
             echo "ERROR: Tunnel host was not returned."
             exit 1
-          fi
+          }
 
           case "$REMOTE_PORT" in
             *[!0-9]*|'')
@@ -396,25 +402,66 @@ jobs:
 
 
       # =========================================================
-      # CONSTRUCT DATABASE URL
+      # CONSTRUCT DATABASE URI
       # =========================================================
 
-      - name: Construct database URL
+      - name: Configure database URI
         run: |
-          # TODO:
-          #
-          # Construct DATABASE_URI using:
-          #
-          # 127.0.0.1
-          # $DB_LOCAL_PORT
-          #
-          # Plus database credentials.
-          #
-          # Write it to GITHUB_ENV.
-          #
-          # Never print the URI or credentials.
+          set -euo pipefail
 
-          echo "// TODO: construct database URL"
+          if [[ "$DATABASE_URI_TEMPLATE" != *"[DB_HOST]"* ]]; then
+            echo "ERROR: DATABASE_URI is missing [DB_HOST]."
+            exit 1
+          fi
+
+          if [[ "$DATABASE_URI_TEMPLATE" != *"[DB_PORT]"* ]]; then
+            echo "ERROR: DATABASE_URI is missing [DB_PORT]."
+            exit 1
+          fi
+
+          DATABASE_URI="${DATABASE_URI_TEMPLATE//\[DB_HOST\]/127.0.0.1}"
+          DATABASE_URI="${DATABASE_URI//\[DB_PORT\]/$DB_LOCAL_PORT}"
+
+          if [[ "$DATABASE_URI" == *"[DB_HOST]"* ]] || \
+             [[ "$DATABASE_URI" == *"[DB_PORT]"* ]]; then
+            echo "ERROR: Database URI placeholders were not fully replaced."
+            exit 1
+          fi
+
+          echo "::add-mask::$DATABASE_URI"
+
+          {
+            echo 'DATABASE_URI<<__DATABASE_URI_EOF__'
+            printf '%s\n' "$DATABASE_URI"
+            echo '__DATABASE_URI_EOF__'
+          } >> "$GITHUB_ENV"
+
+          echo "Database URI configured successfully."
+
+
+      # =========================================================
+      # TEST DATABASE CONNECTION
+      # =========================================================
+
+      - name: Test database connection
+        run: |
+          set -euo pipefail
+
+          # Basic TCP-level check.
+          if ! nc -z -w 5 127.0.0.1 "$DB_LOCAL_PORT"; then
+            echo "ERROR: Database tunnel is not reachable."
+            exit 1
+          fi
+
+          # If mongosh is available later, this can be upgraded to:
+          #
+          # mongosh "$DATABASE_URI" \
+          #   --quiet \
+          #   --eval 'db.adminCommand({ ping: 1 })'
+          #
+          # For now, confirm the tunnel is accepting connections.
+
+          echo "Database connection test successful."
 
 
       # =========================================================
@@ -468,10 +515,7 @@ jobs:
 
           echo "Cleaning up database connection..."
 
-          # -----------------------------------------------------
           # Stop local SSH forward
-          # -----------------------------------------------------
-
           if [ -f /tmp/db-ssh-tunnel.pid ]; then
 
             SSH_PID="$(cat /tmp/db-ssh-tunnel.pid)"
@@ -498,11 +542,7 @@ jobs:
             rm -f /tmp/db-ssh-tunnel.pid
           fi
 
-
-          # -----------------------------------------------------
           # Remove VPS proxy
-          # -----------------------------------------------------
-
           if [ -f /tmp/db-tunnel-session ]; then
 
             SESSION_ID="$(cat /tmp/db-tunnel-session)"
