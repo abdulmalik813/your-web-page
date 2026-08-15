@@ -20,8 +20,9 @@ FROM base AS deps
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
-# The package postinstall uses scripts/export-css.js.
-# Source files are not copied yet, so skip lifecycle scripts.
+# postinstall calls scripts/export-css.js.
+# Source is not copied yet, so skip lifecycle scripts here.
+
 RUN pnpm install \
     --frozen-lockfile \
     --ignore-scripts
@@ -48,9 +49,10 @@ RUN pnpm run export-css
 # =============================================================
 # CACHE BUSTER
 #
-# Secret contents themselves do not participate in Docker's
-# cache key. Git SHA changes on every committed build, ensuring
-# this RUN is executed again for the new deployment.
+# BuildKit secrets are intentionally excluded from cache keys.
+#
+# The workflow passes github.sha here so this build RUN executes
+# again for each commit.
 # =============================================================
 
 ARG CACHEBUST=1
@@ -59,17 +61,15 @@ ARG CACHEBUST=1
 # =============================================================
 # APPLICATION BUILD
 #
-# BUILD_ENV is one JSON document containing every environment
-# variable from the GitHub ENV secret.
+# BUILD_ENV contains all application environment variables.
 #
-# Node reads that JSON and starts:
+# The workflow has already:
 #
-#     pnpm build
+#   [DB_HOST] -> host.docker.internal
+#   [DB_PORT] -> 27018
 #
-# with all JSON entries merged into process.env.
-#
-# This means NEW environment variables automatically become
-# available during future builds without Dockerfile changes.
+# CI-only secrets have been removed before BUILD_ENV reaches
+# this stage.
 # =============================================================
 
 RUN --mount=type=secret,id=BUILD_ENV,required=true \
@@ -77,11 +77,16 @@ RUN --mount=type=secret,id=BUILD_ENV,required=true \
       const fs = require("fs"); \
       const { spawnSync } = require("child_process"); \
       \
-      const path = "/run/secrets/BUILD_ENV"; \
-      const raw = fs.readFileSync(path, "utf8"); \
+      const secretPath = "/run/secrets/BUILD_ENV"; \
+      \
+      const raw = fs.readFileSync(secretPath, "utf8"); \
       const parsed = JSON.parse(raw); \
       \
-      if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") { \
+      if ( \
+        !parsed || \
+        Array.isArray(parsed) || \
+        typeof parsed !== "object" \
+      ) { \
         console.error("ERROR: BUILD_ENV must contain a JSON object."); \
         process.exit(1); \
       } \
@@ -89,6 +94,7 @@ RUN --mount=type=secret,id=BUILD_ENV,required=true \
       const buildEnv = {}; \
       \
       for (const [key, value] of Object.entries(parsed)) { \
+        \
         if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) { \
           console.error(`ERROR: Invalid environment variable name: ${key}`); \
           process.exit(1); \
@@ -104,9 +110,30 @@ RUN --mount=type=secret,id=BUILD_ENV,required=true \
       } \
       \
       if (!buildEnv.DATABASE_URI) { \
-        console.error("ERROR: DATABASE_URI is required for the build."); \
+        console.error("ERROR: DATABASE_URI is required."); \
         process.exit(1); \
       } \
+      \
+      let dbUri; \
+      \
+      try { \
+        dbUri = new URL(buildEnv.DATABASE_URI); \
+      } catch { \
+        console.error("ERROR: DATABASE_URI is not a valid URI."); \
+        process.exit(1); \
+      } \
+      \
+      if (dbUri.hostname !== "host.docker.internal") { \
+        console.error("ERROR: Docker received the wrong DATABASE_URI hostname."); \
+        process.exit(1); \
+      } \
+      \
+      if (!dbUri.port) { \
+        console.error("ERROR: DATABASE_URI does not contain a port."); \
+        process.exit(1); \
+      } \
+      \
+      console.log("Docker build database configuration verified."); \
       \
       const result = spawnSync( \
         "pnpm", \
@@ -121,7 +148,7 @@ RUN --mount=type=secret,id=BUILD_ENV,required=true \
       ); \
       \
       if (result.error) { \
-        console.error("ERROR: Failed to start pnpm build."); \
+        console.error("ERROR: Unable to start pnpm build."); \
         console.error(result.error.message); \
         process.exit(1); \
       } \

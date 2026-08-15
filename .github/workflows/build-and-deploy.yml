@@ -26,23 +26,27 @@ jobs:
 
     steps:
       # =========================================================
-      # LOAD SINGLE ENV JSON SECRET
+      # LOAD SINGLE JSON SECRET
       #
-      # GitHub secret:
+      # GitHub environment secret:
+      #
       # ENV
       #
-      # Expected:
+      # Example:
+      #
       # {
       #   "SSH_HOST": "...",
-      #   "SSH_USER": "...",
+      #   "SSH_USER": "root",
       #   "SSH_PRIVATE_KEY": "...",
+      #   "CF_ACCESS_CLIENT_ID": "...",
+      #   "CF_ACCESS_CLIENT_SECRET": "...",
+      #   "TUNNEL_TARGET_PORT_NETWORK": "target,27017,network",
+      #   "DATABASE_URI": "mongodb://user:pass@[DB_HOST]:[DB_PORT]/...",
+      #   "DOKPLOY_DEPLOY_URL": "...",
+      #   "NODE_ENV": "production",
+      #   "PAYLOAD_SECRET": "...",
       #   ...
       # }
-      #
-      # IMPORTANT:
-      # Do NOT echo parsed values.
-      # Do NOT use set -x.
-      # Do NOT call add-mask on multiline values.
       # =========================================================
 
       - name: Load environment
@@ -60,21 +64,18 @@ jobs:
             | jq -e 'type == "object"' \
             >/dev/null
           then
-            echo "ERROR: ENV must be a valid JSON object."
+            echo "ERROR: ENV must contain a valid JSON object."
             exit 1
           fi
 
-          # Keep original JSON privately for the Docker build.
           printf '%s' "$ENV_JSON" > /tmp/source-env.json
           chmod 600 /tmp/source-env.json
 
-          # Export all JSON keys to future GitHub Actions steps.
+          # Export every JSON key for future workflow steps.
           #
-          # The base64 wrapper safely handles:
-          # - spaces
-          # - quotes
-          # - special characters
-          # - multiline SSH keys
+          # Do NOT print values.
+          # Supports multiline values such as SSH_PRIVATE_KEY.
+
           while IFS= read -r ENTRY; do
 
             DECODED="$(
@@ -101,7 +102,7 @@ jobs:
             )"
 
             if ! [[ "$KEY" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
-              echo "ERROR: ENV contains an invalid variable name."
+              echo "ERROR: ENV contains an invalid environment variable name."
               exit 1
             fi
 
@@ -130,10 +131,9 @@ jobs:
 
 
       # =========================================================
-      # VALIDATE ONLY REQUIRED CI / TUNNEL VALUES
+      # VALIDATE ONLY REQUIRED WORKFLOW VALUES
       #
-      # Application ENV values such as SMTP, S3, etc. are NOT
-      # validated here.
+      # We intentionally do NOT validate SMTP/S3/etc.
       # =========================================================
 
       - name: Validate required configuration
@@ -184,7 +184,7 @@ jobs:
 
 
       # =========================================================
-      # INSTALL SSH PRIVATE KEY
+      # SSH KEY
       # =========================================================
 
       - name: Install SSH private key
@@ -203,9 +203,7 @@ jobs:
 
 
       # =========================================================
-      # CLOUDFLARE SERVICE TOKEN ENV
-      #
-      # cloudflared automatically reads these names.
+      # CLOUDFLARE SERVICE TOKEN
       # =========================================================
 
       - name: Configure Cloudflare authentication
@@ -267,7 +265,7 @@ jobs:
       # =========================================================
       # VALIDATE TUNNEL CONFIG
       #
-      # Must be EXACTLY:
+      # EXACTLY:
       #
       # target,port,network
       # =========================================================
@@ -347,7 +345,7 @@ jobs:
 
 
       # =========================================================
-      # CREATE VPS DATABASE PROXY
+      # CREATE TEMPORARY VPS DATABASE PROXY
       # =========================================================
 
       - name: Prepare database tunnel
@@ -424,7 +422,6 @@ jobs:
               ;;
           esac
 
-          # Store session privately for cleanup.
           printf '%s\n' "$SESSION_ID" \
             > /tmp/db-tunnel-session
 
@@ -437,10 +434,9 @@ jobs:
 
 
       # =========================================================
-      # OPEN GITHUB RUNNER -> VPS SSH FORWARD
+      # OPEN SSH FORWARD ON RUNNER
       #
-      # Bind to 0.0.0.0 so Docker can reach it through
-      # host.docker.internal.
+      # Docker will reach this through host.docker.internal.
       # =========================================================
 
       - name: Open database SSH tunnel
@@ -450,7 +446,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          if nc -z \
+          if nc \
+            -z \
             127.0.0.1 \
             "$DB_LOCAL_PORT" \
             2>/dev/null
@@ -508,15 +505,16 @@ jobs:
 
 
       # =========================================================
-      # PREPARE DYNAMIC BUILD ENVIRONMENT
+      # PREPARE BUILD ENVIRONMENT
       #
-      # EVERY value from secrets.ENV is automatically passed
-      # into the Docker build.
+      # 1. Copy all application env values automatically.
       #
-      # Only DATABASE_URI is modified:
+      # 2. Remove CI-only secrets.
       #
-      # [DB_HOST] -> host.docker.internal
-      # [DB_PORT] -> DB_LOCAL_PORT
+      # 3. Rewrite DATABASE_URI:
+      #
+      #    [DB_HOST] -> host.docker.internal
+      #    [DB_PORT] -> 27018
       # =========================================================
 
       - name: Prepare build environment
@@ -544,17 +542,79 @@ jobs:
             exit 1
           fi
 
-          # Update only DATABASE_URI.
-          # Every other ENV key remains unchanged.
+          # -----------------------------------------------------
+          # Build environment starts from the original ENV JSON.
+          #
+          # Remove CI-only values that the application does not
+          # need during pnpm build.
+          #
+          # Replace DATABASE_URI with the tunnel URI.
+          # -----------------------------------------------------
+
           jq \
             --arg databaseUri "$BUILD_DATABASE_URI" \
-            '.DATABASE_URI = $databaseUri' \
+            '
+              del(
+                .SSH_HOST,
+                .SSH_USER,
+                .SSH_PRIVATE_KEY,
+                .CF_ACCESS_CLIENT_ID,
+                .CF_ACCESS_CLIENT_SECRET,
+                .TUNNEL_TARGET_PORT_NETWORK,
+                .DOKPLOY_DEPLOY_URL
+              )
+              |
+              .DATABASE_URI = $databaseUri
+            ' \
             /tmp/source-env.json \
             > /tmp/build-env.json
 
           chmod 600 /tmp/build-env.json
 
           echo "Build environment prepared successfully."
+
+
+      # =========================================================
+      # VERIFY REWRITTEN DATABASE URI
+      #
+      # Do not print credentials or URI.
+      # =========================================================
+
+      - name: Verify build database URI
+        run: |
+          set -euo pipefail
+
+          DATABASE_URI_VALUE="$(
+            jq -r '.DATABASE_URI // empty' \
+              /tmp/build-env.json
+          )"
+
+          if [ -z "$DATABASE_URI_VALUE" ]; then
+            echo "ERROR: Build DATABASE_URI is missing."
+            exit 1
+          fi
+
+          DB_HOST="$(
+            printf '%s' "$DATABASE_URI_VALUE" |
+            sed -E 's#^[^@]*@([^:/?]+).*#\1#'
+          )"
+
+          DB_PORT="$(
+            printf '%s' "$DATABASE_URI_VALUE" |
+            sed -E 's#^[^@]*@[^:]+:([0-9]+).*#\1#'
+          )"
+
+          if [ "$DB_HOST" != "host.docker.internal" ]; then
+            echo "ERROR: Build DATABASE_URI contains the wrong host."
+            exit 1
+          fi
+
+          if [ "$DB_PORT" != "$DB_LOCAL_PORT" ]; then
+            echo "ERROR: Build DATABASE_URI contains the wrong port."
+            exit 1
+          fi
+
+          echo "Build database URI verified."
 
 
       # =========================================================
@@ -579,7 +639,7 @@ jobs:
 
 
       # =========================================================
-      # TEST DOCKER -> HOST -> DATABASE
+      # TEST DOCKER -> RUNNER -> DATABASE
       # =========================================================
 
       - name: Test Docker database access
@@ -633,13 +693,9 @@ jobs:
 
 
       # =========================================================
-      # BUILD IMAGE
+      # BUILD DOCKER IMAGE
       #
-      # Dockerfile receives ONE BuildKit secret:
-      #
-      # BUILD_ENV
-      #
-      # containing the complete dynamic JSON environment.
+      # BUILD_ENV is the ONE BuildKit secret.
       # =========================================================
 
       - name: Build Docker image
@@ -666,7 +722,7 @@ jobs:
 
 
       # =========================================================
-      # PUSH GHCR
+      # PUSH TO GHCR
       # =========================================================
 
       - name: Push Docker image
@@ -682,7 +738,7 @@ jobs:
 
 
       # =========================================================
-      # DOKPLOY DEPLOYMENT
+      # DOKPLOY
       # =========================================================
 
       - name: Deploy to Dokploy
@@ -705,7 +761,7 @@ jobs:
       # =========================================================
       # CLEANUP DATABASE TUNNEL
       #
-      # ALWAYS RUN
+      # ALWAYS RUNS
       # =========================================================
 
       - name: Cleanup database tunnel
@@ -716,7 +772,7 @@ jobs:
           echo "Cleaning up database connection..."
 
           # -----------------------------------------------------
-          # Stop local SSH forward
+          # Stop local SSH tunnel
           # -----------------------------------------------------
 
           if [ -f /tmp/db-ssh-tunnel.pid ]; then
@@ -751,7 +807,7 @@ jobs:
 
 
           # -----------------------------------------------------
-          # Remove VPS temporary proxy
+          # Remove temporary VPS proxy
           # -----------------------------------------------------
 
           if [ -f /tmp/db-tunnel-session ]; then
@@ -775,7 +831,7 @@ jobs:
 
 
           # -----------------------------------------------------
-          # Remove temporary environment files
+          # Delete temporary env files
           # -----------------------------------------------------
 
           rm -f /tmp/source-env.json
@@ -785,9 +841,7 @@ jobs:
 
 
       # =========================================================
-      # CLEANUP SSH
-      #
-      # MUST REMAIN LAST
+      # SSH CLEANUP
       # =========================================================
 
       - name: Cleanup SSH credentials
