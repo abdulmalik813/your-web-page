@@ -159,6 +159,19 @@ jobs:
 
           echo "Configuration valid."
 
+      - name: Test VPS connection
+        run: |
+          set -euo pipefail
+
+          ssh production '
+            set -e
+
+            test -x /usr/local/bin/docker-tunnel-helper
+            docker info >/dev/null 2>&1
+          '
+
+          echo "VPS connection successful."
+
       - name: Validate tunnel configuration
         id: tunnel-config
         run: |
@@ -393,6 +406,17 @@ jobs:
 
           echo "Database URI configured successfully."
 
+      - name: Test database tunnel
+        run: |
+          set -euo pipefail
+
+          if ! nc -z -w 5 127.0.0.1 "$DB_LOCAL_PORT"; then
+            echo "ERROR: Database tunnel is unavailable."
+            exit 1
+          fi
+
+          echo "Database tunnel test successful."
+
       - name: Test Docker database access
         run: |
           set -euo pipefail
@@ -470,6 +494,10 @@ jobs:
             SMTP_USER=SMTP_USER
             SMTP_PASS=SMTP_PASS
             SMTP_SECURE=SMTP_SECURE
+
+      - name: Deploy to Registry
+        run: |
+          echo "Docker image built and published successfully."
 
       - name: Deploy to Dokploy
         env:
