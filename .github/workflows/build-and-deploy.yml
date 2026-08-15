@@ -1,47 +1,15 @@
 name: Build and Deploy
 
 on:
-  push:
-    branches:
-      - main
-
   workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: production-deploy
-  cancel-in-progress: false
-
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm build
-
-
-  deploy:
+  test-vps:
     name: Test VPS Access
     runs-on: ubuntu-latest
-    needs: build
 
     environment: prod
 
@@ -56,13 +24,11 @@ jobs:
       - name: Install cloudflared
         run: |
           curl -fsSL \
-            https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            https://github.com/cloudflare/cloudflared/releases/download/2026.5.1/cloudflared-linux-amd64 \
             -o /usr/local/bin/cloudflared
 
           chmod +x /usr/local/bin/cloudflared
-
           cloudflared --version
-
 
       - name: Install SSH private key
         env:
@@ -73,7 +39,6 @@ jobs:
 
           printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-
 
       - name: Configure SSH
         run: |
@@ -91,7 +56,6 @@ jobs:
 
           chmod 600 ~/.ssh/config
 
-
       - name: Test Cloudflare SSH connection
         run: |
           ssh production '
@@ -106,18 +70,6 @@ jobs:
             echo "Docker:"
             docker --version
           '
-
-
-      - name: Deploy
-        run: |
-          ssh production '
-            echo "======================================"
-            echo " Deploy connection SUCCESS"
-            echo "======================================"
-            echo
-            echo "Real deployment will be added here."
-          '
-
 
       - name: Cleanup SSH credentials
         if: always()
