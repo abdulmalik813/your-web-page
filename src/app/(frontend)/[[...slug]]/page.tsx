@@ -2,10 +2,9 @@ import type { Metadata } from 'next'
 
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import { draftMode, headers } from 'next/headers'
-import React, { cache } from 'react'
+import { draftMode } from 'next/headers'
+import React from 'react'
 import { generateMeta, generatePostsListingMeta } from '@/lib/generate-meta'
-import { notFound } from 'next/navigation'
 import { joinStyles } from '@/lib/make-styles'
 import { cn } from '@/lib/utils'
 import { BlockRenderer } from '@/components/renderer/block-renderer'
@@ -24,6 +23,7 @@ import { AlertCircle, Home } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { unstable_cache } from 'next/cache'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -73,6 +73,9 @@ export async function generateStaticParams() {
   return params
 }
 
+// Allow dynamic params for pages not in generateStaticParams (e.g. new pages created after build)
+export const dynamicParams = true
+
 const gapClasses = {
   none: 'gap-0',
   small: 'gap-2',
@@ -110,6 +113,55 @@ function extractPostSlug(slugArray: string[], postSlug: string): string | null {
   return slugArray.slice(postSlugParts.length).join('/')
 }
 
+/**
+ * Cached query for static rendering — does NOT call draftMode(),
+ * so the page stays statically cacheable.
+ */
+const queryCachedBySlug = (slug: string, collection: 'pages' | 'posts') =>
+  unstable_cache(
+    async () => {
+      const payload = await getPayload({ config: configPromise })
+      const result = await payload.find({
+        collection,
+        draft: false,
+        limit: 1,
+        pagination: false,
+        overrideAccess: false,
+        where: {
+          slug: {
+            equals: slug,
+          },
+        },
+      })
+      return result.docs?.[0] || null
+    },
+    [collection, slug],
+    {
+      tags: [`collection-${collection}`, `${collection}-slug-${slug}`],
+    },
+  )()
+
+/**
+ * Direct query for draft mode — bypasses cache, used only
+ * when an editor is previewing unpublished content.
+ */
+async function queryDraftBySlug(slug: string, collection: 'pages' | 'posts') {
+  const payload = await getPayload({ config: configPromise })
+  const result = await payload.find({
+    collection,
+    draft: true,
+    limit: 1,
+    pagination: false,
+    overrideAccess: true,
+    where: {
+      slug: {
+        equals: slug,
+      },
+    },
+  })
+  return result.docs?.[0] || null
+}
+
 export default async function PageRoute({ params, searchParams }: Readonly<SlugProps>) {
   const { isEnabled: draft } = await draftMode()
   const setting = (await getCachedGlobal('settings', 1, draft)) as Setting
@@ -121,6 +173,9 @@ export default async function PageRoute({ params, searchParams }: Readonly<SlugP
   let isPostListingPage = false
   let isItAPost = false
 
+  // Choose the query strategy based on draft mode
+  const queryBySlug = draft ? queryDraftBySlug : queryCachedBySlug
+
   if (isPostEnabled) {
     const postSlug = setting.postSlug || 'posts'
 
@@ -131,21 +186,13 @@ export default async function PageRoute({ params, searchParams }: Readonly<SlugP
         isPostListingPage = true
       } else if (postItemSlug) {
         isItAPost = true
-        page = await queryBySlug({
-          slug: postItemSlug,
-          collection: 'posts',
-          draft,
-        })
+        page = await queryBySlug(postItemSlug, 'posts')
       }
     }
   }
 
   if (!page && !isPostListingPage) {
-    page = await queryBySlug({
-      slug,
-      collection: 'pages',
-      draft,
-    })
+    page = await queryBySlug(slug, 'pages')
   }
 
   const pageContext: PageContext = {
@@ -254,21 +301,13 @@ export async function generateMetadata({ params }: SlugProps): Promise<Metadata>
         return generatePostsListingMeta(setting)
       } else if (postItemSlug) {
         post = true
-        page = await queryBySlug({
-          slug: postItemSlug,
-          collection: 'posts',
-          draft: false,
-        })
+        page = await queryCachedBySlug(postItemSlug, 'posts')
       }
     }
   }
 
   if (!page) {
-    page = await queryBySlug({
-      slug,
-      collection: 'pages',
-      draft: false,
-    })
+    page = await queryCachedBySlug(slug, 'pages')
   }
 
   if (!page) {
@@ -280,32 +319,3 @@ export async function generateMetadata({ params }: SlugProps): Promise<Metadata>
 
   return generateMeta(page, post, setting)
 }
-
-const queryBySlug = cache(
-  async ({
-    slug,
-    collection,
-    draft,
-  }: {
-    slug: string
-    collection: 'pages' | 'posts'
-    draft: boolean
-  }) => {
-    const payload = await getPayload({ config: configPromise })
-
-    const result = await payload.find({
-      collection,
-      draft,
-      limit: 1,
-      pagination: false,
-      overrideAccess: draft,
-      where: {
-        slug: {
-          equals: slug,
-        },
-      },
-    })
-
-    return result.docs?.[0] || null
-  },
-)

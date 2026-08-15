@@ -17,13 +17,15 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
     if (doc._status === 'published') {
       const path = doc.slug === 'home' ? '/' : `/${doc.slug}`
       revalidatePath(path)
-      revalidateTag('pages-sitemap', 'max')
+      revalidateTag('pages-sitemap', undefined as any)
+      revalidateTag(`pages-slug-${doc.slug}`, undefined as any)
     }
 
     if (previousDoc?._status === 'published' && doc._status !== 'published') {
       const oldPath = previousDoc.slug === 'home' ? '/' : `/${previousDoc.slug}`
       revalidatePath(oldPath)
-      revalidateTag('pages-sitemap', 'max')
+      revalidateTag('pages-sitemap', undefined as any)
+      revalidateTag(`pages-slug-${previousDoc.slug}`, undefined as any)
     }
   }
   return doc
@@ -33,7 +35,8 @@ export const revalidateDelete: CollectionAfterDeleteHook<Page> = ({ doc, req: { 
   if (!context.disableRevalidate) {
     const path = doc?.slug === 'home' ? '/' : `/${doc?.slug}`
     revalidatePath(path)
-    revalidateTag('pages-sitemap', 'max')
+    revalidateTag('pages-sitemap', undefined as any)
+    revalidateTag(`pages-slug-${doc?.slug}`, undefined as any)
   }
 
   return doc

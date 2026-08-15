@@ -21,14 +21,16 @@ export const revalidatePost: CollectionAfterChangeHook<Post> = async ({
       const path = `/${postSlug}/${doc.slug}`
       revalidatePath(path)
       revalidatePath(`/${postSlug}`)
-      revalidateTag('posts-sitemap', 'max')
+      revalidateTag('posts-sitemap', undefined as any)
+      revalidateTag(`posts-slug-${doc.slug}`, undefined as any)
     }
 
     if (previousDoc?._status === 'published' && doc._status !== 'published') {
       const oldPath = `/${postSlug}/${previousDoc.slug}`
       revalidatePath(oldPath)
       revalidatePath(`/${postSlug}`)
-      revalidateTag('posts-sitemap', 'max')
+      revalidateTag('posts-sitemap', undefined as any)
+      revalidateTag(`posts-slug-${previousDoc.slug}`, undefined as any)
     }
   }
   return doc
@@ -45,7 +47,8 @@ export const revalidateDelete: CollectionAfterDeleteHook<Post> = async ({
     const path = `/${postSlug}/${doc?.slug}`
     revalidatePath(path)
     revalidatePath(`/${postSlug}`)
-    revalidateTag('posts-sitemap', 'max')
+    revalidateTag('posts-sitemap', undefined as any)
+    revalidateTag(`posts-slug-${doc?.slug}`, undefined as any)
   }
 
   return doc

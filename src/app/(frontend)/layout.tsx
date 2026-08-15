@@ -13,11 +13,13 @@ import { LivePreviewListener } from '@/components/live-preview-listener'
 import { Analytics } from '@vercel/analytics/next'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import Script from 'next/script'
+import NextTopLoader from 'nextjs-toploader'
 
 export async function generateMetadata(): Promise<Metadata> {
   const appData = await getAppSettings()
 
   return {
+    metadataBase: new URL(getServerSideURL()),
     description: appData.appDescription,
     title: appData.appTitle,
     openGraph: {
@@ -82,6 +84,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       <body className="flex flex-col" suppressHydrationWarning>
         <PreloadResources />
         <link href="/api/stylesheet" rel="stylesheet" precedence="default" />
+        <NextTopLoader color="hsl(var(--primary))" showSpinner={false} />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
         </ThemeProvider>

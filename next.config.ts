@@ -32,7 +32,6 @@ const getImageRemotePatterns = () => {
 }
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
   images: {
     remotePatterns: getImageRemotePatterns(),
     unoptimized: process.env.NODE_ENV === 'development',
@@ -65,6 +64,9 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.cts', '.cjs', '.mts', '.mjs', '.json'],
+  },
+  experimental: {
+    turbopackServerFastRefresh: true,
   },
   reactStrictMode: true,
 }

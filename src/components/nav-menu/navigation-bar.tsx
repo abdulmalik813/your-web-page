@@ -69,7 +69,7 @@ function LogoLink({
   pageContext: PageContext
 }) {
   return (
-    <Link href="/" className="group flex items-center gap-2 shrink-0" aria-label="Home">
+    <Link href="/" prefetch={true} className="group flex items-center gap-2 shrink-0" aria-label="Home">
       <MediaBlockUI
         media={lightLogo}
         pageContext={pageContext}

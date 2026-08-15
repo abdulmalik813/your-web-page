@@ -30,9 +30,9 @@ export const generateStylesheet: CollectionBeforeChangeHook<Style> = async ({ da
   return data
 }
 export const revalidateCache: CollectionAfterChangeHook<Style> = async ({ doc }) => {
-  revalidateTag('collection-styles', 'max')
+  revalidateTag('collection-styles', undefined as any)
   return doc
 }
 export const revalidateDelete: CollectionAfterDeleteHook<Style> = async () => {
-  revalidateTag('collection-styles', 'max')
+  revalidateTag('collection-styles', undefined as any)
 }
