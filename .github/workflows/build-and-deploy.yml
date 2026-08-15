@@ -24,141 +24,52 @@ jobs:
     environment: prod
 
     env:
+
+      SSH_HOST: ${{ fromJSON(secrets.ENV).SSH_HOST }}
+      SSH_USER: ${{ fromJSON(secrets.ENV).SSH_USER }}
+
+      TUNNEL_SERVICE_TOKEN_ID: ${{ fromJSON(secrets.ENV).CF_ACCESS_CLIENT_ID }}
+      TUNNEL_SERVICE_TOKEN_SECRET: ${{ fromJSON(secrets.ENV).CF_ACCESS_CLIENT_SECRET }}
+
+      TUNNEL_TARGET_PORT_NETWORK: ${{ fromJSON(secrets.ENV).TUNNEL_TARGET_PORT_NETWORK }}
+
       DB_LOCAL_PORT: "27018"
+
+      DATABASE_URI_TEMPLATE: ${{ fromJSON(secrets.ENV).DATABASE_URI }}
+
+      NODE_ENV: ${{ fromJSON(secrets.ENV).NODE_ENV }}
+
+      CRON_SECRET: ${{ fromJSON(secrets.ENV).CRON_SECRET }}
+      NEXT_PUBLIC_SERVER_URL: ${{ fromJSON(secrets.ENV).NEXT_PUBLIC_SERVER_URL }}
+      PAYLOAD_SECRET: ${{ fromJSON(secrets.ENV).PAYLOAD_SECRET }}
+      PREVIEW_SECRET: ${{ fromJSON(secrets.ENV).PREVIEW_SECRET }}
+
+      RESEND_API_KEY: ${{ fromJSON(secrets.ENV).RESEND_API_KEY }}
+
+      S3_ACCESS_KEY_ID: ${{ fromJSON(secrets.ENV).S3_ACCESS_KEY_ID }}
+      S3_SECRET_ACCESS_KEY: ${{ fromJSON(secrets.ENV).S3_SECRET_ACCESS_KEY }}
+      S3_BUCKET: ${{ fromJSON(secrets.ENV).S3_BUCKET }}
+      S3_ENDPOINT: ${{ fromJSON(secrets.ENV).S3_ENDPOINT }}
+      S3_REGION: ${{ fromJSON(secrets.ENV).S3_REGION }}
+
+      TAILWIND_GENERATOR: ${{ fromJSON(secrets.ENV).TAILWIND_GENERATOR }}
+      USE_RESEND: ${{ fromJSON(secrets.ENV).USE_RESEND }}
+
+      IMAGE_HOSTS: ${{ fromJSON(secrets.ENV).IMAGE_HOSTS }}
+
+      EMAIL_FROM_ADDRESS: ${{ fromJSON(secrets.ENV).EMAIL_FROM_ADDRESS }}
+      EMAIL_FROM_NAME: ${{ fromJSON(secrets.ENV).EMAIL_FROM_NAME }}
+
+      SMTP_HOST: ${{ fromJSON(secrets.ENV).SMTP_HOST }}
+      SMTP_PORT: ${{ fromJSON(secrets.ENV).SMTP_PORT }}
+      SMTP_USER: ${{ fromJSON(secrets.ENV).SMTP_USER }}
+      SMTP_PASS: ${{ fromJSON(secrets.ENV).SMTP_PASS }}
+      SMTP_SECURE: ${{ fromJSON(secrets.ENV).SMTP_SECURE }}
 
     steps:
 
       - name: Checkout repository
         uses: actions/checkout@v6
-
-      - name: Load environment variables
-        env:
-          ENV_JSON: ${{ secrets.ENV }}
-        run: |
-          set -euo pipefail
-
-          if [ -z "${ENV_JSON:-}" ]; then
-            echo "ERROR: GitHub secret ENV is missing or empty."
-            exit 1
-          fi
-
-          # Make sure the entire original JSON is masked too.
-          MASKED_ENV_JSON="${ENV_JSON//'%'/'%25'}"
-          MASKED_ENV_JSON="${MASKED_ENV_JSON//$'\r'/'%0D'}"
-          MASKED_ENV_JSON="${MASKED_ENV_JSON//$'\n'/'%0A'}"
-          echo "::add-mask::$MASKED_ENV_JSON"
-
-          # Validate JSON without printing its contents.
-          if ! jq -e 'type == "object"' \
-            >/dev/null 2>&1 <<< "$ENV_JSON"
-          then
-            echo "ERROR: ENV must contain a valid JSON object."
-            exit 1
-          fi
-
-          REQUIRED_ENV_VARS=(
-            NODE_ENV
-            DATABASE_URI
-            CRON_SECRET
-            NEXT_PUBLIC_SERVER_URL
-            PAYLOAD_SECRET
-            PREVIEW_SECRET
-            RESEND_API_KEY
-            S3_ACCESS_KEY_ID
-            S3_SECRET_ACCESS_KEY
-            S3_BUCKET
-            S3_ENDPOINT
-            S3_REGION
-            TAILWIND_GENERATOR
-            USE_RESEND
-            IMAGE_HOSTS
-            EMAIL_FROM_ADDRESS
-            EMAIL_FROM_NAME
-            SMTP_HOST
-            SMTP_PORT
-            SMTP_USER
-            SMTP_PASS
-            SMTP_SECURE
-            CF_ACCESS_CLIENT_ID
-            CF_ACCESS_CLIENT_SECRET
-            SSH_PRIVATE_KEY
-            SSH_HOST
-            SSH_USER
-            TUNNEL_TARGET_PORT_NETWORK
-          )
-
-          for KEY in "${REQUIRED_ENV_VARS[@]}"; do
-
-            # Verify the key exists.
-            if ! jq -e \
-              --arg key "$KEY" \
-              'has($key) and .[$key] != null' \
-              >/dev/null 2>&1 <<< "$ENV_JSON"
-            then
-              echo "ERROR: Required variable $KEY is missing from ENV."
-              exit 1
-            fi
-
-            # Read the value without printing it.
-            VALUE="$(
-              jq -r \
-                --arg key "$KEY" \
-                '
-                  .[$key]
-                  | if type == "string"
-                    then .
-                    else tostring
-                    end
-                ' <<< "$ENV_JSON"
-            )"
-
-            # Explicitly mask each parsed value.
-            #
-            # Escape characters used by GitHub workflow commands.
-            MASKED_VALUE="${VALUE//'%'/'%25'}"
-            MASKED_VALUE="${MASKED_VALUE//$'\r'/'%0D'}"
-            MASKED_VALUE="${MASKED_VALUE//$'\n'/'%0A'}"
-
-            if [ -n "$MASKED_VALUE" ]; then
-              echo "::add-mask::$MASKED_VALUE"
-            fi
-
-            # Use a random delimiter so multiline values are safe.
-            DELIMITER="ENV_$(openssl rand -hex 16)"
-
-            while grep -Fqx "$DELIMITER" <<< "$VALUE"; do
-              DELIMITER="ENV_$(openssl rand -hex 16)"
-            done
-
-            {
-              echo "${KEY}<<${DELIMITER}"
-              printf '%s\n' "$VALUE"
-              echo "${DELIMITER}"
-            } >> "$GITHUB_ENV"
-
-            unset VALUE
-            unset MASKED_VALUE
-            unset DELIMITER
-          done
-
-          CF_ID="$(jq -r '.CF_ACCESS_CLIENT_ID | if type == "string" then . else tostring end' <<< "$ENV_JSON")"
-          CF_SECRET="$(jq -r '.CF_ACCESS_CLIENT_SECRET | if type == "string" then . else tostring end' <<< "$ENV_JSON")"
-
-          {
-            echo "TUNNEL_SERVICE_TOKEN_ID<<EOF_CF_ID"
-            printf '%s\n' "$CF_ID"
-            echo "EOF_CF_ID"
-            echo "TUNNEL_SERVICE_TOKEN_SECRET<<EOF_CF_SECRET"
-            printf '%s\n' "$CF_SECRET"
-            echo "EOF_CF_SECRET"
-          } >> "$GITHUB_ENV"
-
-          unset CF_ID
-          unset CF_SECRET
-          unset ENV_JSON
-          unset MASKED_ENV_JSON
-
-          echo "Application environment loaded successfully."
 
       - name: Install cloudflared
         run: |
@@ -173,6 +84,8 @@ jobs:
           echo "cloudflared installed."
 
       - name: Install SSH private key
+        env:
+          SSH_PRIVATE_KEY: ${{ fromJSON(secrets.ENV).SSH_PRIVATE_KEY }}
         run: |
           set -euo pipefail
 
@@ -234,8 +147,8 @@ jobs:
             exit 1
           }
 
-          test -n "$DATABASE_URI" || {
-            echo "ERROR: DATABASE_URI is missing from ENV."
+          test -n "$DATABASE_URI_TEMPLATE" || {
+            echo "ERROR: DATABASE_URI is missing."
             exit 1
           }
 
@@ -451,46 +364,32 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ "$DATABASE_URI" != *"[DB_HOST]"* ]]; then
+          if [[ "$DATABASE_URI_TEMPLATE" != *"[DB_HOST]"* ]]; then
             echo "ERROR: DATABASE_URI is missing [DB_HOST]."
             exit 1
           fi
 
-          if [[ "$DATABASE_URI" != *"[DB_PORT]"* ]]; then
+          if [[ "$DATABASE_URI_TEMPLATE" != *"[DB_PORT]"* ]]; then
             echo "ERROR: DATABASE_URI is missing [DB_PORT]."
             exit 1
           fi
 
-          RESOLVED_DATABASE_URI="${DATABASE_URI//\[DB_HOST\]/host.docker.internal}"
-          RESOLVED_DATABASE_URI="${RESOLVED_DATABASE_URI//\[DB_PORT\]/$DB_LOCAL_PORT}"
+          DATABASE_URI="${DATABASE_URI_TEMPLATE//\[DB_HOST\]/host.docker.internal}"
+          DATABASE_URI="${DATABASE_URI//\[DB_PORT\]/$DB_LOCAL_PORT}"
 
-          if [[ "$RESOLVED_DATABASE_URI" == *"[DB_HOST]"* ]] || \
-             [[ "$RESOLVED_DATABASE_URI" == *"[DB_PORT]"* ]]; then
+          if [[ "$DATABASE_URI" == *"[DB_HOST]"* ]] || \
+             [[ "$DATABASE_URI" == *"[DB_PORT]"* ]]; then
             echo "ERROR: Database URI placeholders were not replaced."
             exit 1
           fi
 
-          MASKED_DATABASE_URI="${RESOLVED_DATABASE_URI//'%'/'%25'}"
-          MASKED_DATABASE_URI="${MASKED_DATABASE_URI//$'\r'/'%0D'}"
-          MASKED_DATABASE_URI="${MASKED_DATABASE_URI//$'\n'/'%0A'}"
-
-          echo "::add-mask::$MASKED_DATABASE_URI"
-
-          DELIMITER="DATABASE_URI_$(openssl rand -hex 16)"
-
-          while grep -Fqx "$DELIMITER" <<< "$RESOLVED_DATABASE_URI"; do
-            DELIMITER="DATABASE_URI_$(openssl rand -hex 16)"
-          done
+          echo "::add-mask::$DATABASE_URI"
 
           {
-            echo "DATABASE_URI<<${DELIMITER}"
-            printf '%s\n' "$RESOLVED_DATABASE_URI"
-            echo "${DELIMITER}"
+            echo 'DATABASE_URI<<__DATABASE_URI_EOF__'
+            printf '%s\n' "$DATABASE_URI"
+            echo '__DATABASE_URI_EOF__'
           } >> "$GITHUB_ENV"
-
-          unset RESOLVED_DATABASE_URI
-          unset MASKED_DATABASE_URI
-          unset DELIMITER
 
           echo "Database URI configured successfully."
 
@@ -571,16 +470,10 @@ jobs:
             SMTP_USER=SMTP_USER
             SMTP_PASS=SMTP_PASS
             SMTP_SECURE=SMTP_SECURE
-            CF_ACCESS_CLIENT_ID=CF_ACCESS_CLIENT_ID
-            CF_ACCESS_CLIENT_SECRET=CF_ACCESS_CLIENT_SECRET
-            SSH_PRIVATE_KEY=SSH_PRIVATE_KEY
-            SSH_HOST=SSH_HOST
-            SSH_USER=SSH_USER
-            TUNNEL_TARGET_PORT_NETWORK=TUNNEL_TARGET_PORT_NETWORK
 
       - name: Deploy to Dokploy
         env:
-          DOKPLOY_DEPLOY_URL: ${{ secrets.DOKPLOY_DEPLOY_URL }}
+          DOKPLOY_DEPLOY_URL: ${{ fromJSON(secrets.ENV).DOKPLOY_DEPLOY_URL }}
         run: |
           set -euo pipefail
 
