@@ -24,9 +24,6 @@ jobs:
     environment: prod
 
     env:
-      # =========================================================
-      # SSH / CLOUDFLARE
-      # =========================================================
 
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
@@ -34,32 +31,11 @@ jobs:
       TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
       TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
 
-      # =========================================================
-      # DATABASE TUNNEL
-      #
-      # Required format:
-      # target,port,network
-      # =========================================================
-
       TUNNEL_TARGET_PORT_NETWORK: ${{ secrets.TUNNEL_TARGET_PORT_NETWORK }}
 
       DB_LOCAL_PORT: "27018"
 
-      # =========================================================
-      # DATABASE URI TEMPLATE
-      #
-      # Must contain:
-      # [DB_HOST]
-      # [DB_PORT]
-      # =========================================================
-
       DATABASE_URI_TEMPLATE: ${{ secrets.DATABASE_URI }}
-
-      # =========================================================
-      # BUILD ENVIRONMENT
-      #
-      # These are optional from the workflow's perspective.
-      # =========================================================
 
       NODE_ENV: ${{ secrets.NODE_ENV }}
 
@@ -91,17 +67,9 @@ jobs:
       SMTP_SECURE: ${{ secrets.SMTP_SECURE }}
 
     steps:
-      # =========================================================
-      # CHECKOUT
-      # =========================================================
 
       - name: Checkout repository
         uses: actions/checkout@v6
-
-
-      # =========================================================
-      # INSTALL CLOUDFLARED
-      # =========================================================
 
       - name: Install cloudflared
         run: |
@@ -114,11 +82,6 @@ jobs:
           sudo chmod +x /usr/local/bin/cloudflared
 
           echo "cloudflared installed."
-
-
-      # =========================================================
-      # SSH PRIVATE KEY
-      # =========================================================
 
       - name: Install SSH private key
         env:
@@ -135,11 +98,6 @@ jobs:
           chmod 600 "$HOME/.ssh/id_ed25519"
 
           echo "SSH key installed."
-
-
-      # =========================================================
-      # SSH CONFIG
-      # =========================================================
 
       - name: Configure SSH
         run: |
@@ -159,11 +117,6 @@ jobs:
           EOF
 
           chmod 600 "$HOME/.ssh/config"
-
-
-      # =========================================================
-      # VALIDATE REQUIRED CONFIG
-      # =========================================================
 
       - name: Validate configuration
         run: |
@@ -205,32 +158,6 @@ jobs:
           }
 
           echo "Configuration valid."
-
-
-      # =========================================================
-      # TEST VPS CONNECTION
-      # =========================================================
-
-      - name: Test VPS connection
-        run: |
-          set -euo pipefail
-
-          ssh production '
-            set -e
-
-            test -x /usr/local/bin/docker-tunnel-helper
-            docker info >/dev/null 2>&1
-          '
-
-          echo "VPS connection successful."
-
-
-      # =========================================================
-      # PARSE + VALIDATE TUNNEL CONFIGURATION
-      #
-      # EXACTLY:
-      # target,port,network
-      # =========================================================
 
       - name: Validate tunnel configuration
         id: tunnel-config
@@ -300,11 +227,6 @@ jobs:
           echo "network=$DB_NETWORK" >> "$GITHUB_OUTPUT"
 
           echo "Tunnel configuration valid."
-
-
-      # =========================================================
-      # CREATE TEMPORARY VPS DATABASE PROXY
-      # =========================================================
 
       - name: Prepare database tunnel
         id: db
@@ -388,13 +310,6 @@ jobs:
 
           echo "Database tunnel prepared successfully."
 
-
-      # =========================================================
-      # OPEN GITHUB RUNNER -> VPS SSH FORWARD
-      #
-      # Bind on 0.0.0.0 so Docker host-gateway can access it.
-      # =========================================================
-
       - name: Open database SSH tunnel
         env:
           REMOTE_HOST: ${{ steps.db.outputs.remote_host }}
@@ -445,15 +360,6 @@ jobs:
 
           echo "Database connection established successfully."
 
-
-      # =========================================================
-      # CONFIGURE DATABASE URI
-      #
-      # Docker build will use:
-      #
-      # host.docker.internal:<port>
-      # =========================================================
-
       - name: Configure database URI
         run: |
           set -euo pipefail
@@ -487,30 +393,6 @@ jobs:
 
           echo "Database URI configured successfully."
 
-
-      # =========================================================
-      # TEST RUNNER DATABASE TUNNEL
-      # =========================================================
-
-      - name: Test database tunnel
-        run: |
-          set -euo pipefail
-
-          if ! nc -z -w 5 127.0.0.1 "$DB_LOCAL_PORT"; then
-            echo "ERROR: Database tunnel is unavailable."
-            exit 1
-          fi
-
-          echo "Database tunnel test successful."
-
-
-      # =========================================================
-      # TEST DOCKER -> RUNNER HOST GATEWAY
-      #
-      # This catches the exact issue we were having BEFORE
-      # starting the expensive application build.
-      # =========================================================
-
       - name: Test Docker database access
         run: |
           set -euo pipefail
@@ -525,21 +407,12 @@ jobs:
 
           echo "Docker database access successful."
 
-      # =========================================================
-      # GHCR LOGIN
-      # =========================================================
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-
-      # =========================================================
-      # PREPARE IMAGE NAME
-      # =========================================================
 
       - name: Prepare image name
         id: image
@@ -554,17 +427,6 @@ jobs:
           )"
 
           echo "name=$IMAGE" >> "$GITHUB_OUTPUT"
-
-
-      # =========================================================
-      # BUILD + PUSH TO GHCR
-      #
-      # NOTE:
-      # No setup-buildx-action.
-      # No GHA cache exporter.
-      #
-      # Uses Docker daemon's built-in BuildKit.
-      # =========================================================
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
@@ -609,21 +471,23 @@ jobs:
             SMTP_PASS=SMTP_PASS
             SMTP_SECURE=SMTP_SECURE
 
-
-      # =========================================================
-      # COMPLETE
-      # =========================================================
-
-      - name: Deployment complete
+      - name: Deploy to Dokploy
+        env:
+          DOKPLOY_DEPLOY_URL: ${{ secrets.DOKPLOY_DEPLOY_URL }}
         run: |
-          echo "Docker image built and published successfully."
+          set -euo pipefail
 
+          echo "Triggering Dokploy deployment..."
 
-      # =========================================================
-      # DATABASE TUNNEL CLEANUP
-      #
-      # ALWAYS RUN
-      # =========================================================
+          curl \
+            --fail-with-body \
+            --silent \
+            --show-error \
+            --max-time 30 \
+            "$DOKPLOY_DEPLOY_URL"
+
+          echo
+          echo "Dokploy deployment triggered successfully."
 
       - name: Cleanup database tunnel
         if: always()
@@ -631,10 +495,6 @@ jobs:
           set +e
 
           echo "Cleaning up database connection..."
-
-          # -----------------------------------------------------
-          # Stop local SSH tunnel
-          # -----------------------------------------------------
 
           if [ -f /tmp/db-ssh-tunnel.pid ]; then
 
@@ -662,11 +522,6 @@ jobs:
             rm -f /tmp/db-ssh-tunnel.pid
           fi
 
-
-          # -----------------------------------------------------
-          # Remove remote VPS Docker proxy
-          # -----------------------------------------------------
-
           if [ -f /tmp/db-tunnel-session ]; then
 
             SESSION_ID="$(cat /tmp/db-tunnel-session)"
@@ -684,13 +539,6 @@ jobs:
           fi
 
           echo "Database cleanup complete."
-
-
-      # =========================================================
-      # SSH CLEANUP
-      #
-      # MUST REMAIN LAST
-      # =========================================================
 
       - name: Cleanup SSH credentials
         if: always()
