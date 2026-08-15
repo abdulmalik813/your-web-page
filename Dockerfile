@@ -13,12 +13,12 @@ RUN corepack enable
 
 FROM base AS deps
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
 
-# Copy pnpm config files if they exist in your repo
-COPY pnpm-workspace.yaml .npmrc* ./
-
-RUN pnpm install --frozen-lockfile
+# Install dependencies without running project lifecycle scripts yet.
+# postinstall calls scripts/export-css.js, which is not copied until
+# the builder stage.
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 
 # ---------------------------------------------------------
@@ -28,7 +28,12 @@ RUN pnpm install --frozen-lockfile
 FROM base AS builder
 
 COPY --from=deps /app/node_modules ./node_modules
+
 COPY . .
+
+# Run the project's postinstall-equivalent now that the source
+# and scripts directory are available.
+RUN pnpm run export-css
 
 RUN --mount=type=secret,id=NODE_ENV \
     --mount=type=secret,id=DATABASE_URI \
