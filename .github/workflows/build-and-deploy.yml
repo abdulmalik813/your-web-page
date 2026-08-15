@@ -7,10 +7,15 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 concurrency:
   group: production-deploy
   cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-deploy:
@@ -19,17 +24,69 @@ jobs:
     environment: prod
 
     env:
+      # ---------------------------------------------------------
+      # SSH / Cloudflare
+      # ---------------------------------------------------------
+
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
 
       TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
       TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
 
+      # ---------------------------------------------------------
+      # Database tunnel
+      #
+      # Format:
+      # target,port,network
+      # ---------------------------------------------------------
+
       TUNNEL_TARGET_PORT_NETWORK: ${{ secrets.TUNNEL_TARGET_PORT_NETWORK }}
+      DB_LOCAL_PORT: "27018"
+
+      # ---------------------------------------------------------
+      # Database URI template
+      #
+      # Must contain:
+      # [DB_HOST]
+      # [DB_PORT]
+      # ---------------------------------------------------------
 
       DATABASE_URI_TEMPLATE: ${{ secrets.DATABASE_URI }}
 
-      DB_LOCAL_PORT: "27018"
+      # ---------------------------------------------------------
+      # Docker build environment/secrets
+      #
+      # Missing optional secrets become empty values.
+      # Only the connection/auth values validated later are
+      # required by the workflow.
+      # ---------------------------------------------------------
+
+      NODE_ENV: ${{ secrets.NODE_ENV }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      NEXT_PUBLIC_SERVER_URL: ${{ secrets.NEXT_PUBLIC_SERVER_URL }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+
+      S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
+      S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
+      S3_REGION: ${{ secrets.S3_REGION }}
+
+      TAILWIND_GENERATOR: ${{ secrets.TAILWIND_GENERATOR }}
+      USE_RESEND: ${{ secrets.USE_RESEND }}
+      IMAGE_HOSTS: ${{ secrets.IMAGE_HOSTS }}
+
+      EMAIL_FROM_ADDRESS: ${{ secrets.EMAIL_FROM_ADDRESS }}
+      EMAIL_FROM_NAME: ${{ secrets.EMAIL_FROM_NAME }}
+
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASS: ${{ secrets.SMTP_PASS }}
+      SMTP_SECURE: ${{ secrets.SMTP_SECURE }}
 
     steps:
       # =========================================================
@@ -41,7 +98,7 @@ jobs:
 
 
       # =========================================================
-      # INSTALL CLOUDFLARED
+      # CLOUDFLARED
       # =========================================================
 
       - name: Install cloudflared
@@ -58,7 +115,7 @@ jobs:
 
 
       # =========================================================
-      # INSTALL SSH PRIVATE KEY
+      # SSH PRIVATE KEY
       # =========================================================
 
       - name: Install SSH private key
@@ -79,7 +136,7 @@ jobs:
 
 
       # =========================================================
-      # CONFIGURE SSH THROUGH CLOUDFLARE
+      # SSH THROUGH CLOUDFLARE
       # =========================================================
 
       - name: Configure SSH
@@ -103,7 +160,7 @@ jobs:
 
 
       # =========================================================
-      # VALIDATE BASE CONFIGURATION
+      # VALIDATE REQUIRED CONFIG
       # =========================================================
 
       - name: Validate configuration
@@ -149,7 +206,7 @@ jobs:
 
 
       # =========================================================
-      # TEST CLOUDFLARE + SSH
+      # TEST VPS
       # =========================================================
 
       - name: Test VPS connection
@@ -161,15 +218,15 @@ jobs:
 
             test -x /usr/local/bin/docker-tunnel-helper
             docker info >/dev/null 2>&1
-
-            echo "SSH connection successful."
           '
+
+          echo "VPS connection successful."
 
 
       # =========================================================
-      # PARSE + VALIDATE TUNNEL SECRET
+      # VALIDATE TUNNEL CONFIG
       #
-      # REQUIRED:
+      # Exactly:
       # target,port,network
       # =========================================================
 
@@ -181,9 +238,9 @@ jobs:
           VALUE="$TUNNEL_TARGET_PORT_NETWORK"
 
           COMMA_COUNT="$(
-            printf '%s' "$VALUE" \
-              | tr -cd ',' \
-              | wc -c
+            printf '%s' "$VALUE" |
+            tr -cd ',' |
+            wc -c
           )"
 
           if [ "$COMMA_COUNT" -ne 2 ]; then
@@ -244,7 +301,7 @@ jobs:
 
 
       # =========================================================
-      # CREATE SERVER-SIDE DATABASE PROXY
+      # SERVER-SIDE DATABASE PROXY
       # =========================================================
 
       - name: Prepare database tunnel
@@ -276,27 +333,27 @@ jobs:
           fi
 
           STATUS="$(
-            printf '%s\n' "$RESULT" \
-              | sed -n 's/^STATUS=//p' \
-              | head -n 1
+            printf '%s\n' "$RESULT" |
+            sed -n 's/^STATUS=//p' |
+            head -1
           )"
 
           SESSION_ID="$(
-            printf '%s\n' "$RESULT" \
-              | sed -n 's/^SESSION_ID=//p' \
-              | head -n 1
+            printf '%s\n' "$RESULT" |
+            sed -n 's/^SESSION_ID=//p' |
+            head -1
           )"
 
           REMOTE_HOST="$(
-            printf '%s\n' "$RESULT" \
-              | sed -n 's/^HOST=//p' \
-              | head -n 1
+            printf '%s\n' "$RESULT" |
+            sed -n 's/^HOST=//p' |
+            head -1
           )"
 
           REMOTE_PORT="$(
-            printf '%s\n' "$RESULT" \
-              | sed -n 's/^PORT=//p' \
-              | head -n 1
+            printf '%s\n' "$RESULT" |
+            sed -n 's/^PORT=//p' |
+            head -1
           )"
 
           [ "$STATUS" = "OK" ] || {
@@ -316,7 +373,7 @@ jobs:
 
           case "$REMOTE_PORT" in
             *[!0-9]*|'')
-              echo "ERROR: Tunnel port was not returned correctly."
+              echo "ERROR: Invalid tunnel response."
               exit 1
               ;;
           esac
@@ -331,29 +388,15 @@ jobs:
 
 
       # =========================================================
-      # OPEN GITHUB RUNNER -> VPS SSH FORWARD
+      # LOCAL SSH FORWARD
       # =========================================================
 
       - name: Open database SSH tunnel
-        id: db-forward
         env:
           REMOTE_HOST: ${{ steps.db.outputs.remote_host }}
           REMOTE_PORT: ${{ steps.db.outputs.remote_port }}
         run: |
           set -euo pipefail
-
-          case "$DB_LOCAL_PORT" in
-            *[!0-9]*|'')
-              echo "ERROR: Invalid local database port."
-              exit 1
-              ;;
-          esac
-
-          if [ "$DB_LOCAL_PORT" -lt 1 ] || \
-             [ "$DB_LOCAL_PORT" -gt 65535 ]; then
-            echo "ERROR: Invalid local database port."
-            exit 1
-          fi
 
           if nc -z 127.0.0.1 "$DB_LOCAL_PORT" 2>/dev/null; then
             echo "ERROR: Local database port is already in use."
@@ -379,7 +422,7 @@ jobs:
           for _ in $(seq 1 20); do
 
             if ! kill -0 "$SSH_PID" 2>/dev/null; then
-              echo "ERROR: Database SSH tunnel exited unexpectedly."
+              echo "ERROR: Database tunnel exited unexpectedly."
               exit 1
             fi
 
@@ -396,13 +439,11 @@ jobs:
             exit 1
           fi
 
-          echo "local_port=$DB_LOCAL_PORT" >> "$GITHUB_OUTPUT"
-
           echo "Database connection established successfully."
 
 
       # =========================================================
-      # CONSTRUCT DATABASE URI
+      # DATABASE URI
       # =========================================================
 
       - name: Configure database URI
@@ -422,12 +463,6 @@ jobs:
           DATABASE_URI="${DATABASE_URI_TEMPLATE//\[DB_HOST\]/127.0.0.1}"
           DATABASE_URI="${DATABASE_URI//\[DB_PORT\]/$DB_LOCAL_PORT}"
 
-          if [[ "$DATABASE_URI" == *"[DB_HOST]"* ]] || \
-             [[ "$DATABASE_URI" == *"[DB_PORT]"* ]]; then
-            echo "ERROR: Database URI placeholders were not fully replaced."
-            exit 1
-          fi
-
           echo "::add-mask::$DATABASE_URI"
 
           {
@@ -440,16 +475,15 @@ jobs:
 
 
       # =========================================================
-      # TEST DATABASE CONNECTION
+      # TEST DATABASE TUNNEL
       # =========================================================
 
       - name: Test database connection
         run: |
           set -euo pipefail
 
-          # Basic TCP-level check.
           if ! nc -z -w 5 127.0.0.1 "$DB_LOCAL_PORT"; then
-            echo "ERROR: Database tunnel is not reachable."
+            echo "ERROR: Database connection failed."
             exit 1
           fi
 
@@ -457,47 +491,117 @@ jobs:
 
 
       # =========================================================
-      # INSTALL
+      # SETUP DOCKER BUILDX
       # =========================================================
 
-      - name: Install dependencies
-        run: |
-          # TODO:
-          # setup Node
-          # setup pnpm
-          # pnpm install --frozen-lockfile
-
-          echo "// TODO: install dependencies"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
 
       # =========================================================
-      # BUILD
+      # LOGIN TO GHCR
       # =========================================================
 
-      - name: Build application
-        run: |
-          # TODO:
-          # pnpm build
-
-          echo "// TODO: build application"
-
-
-      # =========================================================
-      # DEPLOY
-      # =========================================================
-
-      - name: Deploy application
-        run: |
-          # TODO:
-          # deploy application
-
-          echo "// TODO: deploy application"
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
 
       # =========================================================
-      # CLEANUP DATABASE TUNNEL
+      # PREPARE IMAGE NAME
       #
-      # ALWAYS RUNS
+      # GHCR names must be lowercase.
+      # =========================================================
+
+      - name: Prepare image name
+        id: image
+        run: |
+          set -euo pipefail
+
+          IMAGE="$REGISTRY/$IMAGE_NAME"
+          IMAGE="$(printf '%s' "$IMAGE" | tr '[:upper:]' '[:lower:]')"
+
+          echo "name=$IMAGE" >> "$GITHUB_OUTPUT"
+
+
+      # =========================================================
+      # INSTALL + BUILD + PUSH
+      #
+      # pnpm install happens inside Dockerfile:
+      #
+      #   FROM base AS deps
+      #   RUN pnpm install --frozen-lockfile
+      #
+      # pnpm build happens inside Dockerfile builder stage.
+      # =========================================================
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+
+          push: true
+
+          # Required because DATABASE_URI points to the
+          # SSH tunnel listening on the GitHub runner.
+          network: host
+
+          tags: |
+            ${{ steps.image.outputs.name }}:latest
+            ${{ steps.image.outputs.name }}:${{ github.sha }}
+
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+          secrets: |
+            NODE_ENV=${{ env.NODE_ENV }}
+            DATABASE_URI=${{ env.DATABASE_URI }}
+            CRON_SECRET=${{ env.CRON_SECRET }}
+            NEXT_PUBLIC_SERVER_URL=${{ env.NEXT_PUBLIC_SERVER_URL }}
+            PAYLOAD_SECRET=${{ env.PAYLOAD_SECRET }}
+            PREVIEW_SECRET=${{ env.PREVIEW_SECRET }}
+            RESEND_API_KEY=${{ env.RESEND_API_KEY }}
+            S3_ACCESS_KEY_ID=${{ env.S3_ACCESS_KEY_ID }}
+            S3_SECRET_ACCESS_KEY=${{ env.S3_SECRET_ACCESS_KEY }}
+            S3_BUCKET=${{ env.S3_BUCKET }}
+            S3_ENDPOINT=${{ env.S3_ENDPOINT }}
+            S3_REGION=${{ env.S3_REGION }}
+            TAILWIND_GENERATOR=${{ env.TAILWIND_GENERATOR }}
+            USE_RESEND=${{ env.USE_RESEND }}
+            IMAGE_HOSTS=${{ env.IMAGE_HOSTS }}
+            EMAIL_FROM_ADDRESS=${{ env.EMAIL_FROM_ADDRESS }}
+            EMAIL_FROM_NAME=${{ env.EMAIL_FROM_NAME }}
+            SMTP_HOST=${{ env.SMTP_HOST }}
+            SMTP_PORT=${{ env.SMTP_PORT }}
+            SMTP_USER=${{ env.SMTP_USER }}
+            SMTP_PASS=${{ env.SMTP_PASS }}
+            SMTP_SECURE=${{ env.SMTP_SECURE }}
+
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+
+      # =========================================================
+      # DEPLOY RESULT
+      #
+      # For now deployment means publishing the finished image
+      # to GitHub Container Registry.
+      # =========================================================
+
+      - name: Deployment complete
+        run: |
+          echo "Container image built and published successfully."
+
+
+      # =========================================================
+      # DATABASE TUNNEL CLEANUP
+      #
+      # ALWAYS RUN
       # =========================================================
 
       - name: Cleanup database tunnel
@@ -534,7 +638,7 @@ jobs:
             rm -f /tmp/db-ssh-tunnel.pid
           fi
 
-          # Remove VPS proxy
+          # Remove remote Docker proxy
           if [ -f /tmp/db-tunnel-session ]; then
 
             SESSION_ID="$(cat /tmp/db-tunnel-session)"
@@ -555,9 +659,9 @@ jobs:
 
 
       # =========================================================
-      # CLEANUP SSH CREDENTIALS
+      # SSH CLEANUP
       #
-      # MUST BE LAST
+      # MUST REMAIN AFTER DATABASE CLEANUP
       # =========================================================
 
       - name: Cleanup SSH credentials
