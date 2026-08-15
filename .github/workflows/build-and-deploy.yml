@@ -1,8 +1,5 @@
 name: Build and Deploy
 
-on:
-  workflow_dispatch:
-
 permissions:
   contents: read
 
@@ -17,8 +14,8 @@ jobs:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
 
-      TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
-      TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
 
     steps:
       - name: Install cloudflared
@@ -28,7 +25,24 @@ jobs:
             -o /usr/local/bin/cloudflared
 
           chmod +x /usr/local/bin/cloudflared
+
           cloudflared --version
+
+      - name: Test Cloudflare Service Token
+        run: |
+          STATUS=$(curl -sS \
+            -o /tmp/cf-response \
+            -w "%{http_code}" \
+            -H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" \
+            -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}" \
+            "https://${SSH_HOST}/")
+
+          echo "Cloudflare HTTP status: ${STATUS}"
+
+          echo
+          echo "Cloudflare response:"
+          head -c 1000 /tmp/cf-response || true
+          echo
 
       - name: Install SSH private key
         env:
@@ -48,7 +62,7 @@ jobs:
             User ${SSH_USER}
             IdentityFile ~/.ssh/id_ed25519
             IdentitiesOnly yes
-            ProxyCommand cloudflared access ssh --hostname %h
+            ProxyCommand cloudflared access ssh --hostname %h --service-token-id '${CF_ACCESS_CLIENT_ID}' --service-token-secret '${CF_ACCESS_CLIENT_SECRET}'
             StrictHostKeyChecking accept-new
             ServerAliveInterval 30
             ServerAliveCountMax 3
@@ -76,3 +90,4 @@ jobs:
         run: |
           rm -f ~/.ssh/id_ed25519
           rm -f ~/.ssh/config
+          rm -f /tmp/cf-response
