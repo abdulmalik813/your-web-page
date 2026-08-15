@@ -26,7 +26,23 @@ jobs:
 
     steps:
       # =========================================================
-      # LOAD SINGLE JSON ENV SECRET
+      # LOAD SINGLE ENV JSON SECRET
+      #
+      # GitHub secret:
+      # ENV
+      #
+      # Expected:
+      # {
+      #   "SSH_HOST": "...",
+      #   "SSH_USER": "...",
+      #   "SSH_PRIVATE_KEY": "...",
+      #   ...
+      # }
+      #
+      # IMPORTANT:
+      # Do NOT echo parsed values.
+      # Do NOT use set -x.
+      # Do NOT call add-mask on multiline values.
       # =========================================================
 
       - name: Load environment
@@ -40,43 +56,56 @@ jobs:
             exit 1
           fi
 
-          if ! printf '%s' "$ENV_JSON" | jq -e 'type == "object"' >/dev/null; then
+          if ! printf '%s' "$ENV_JSON" \
+            | jq -e 'type == "object"' \
+            >/dev/null
+          then
             echo "ERROR: ENV must be a valid JSON object."
             exit 1
           fi
 
-          # Keep original JSON privately for later build preparation.
+          # Keep original JSON privately for the Docker build.
           printf '%s' "$ENV_JSON" > /tmp/source-env.json
           chmod 600 /tmp/source-env.json
 
-          # Export every key from ENV into GitHub's environment.
+          # Export all JSON keys to future GitHub Actions steps.
           #
-          # Supports multiline values such as SSH_PRIVATE_KEY.
-          while IFS= read -r entry; do
+          # The base64 wrapper safely handles:
+          # - spaces
+          # - quotes
+          # - special characters
+          # - multiline SSH keys
+          while IFS= read -r ENTRY; do
+
+            DECODED="$(
+              printf '%s' "$ENTRY" |
+              base64 --decode
+            )"
 
             KEY="$(
-              printf '%s' "$entry" |
-              base64 --decode |
+              printf '%s' "$DECODED" |
               jq -r '.key'
             )"
 
             VALUE="$(
-              printf '%s' "$entry" |
-              base64 --decode |
-              jq -r '.value // "" | tostring'
+              printf '%s' "$DECODED" |
+              jq -r '
+                if .value == null then
+                  ""
+                elif (.value | type) == "string" then
+                  .value
+                else
+                  (.value | tostring)
+                end
+              '
             )"
 
             if ! [[ "$KEY" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
-              echo "ERROR: ENV contains an invalid environment variable name."
+              echo "ERROR: ENV contains an invalid variable name."
               exit 1
             fi
 
-            # Hide values from public logs.
-            if [ -n "$VALUE" ]; then
-              echo "::add-mask::$VALUE"
-            fi
-
-            DELIMITER="__ENV_${KEY}_${RANDOM}_${RANDOM}__"
+            DELIMITER="__ENV_${RANDOM}_${RANDOM}_${RANDOM}__"
 
             {
               echo "${KEY}<<${DELIMITER}"
@@ -102,6 +131,9 @@ jobs:
 
       # =========================================================
       # VALIDATE ONLY REQUIRED CI / TUNNEL VALUES
+      #
+      # Application ENV values such as SMTP, S3, etc. are NOT
+      # validated here.
       # =========================================================
 
       - name: Validate required configuration
@@ -124,7 +156,7 @@ jobs:
             VALUE="${!NAME:-}"
 
             if [ -z "$VALUE" ]; then
-              echo "ERROR: Required value is missing: $NAME"
+              echo "ERROR: Required configuration is missing: $NAME"
               exit 1
             fi
 
@@ -134,14 +166,15 @@ jobs:
 
 
       # =========================================================
-      # CLOUDFLARED
+      # INSTALL CLOUDFLARED
       # =========================================================
 
       - name: Install cloudflared
         run: |
           set -euo pipefail
 
-          sudo curl -fsSL \
+          sudo curl \
+            -fsSL \
             https://github.com/cloudflare/cloudflared/releases/download/2026.5.1/cloudflared-linux-amd64 \
             -o /usr/local/bin/cloudflared
 
@@ -151,7 +184,7 @@ jobs:
 
 
       # =========================================================
-      # SSH KEY
+      # INSTALL SSH PRIVATE KEY
       # =========================================================
 
       - name: Install SSH private key
@@ -170,7 +203,9 @@ jobs:
 
 
       # =========================================================
-      # CLOUDFLARE SERVICE TOKEN
+      # CLOUDFLARE SERVICE TOKEN ENV
+      #
+      # cloudflared automatically reads these names.
       # =========================================================
 
       - name: Configure Cloudflare authentication
@@ -208,6 +243,8 @@ jobs:
 
           chmod 600 "$HOME/.ssh/config"
 
+          echo "SSH configured."
+
 
       # =========================================================
       # TEST VPS
@@ -230,7 +267,8 @@ jobs:
       # =========================================================
       # VALIDATE TUNNEL CONFIG
       #
-      # Exactly:
+      # Must be EXACTLY:
+      #
       # target,port,network
       # =========================================================
 
@@ -248,8 +286,8 @@ jobs:
           )"
 
           if [ "$COMMA_COUNT" -ne 2 ]; then
-            echo "ERROR: TUNNEL_TARGET_PORT_NETWORK must contain exactly 3 values."
-            echo "Expected: target,port,network"
+            echo "ERROR: Tunnel configuration must contain exactly 3 values."
+            echo "Expected format: target,port,network"
             exit 1
           fi
 
@@ -263,20 +301,20 @@ jobs:
           DB_TARGET_PORT="$(printf '%s' "$DB_TARGET_PORT" | xargs)"
           DB_NETWORK="$(printf '%s' "$DB_NETWORK" | xargs)"
 
-          [ -n "$DB_TARGET" ] || {
+          if [ -z "$DB_TARGET" ]; then
             echo "ERROR: Tunnel target is empty."
             exit 1
-          }
+          fi
 
-          [ -n "$DB_TARGET_PORT" ] || {
+          if [ -z "$DB_TARGET_PORT" ]; then
             echo "ERROR: Tunnel port is empty."
             exit 1
-          }
+          fi
 
-          [ -n "$DB_NETWORK" ] || {
+          if [ -z "$DB_NETWORK" ]; then
             echo "ERROR: Tunnel network is empty."
             exit 1
-          }
+          fi
 
           case "$DB_TARGET_PORT" in
             *[!0-9]*|'')
@@ -309,17 +347,15 @@ jobs:
 
 
       # =========================================================
-      # CREATE SERVER-SIDE DATABASE PROXY
+      # CREATE VPS DATABASE PROXY
       # =========================================================
 
       - name: Prepare database tunnel
         id: db
-
         env:
           DB_TARGET: ${{ steps.tunnel-config.outputs.target }}
           DB_TARGET_PORT: ${{ steps.tunnel-config.outputs.port }}
           DB_NETWORK: ${{ steps.tunnel-config.outputs.network }}
-
         run: |
           set -euo pipefail
 
@@ -366,20 +402,20 @@ jobs:
             head -1
           )"
 
-          [ "$STATUS" = "OK" ] || {
+          if [ "$STATUS" != "OK" ]; then
             echo "ERROR: Tunnel preparation failed."
             exit 1
-          }
+          fi
 
-          [ -n "$SESSION_ID" ] || {
+          if [ -z "$SESSION_ID" ]; then
             echo "ERROR: Tunnel session was not returned."
             exit 1
-          }
+          fi
 
-          [ -n "$REMOTE_HOST" ] || {
+          if [ -z "$REMOTE_HOST" ]; then
             echo "ERROR: Tunnel host was not returned."
             exit 1
-          }
+          fi
 
           case "$REMOTE_PORT" in
             *[!0-9]*|'')
@@ -388,8 +424,11 @@ jobs:
               ;;
           esac
 
+          # Store session privately for cleanup.
           printf '%s\n' "$SESSION_ID" \
             > /tmp/db-tunnel-session
+
+          chmod 600 /tmp/db-tunnel-session
 
           echo "remote_host=$REMOTE_HOST" >> "$GITHUB_OUTPUT"
           echo "remote_port=$REMOTE_PORT" >> "$GITHUB_OUTPUT"
@@ -398,7 +437,10 @@ jobs:
 
 
       # =========================================================
-      # OPEN RUNNER -> VPS SSH FORWARD
+      # OPEN GITHUB RUNNER -> VPS SSH FORWARD
+      #
+      # Bind to 0.0.0.0 so Docker can reach it through
+      # host.docker.internal.
       # =========================================================
 
       - name: Open database SSH tunnel
@@ -408,7 +450,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          if nc -z 127.0.0.1 "$DB_LOCAL_PORT" 2>/dev/null; then
+          if nc -z \
+            127.0.0.1 \
+            "$DB_LOCAL_PORT" \
+            2>/dev/null
+          then
             echo "ERROR: Local database port is already in use."
             exit 1
           fi
@@ -427,16 +473,20 @@ jobs:
           printf '%s\n' "$SSH_PID" \
             > /tmp/db-ssh-tunnel.pid
 
+          chmod 600 /tmp/db-ssh-tunnel.pid
+
           READY=0
 
           for _ in $(seq 1 30); do
 
             if ! kill -0 "$SSH_PID" 2>/dev/null; then
-              echo "ERROR: Database tunnel exited unexpectedly."
+              echo "ERROR: Database SSH tunnel exited unexpectedly."
               exit 1
             fi
 
-            if nc -z -w 1 \
+            if nc \
+              -z \
+              -w 1 \
               127.0.0.1 \
               "$DB_LOCAL_PORT" \
               2>/dev/null
@@ -458,11 +508,15 @@ jobs:
 
 
       # =========================================================
-      # PREPARE COMPLETE BUILD ENV JSON
+      # PREPARE DYNAMIC BUILD ENVIRONMENT
       #
-      # Automatically passes EVERY key from ENV to Docker.
+      # EVERY value from secrets.ENV is automatically passed
+      # into the Docker build.
       #
-      # Only DATABASE_URI is modified.
+      # Only DATABASE_URI is modified:
+      #
+      # [DB_HOST] -> host.docker.internal
+      # [DB_PORT] -> DB_LOCAL_PORT
       # =========================================================
 
       - name: Prepare build environment
@@ -490,8 +544,8 @@ jobs:
             exit 1
           fi
 
-          echo "::add-mask::$BUILD_DATABASE_URI"
-
+          # Update only DATABASE_URI.
+          # Every other ENV key remains unchanged.
           jq \
             --arg databaseUri "$BUILD_DATABASE_URI" \
             '.DATABASE_URI = $databaseUri' \
@@ -504,14 +558,16 @@ jobs:
 
 
       # =========================================================
-      # TEST RUNNER DATABASE CONNECTION
+      # TEST RUNNER -> DATABASE
       # =========================================================
 
       - name: Test database tunnel
         run: |
           set -euo pipefail
 
-          if ! nc -z -w 5 \
+          if ! nc \
+            -z \
+            -w 5 \
             127.0.0.1 \
             "$DB_LOCAL_PORT"
           then
@@ -523,23 +579,24 @@ jobs:
 
 
       # =========================================================
-      # TEST DOCKER -> HOST -> TUNNEL
+      # TEST DOCKER -> HOST -> DATABASE
       # =========================================================
 
       - name: Test Docker database access
         run: |
           set -euo pipefail
 
-          docker run \
+          if ! docker run \
             --rm \
             --add-host host.docker.internal:host-gateway \
             alpine:3.22 \
             sh -c \
             "nc -z -w 5 host.docker.internal '$DB_LOCAL_PORT'" \
-            >/dev/null 2>&1 || {
-              echo "ERROR: Docker cannot reach database tunnel."
-              exit 1
-            }
+            >/dev/null 2>&1
+          then
+            echo "ERROR: Docker cannot reach database tunnel."
+            exit 1
+          fi
 
           echo "Docker database access successful."
 
@@ -578,7 +635,11 @@ jobs:
       # =========================================================
       # BUILD IMAGE
       #
-      # BUILD_ENV contains ALL keys from secrets.ENV.
+      # Dockerfile receives ONE BuildKit secret:
+      #
+      # BUILD_ENV
+      #
+      # containing the complete dynamic JSON environment.
       # =========================================================
 
       - name: Build Docker image
@@ -605,7 +666,7 @@ jobs:
 
 
       # =========================================================
-      # PUSH TO GHCR
+      # PUSH GHCR
       # =========================================================
 
       - name: Push Docker image
@@ -621,7 +682,7 @@ jobs:
 
 
       # =========================================================
-      # DOKPLOY
+      # DOKPLOY DEPLOYMENT
       # =========================================================
 
       - name: Deploy to Dokploy
@@ -643,6 +704,8 @@ jobs:
 
       # =========================================================
       # CLEANUP DATABASE TUNNEL
+      #
+      # ALWAYS RUN
       # =========================================================
 
       - name: Cleanup database tunnel
@@ -653,12 +716,14 @@ jobs:
           echo "Cleaning up database connection..."
 
           # -----------------------------------------------------
-          # Local SSH tunnel
+          # Stop local SSH forward
           # -----------------------------------------------------
 
           if [ -f /tmp/db-ssh-tunnel.pid ]; then
 
-            SSH_PID="$(cat /tmp/db-ssh-tunnel.pid)"
+            SSH_PID="$(
+              cat /tmp/db-ssh-tunnel.pid
+            )"
 
             if kill -0 "$SSH_PID" 2>/dev/null; then
 
@@ -686,12 +751,14 @@ jobs:
 
 
           # -----------------------------------------------------
-          # Remote VPS Docker proxy
+          # Remove VPS temporary proxy
           # -----------------------------------------------------
 
           if [ -f /tmp/db-tunnel-session ]; then
 
-            SESSION_ID="$(cat /tmp/db-tunnel-session)"
+            SESSION_ID="$(
+              cat /tmp/db-tunnel-session
+            )"
 
             if ssh production \
               "/usr/local/bin/docker-tunnel-helper cleanup '$SESSION_ID'" \
@@ -706,14 +773,21 @@ jobs:
 
           fi
 
-          rm -f /tmp/build-env.json
+
+          # -----------------------------------------------------
+          # Remove temporary environment files
+          # -----------------------------------------------------
+
           rm -f /tmp/source-env.json
+          rm -f /tmp/build-env.json
 
           echo "Database cleanup complete."
 
 
       # =========================================================
-      # SSH CLEANUP
+      # CLEANUP SSH
+      #
+      # MUST REMAIN LAST
       # =========================================================
 
       - name: Cleanup SSH credentials
