@@ -173,7 +173,6 @@ jobs:
       # =========================================================
       # CREATE SERVER-SIDE DATABASE PROXY
       # =========================================================
-
       - name: Prepare database tunnel
         id: db
         run: |
@@ -183,12 +182,29 @@ jobs:
           echo " PREPARE DATABASE TUNNEL"
           echo "======================================"
 
+          set +e
+
           RESULT="$(
             ssh production \
-              "/usr/local/bin/docker-tunnel-helper prepare '$DB_TARGET' '$DB_TARGET_PORT' '$DB_NETWORK'"
+              "/usr/local/bin/docker-tunnel-helper prepare '$DB_TARGET' '$DB_TARGET_PORT' '$DB_NETWORK'" \
+              2>&1
           )"
 
-          echo "$RESULT"
+          EXIT_CODE=$?
+
+          set -e
+
+          echo
+          echo "Helper output:"
+          echo "--------------------------------------"
+          printf '%s\n' "$RESULT"
+          echo "--------------------------------------"
+          echo
+
+          if [ "$EXIT_CODE" -ne 0 ]; then
+            echo "ERROR: docker-tunnel-helper failed with exit code $EXIT_CODE"
+            exit "$EXIT_CODE"
+          fi
 
           STATUS="$(
             printf '%s\n' "$RESULT" |
@@ -221,7 +237,7 @@ jobs:
           )"
 
           if [ "$STATUS" != "OK" ]; then
-            echo "ERROR: VPS tunnel helper did not return STATUS=OK"
+            echo "ERROR: Helper did not return STATUS=OK"
             exit 1
           fi
 
@@ -229,88 +245,18 @@ jobs:
           test -n "$REMOTE_HOST"
           test -n "$REMOTE_PORT"
 
-          case "$REMOTE_PORT" in
-            *[!0-9]*|'')
-              echo "ERROR: Invalid remote tunnel port"
-              exit 1
-              ;;
-          esac
-
-          echo
-          echo "Tunnel proxy created:"
-          echo "  Session: $SESSION_ID"
-          echo "  Proxy:   $PROXY_NAME"
-          echo "  VPS:     $REMOTE_HOST:$REMOTE_PORT"
-
-          # GitHub step outputs
           echo "session_id=$SESSION_ID" >> "$GITHUB_OUTPUT"
           echo "remote_host=$REMOTE_HOST" >> "$GITHUB_OUTPUT"
           echo "remote_port=$REMOTE_PORT" >> "$GITHUB_OUTPUT"
           echo "proxy_name=$PROXY_NAME" >> "$GITHUB_OUTPUT"
 
-          # Also persist session ID for cleanup safety
           printf '%s\n' "$SESSION_ID" > /tmp/db-tunnel-session
 
-
-      # =========================================================
-      # OPEN GITHUB RUNNER -> VPS SSH FORWARD
-      # =========================================================
-
-      - name: Open database SSH tunnel
-        id: db-forward
-        env:
-          REMOTE_HOST: ${{ steps.db.outputs.remote_host }}
-          REMOTE_PORT: ${{ steps.db.outputs.remote_port }}
-        run: |
-          set -euo pipefail
-
-          echo "======================================"
-          echo " OPEN SSH DATABASE FORWARD"
-          echo "======================================"
-
-          # Ensure local port is not already occupied
-          if nc -z 127.0.0.1 "$DB_LOCAL_PORT" 2>/dev/null; then
-            echo "ERROR: Local port $DB_LOCAL_PORT already in use"
-            exit 1
-          fi
-
-          ssh \
-            -N \
-            -o ExitOnForwardFailure=yes \
-            -L "${DB_LOCAL_PORT}:${REMOTE_HOST}:${REMOTE_PORT}" \
-            production &
-
-          SSH_PID=$!
-
-          printf '%s\n' "$SSH_PID" > /tmp/db-ssh-tunnel.pid
-
-          echo "SSH tunnel PID: $SSH_PID"
-
-          # Give SSH a moment to establish
-          sleep 3
-
-          if ! kill -0 "$SSH_PID" 2>/dev/null; then
-            echo "ERROR: SSH tunnel process exited"
-            exit 1
-          fi
-
-          # Confirm the complete path reaches Mongo
-          if ! nc -z -w 5 127.0.0.1 "$DB_LOCAL_PORT"; then
-            echo "ERROR: Database tunnel is not reachable"
-            exit 1
-          fi
-
           echo
-          echo "Database tunnel ACTIVE"
-          echo
-          echo "GitHub runner:"
-          echo "  127.0.0.1:$DB_LOCAL_PORT"
-          echo
-          echo "VPS proxy:"
-          echo "  $REMOTE_HOST:$REMOTE_PORT"
-
-          echo "local_port=$DB_LOCAL_PORT" >> "$GITHUB_OUTPUT"
-
+          echo "Tunnel prepared successfully."
+          echo "Session: $SESSION_ID"
+          echo "Proxy:   $PROXY_NAME"
+          echo "Remote:  $REMOTE_HOST:$REMOTE_PORT"
 
       # =========================================================
       # CONSTRUCT DATABASE URL
