@@ -16,6 +16,7 @@ concurrency:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  DB_LOCAL_PORT: "27018"
 
 jobs:
   build-and-deploy:
@@ -23,53 +24,118 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod
 
-    env:
-
-      SSH_HOST: ${{ fromJSON(secrets.ENV).SSH_HOST }}
-      SSH_USER: ${{ fromJSON(secrets.ENV).SSH_USER }}
-
-      TUNNEL_SERVICE_TOKEN_ID: ${{ fromJSON(secrets.ENV).CF_ACCESS_CLIENT_ID }}
-      TUNNEL_SERVICE_TOKEN_SECRET: ${{ fromJSON(secrets.ENV).CF_ACCESS_CLIENT_SECRET }}
-
-      TUNNEL_TARGET_PORT_NETWORK: ${{ fromJSON(secrets.ENV).TUNNEL_TARGET_PORT_NETWORK }}
-
-      DB_LOCAL_PORT: "27018"
-
-      DATABASE_URI_TEMPLATE: ${{ fromJSON(secrets.ENV).DATABASE_URI }}
-
-      NODE_ENV: ${{ fromJSON(secrets.ENV).NODE_ENV }}
-
-      CRON_SECRET: ${{ fromJSON(secrets.ENV).CRON_SECRET }}
-      NEXT_PUBLIC_SERVER_URL: ${{ fromJSON(secrets.ENV).NEXT_PUBLIC_SERVER_URL }}
-      PAYLOAD_SECRET: ${{ fromJSON(secrets.ENV).PAYLOAD_SECRET }}
-      PREVIEW_SECRET: ${{ fromJSON(secrets.ENV).PREVIEW_SECRET }}
-
-      RESEND_API_KEY: ${{ fromJSON(secrets.ENV).RESEND_API_KEY }}
-
-      S3_ACCESS_KEY_ID: ${{ fromJSON(secrets.ENV).S3_ACCESS_KEY_ID }}
-      S3_SECRET_ACCESS_KEY: ${{ fromJSON(secrets.ENV).S3_SECRET_ACCESS_KEY }}
-      S3_BUCKET: ${{ fromJSON(secrets.ENV).S3_BUCKET }}
-      S3_ENDPOINT: ${{ fromJSON(secrets.ENV).S3_ENDPOINT }}
-      S3_REGION: ${{ fromJSON(secrets.ENV).S3_REGION }}
-
-      TAILWIND_GENERATOR: ${{ fromJSON(secrets.ENV).TAILWIND_GENERATOR }}
-      USE_RESEND: ${{ fromJSON(secrets.ENV).USE_RESEND }}
-
-      IMAGE_HOSTS: ${{ fromJSON(secrets.ENV).IMAGE_HOSTS }}
-
-      EMAIL_FROM_ADDRESS: ${{ fromJSON(secrets.ENV).EMAIL_FROM_ADDRESS }}
-      EMAIL_FROM_NAME: ${{ fromJSON(secrets.ENV).EMAIL_FROM_NAME }}
-
-      SMTP_HOST: ${{ fromJSON(secrets.ENV).SMTP_HOST }}
-      SMTP_PORT: ${{ fromJSON(secrets.ENV).SMTP_PORT }}
-      SMTP_USER: ${{ fromJSON(secrets.ENV).SMTP_USER }}
-      SMTP_PASS: ${{ fromJSON(secrets.ENV).SMTP_PASS }}
-      SMTP_SECURE: ${{ fromJSON(secrets.ENV).SMTP_SECURE }}
-
     steps:
+      # =========================================================
+      # LOAD SINGLE JSON ENV SECRET
+      # =========================================================
+
+      - name: Load environment
+        env:
+          ENV_JSON: ${{ secrets.ENV }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$ENV_JSON" ]; then
+            echo "ERROR: ENV secret is missing."
+            exit 1
+          fi
+
+          if ! printf '%s' "$ENV_JSON" | jq -e 'type == "object"' >/dev/null; then
+            echo "ERROR: ENV must be a valid JSON object."
+            exit 1
+          fi
+
+          # Keep original JSON privately for later build preparation.
+          printf '%s' "$ENV_JSON" > /tmp/source-env.json
+          chmod 600 /tmp/source-env.json
+
+          # Export every key from ENV into GitHub's environment.
+          #
+          # Supports multiline values such as SSH_PRIVATE_KEY.
+          while IFS= read -r entry; do
+
+            KEY="$(
+              printf '%s' "$entry" |
+              base64 --decode |
+              jq -r '.key'
+            )"
+
+            VALUE="$(
+              printf '%s' "$entry" |
+              base64 --decode |
+              jq -r '.value // "" | tostring'
+            )"
+
+            if ! [[ "$KEY" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+              echo "ERROR: ENV contains an invalid environment variable name."
+              exit 1
+            fi
+
+            # Hide values from public logs.
+            if [ -n "$VALUE" ]; then
+              echo "::add-mask::$VALUE"
+            fi
+
+            DELIMITER="__ENV_${KEY}_${RANDOM}_${RANDOM}__"
+
+            {
+              echo "${KEY}<<${DELIMITER}"
+              printf '%s\n' "$VALUE"
+              echo "${DELIMITER}"
+            } >> "$GITHUB_ENV"
+
+          done < <(
+            printf '%s' "$ENV_JSON" |
+            jq -r 'to_entries[] | @base64'
+          )
+
+          echo "Environment loaded successfully."
+
+
+      # =========================================================
+      # CHECKOUT
+      # =========================================================
 
       - name: Checkout repository
         uses: actions/checkout@v6
+
+
+      # =========================================================
+      # VALIDATE ONLY REQUIRED CI / TUNNEL VALUES
+      # =========================================================
+
+      - name: Validate required configuration
+        run: |
+          set -euo pipefail
+
+          REQUIRED=(
+            SSH_HOST
+            SSH_USER
+            SSH_PRIVATE_KEY
+            CF_ACCESS_CLIENT_ID
+            CF_ACCESS_CLIENT_SECRET
+            TUNNEL_TARGET_PORT_NETWORK
+            DATABASE_URI
+            DOKPLOY_DEPLOY_URL
+          )
+
+          for NAME in "${REQUIRED[@]}"; do
+
+            VALUE="${!NAME:-}"
+
+            if [ -z "$VALUE" ]; then
+              echo "ERROR: Required value is missing: $NAME"
+              exit 1
+            fi
+
+          done
+
+          echo "Required configuration valid."
+
+
+      # =========================================================
+      # CLOUDFLARED
+      # =========================================================
 
       - name: Install cloudflared
         run: |
@@ -83,9 +149,12 @@ jobs:
 
           echo "cloudflared installed."
 
+
+      # =========================================================
+      # SSH KEY
+      # =========================================================
+
       - name: Install SSH private key
-        env:
-          SSH_PRIVATE_KEY: ${{ fromJSON(secrets.ENV).SSH_PRIVATE_KEY }}
         run: |
           set -euo pipefail
 
@@ -98,6 +167,27 @@ jobs:
           chmod 600 "$HOME/.ssh/id_ed25519"
 
           echo "SSH key installed."
+
+
+      # =========================================================
+      # CLOUDFLARE SERVICE TOKEN
+      # =========================================================
+
+      - name: Configure Cloudflare authentication
+        run: |
+          set -euo pipefail
+
+          {
+            echo "TUNNEL_SERVICE_TOKEN_ID=$CF_ACCESS_CLIENT_ID"
+            echo "TUNNEL_SERVICE_TOKEN_SECRET=$CF_ACCESS_CLIENT_SECRET"
+          } >> "$GITHUB_ENV"
+
+          echo "Cloudflare authentication configured."
+
+
+      # =========================================================
+      # SSH CONFIG
+      # =========================================================
 
       - name: Configure SSH
         run: |
@@ -118,46 +208,10 @@ jobs:
 
           chmod 600 "$HOME/.ssh/config"
 
-      - name: Validate configuration
-        run: |
-          set -euo pipefail
 
-          test -n "$SSH_HOST" || {
-            echo "ERROR: SSH_HOST is missing."
-            exit 1
-          }
-
-          test -n "$SSH_USER" || {
-            echo "ERROR: SSH_USER is missing."
-            exit 1
-          }
-
-          test -n "$TUNNEL_SERVICE_TOKEN_ID" || {
-            echo "ERROR: CF_ACCESS_CLIENT_ID is missing."
-            exit 1
-          }
-
-          test -n "$TUNNEL_SERVICE_TOKEN_SECRET" || {
-            echo "ERROR: CF_ACCESS_CLIENT_SECRET is missing."
-            exit 1
-          }
-
-          test -n "$TUNNEL_TARGET_PORT_NETWORK" || {
-            echo "ERROR: TUNNEL_TARGET_PORT_NETWORK is missing."
-            exit 1
-          }
-
-          test -n "$DATABASE_URI_TEMPLATE" || {
-            echo "ERROR: DATABASE_URI is missing."
-            exit 1
-          }
-
-          test -s "$HOME/.ssh/id_ed25519" || {
-            echo "ERROR: SSH_PRIVATE_KEY is missing."
-            exit 1
-          }
-
-          echo "Configuration valid."
+      # =========================================================
+      # TEST VPS
+      # =========================================================
 
       - name: Test VPS connection
         run: |
@@ -171,6 +225,14 @@ jobs:
           '
 
           echo "VPS connection successful."
+
+
+      # =========================================================
+      # VALIDATE TUNNEL CONFIG
+      #
+      # Exactly:
+      # target,port,network
+      # =========================================================
 
       - name: Validate tunnel configuration
         id: tunnel-config
@@ -186,12 +248,16 @@ jobs:
           )"
 
           if [ "$COMMA_COUNT" -ne 2 ]; then
-            echo "ERROR: Tunnel configuration must contain exactly 3 values."
-            echo "Expected format: target,port,network"
+            echo "ERROR: TUNNEL_TARGET_PORT_NETWORK must contain exactly 3 values."
+            echo "Expected: target,port,network"
             exit 1
           fi
 
-          IFS=',' read -r DB_TARGET DB_TARGET_PORT DB_NETWORK <<< "$VALUE"
+          IFS=',' read -r \
+            DB_TARGET \
+            DB_TARGET_PORT \
+            DB_NETWORK \
+            <<< "$VALUE"
 
           DB_TARGET="$(printf '%s' "$DB_TARGET" | xargs)"
           DB_TARGET_PORT="$(printf '%s' "$DB_TARGET_PORT" | xargs)"
@@ -241,12 +307,19 @@ jobs:
 
           echo "Tunnel configuration valid."
 
+
+      # =========================================================
+      # CREATE SERVER-SIDE DATABASE PROXY
+      # =========================================================
+
       - name: Prepare database tunnel
         id: db
+
         env:
           DB_TARGET: ${{ steps.tunnel-config.outputs.target }}
           DB_TARGET_PORT: ${{ steps.tunnel-config.outputs.port }}
           DB_NETWORK: ${{ steps.tunnel-config.outputs.network }}
+
         run: |
           set -euo pipefail
 
@@ -323,6 +396,11 @@ jobs:
 
           echo "Database tunnel prepared successfully."
 
+
+      # =========================================================
+      # OPEN RUNNER -> VPS SSH FORWARD
+      # =========================================================
+
       - name: Open database SSH tunnel
         env:
           REMOTE_HOST: ${{ steps.db.outputs.remote_host }}
@@ -358,12 +436,17 @@ jobs:
               exit 1
             fi
 
-            if nc -z -w 1 127.0.0.1 "$DB_LOCAL_PORT" 2>/dev/null; then
+            if nc -z -w 1 \
+              127.0.0.1 \
+              "$DB_LOCAL_PORT" \
+              2>/dev/null
+            then
               READY=1
               break
             fi
 
             sleep 0.5
+
           done
 
           if [ "$READY" -ne 1 ]; then
@@ -373,9 +456,20 @@ jobs:
 
           echo "Database connection established successfully."
 
-      - name: Configure database URI
+
+      # =========================================================
+      # PREPARE COMPLETE BUILD ENV JSON
+      #
+      # Automatically passes EVERY key from ENV to Docker.
+      #
+      # Only DATABASE_URI is modified.
+      # =========================================================
+
+      - name: Prepare build environment
         run: |
           set -euo pipefail
+
+          DATABASE_URI_TEMPLATE="$DATABASE_URI"
 
           if [[ "$DATABASE_URI_TEMPLATE" != *"[DB_HOST]"* ]]; then
             echo "ERROR: DATABASE_URI is missing [DB_HOST]."
@@ -387,35 +481,50 @@ jobs:
             exit 1
           fi
 
-          DATABASE_URI="${DATABASE_URI_TEMPLATE//\[DB_HOST\]/host.docker.internal}"
-          DATABASE_URI="${DATABASE_URI//\[DB_PORT\]/$DB_LOCAL_PORT}"
+          BUILD_DATABASE_URI="${DATABASE_URI_TEMPLATE//\[DB_HOST\]/host.docker.internal}"
+          BUILD_DATABASE_URI="${BUILD_DATABASE_URI//\[DB_PORT\]/$DB_LOCAL_PORT}"
 
-          if [[ "$DATABASE_URI" == *"[DB_HOST]"* ]] || \
-             [[ "$DATABASE_URI" == *"[DB_PORT]"* ]]; then
-            echo "ERROR: Database URI placeholders were not replaced."
+          if [[ "$BUILD_DATABASE_URI" == *"[DB_HOST]"* ]] || \
+             [[ "$BUILD_DATABASE_URI" == *"[DB_PORT]"* ]]; then
+            echo "ERROR: DATABASE_URI placeholders were not replaced."
             exit 1
           fi
 
-          echo "::add-mask::$DATABASE_URI"
+          echo "::add-mask::$BUILD_DATABASE_URI"
 
-          {
-            echo 'DATABASE_URI<<__DATABASE_URI_EOF__'
-            printf '%s\n' "$DATABASE_URI"
-            echo '__DATABASE_URI_EOF__'
-          } >> "$GITHUB_ENV"
+          jq \
+            --arg databaseUri "$BUILD_DATABASE_URI" \
+            '.DATABASE_URI = $databaseUri' \
+            /tmp/source-env.json \
+            > /tmp/build-env.json
 
-          echo "Database URI configured successfully."
+          chmod 600 /tmp/build-env.json
+
+          echo "Build environment prepared successfully."
+
+
+      # =========================================================
+      # TEST RUNNER DATABASE CONNECTION
+      # =========================================================
 
       - name: Test database tunnel
         run: |
           set -euo pipefail
 
-          if ! nc -z -w 5 127.0.0.1 "$DB_LOCAL_PORT"; then
+          if ! nc -z -w 5 \
+            127.0.0.1 \
+            "$DB_LOCAL_PORT"
+          then
             echo "ERROR: Database tunnel is unavailable."
             exit 1
           fi
 
           echo "Database tunnel test successful."
+
+
+      # =========================================================
+      # TEST DOCKER -> HOST -> TUNNEL
+      # =========================================================
 
       - name: Test Docker database access
         run: |
@@ -427,9 +536,17 @@ jobs:
             alpine:3.22 \
             sh -c \
             "nc -z -w 5 host.docker.internal '$DB_LOCAL_PORT'" \
-            >/dev/null 2>&1
+            >/dev/null 2>&1 || {
+              echo "ERROR: Docker cannot reach database tunnel."
+              exit 1
+            }
 
           echo "Docker database access successful."
+
+
+      # =========================================================
+      # GHCR LOGIN
+      # =========================================================
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4
@@ -437,6 +554,11 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+
+      # =========================================================
+      # IMAGE NAME
+      # =========================================================
 
       - name: Prepare image name
         id: image
@@ -452,59 +574,57 @@ jobs:
 
           echo "name=$IMAGE" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: ./Dockerfile
 
-          push: true
+      # =========================================================
+      # BUILD IMAGE
+      #
+      # BUILD_ENV contains ALL keys from secrets.ENV.
+      # =========================================================
 
-          add-hosts: |
-            host.docker.internal=host-gateway
-
-          build-args: |
-            CACHEBUST=${{ github.sha }}
-
-          tags: |
-            ${{ steps.image.outputs.name }}:latest
-            ${{ steps.image.outputs.name }}:${{ github.sha }}
-
-          labels: |
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-            org.opencontainers.image.revision=${{ github.sha }}
-
-          secret-envs: |
-            NODE_ENV=NODE_ENV
-            DATABASE_URI=DATABASE_URI
-            CRON_SECRET=CRON_SECRET
-            NEXT_PUBLIC_SERVER_URL=NEXT_PUBLIC_SERVER_URL
-            PAYLOAD_SECRET=PAYLOAD_SECRET
-            PREVIEW_SECRET=PREVIEW_SECRET
-            RESEND_API_KEY=RESEND_API_KEY
-            S3_ACCESS_KEY_ID=S3_ACCESS_KEY_ID
-            S3_SECRET_ACCESS_KEY=S3_SECRET_ACCESS_KEY
-            S3_BUCKET=S3_BUCKET
-            S3_ENDPOINT=S3_ENDPOINT
-            S3_REGION=S3_REGION
-            TAILWIND_GENERATOR=TAILWIND_GENERATOR
-            USE_RESEND=USE_RESEND
-            IMAGE_HOSTS=IMAGE_HOSTS
-            EMAIL_FROM_ADDRESS=EMAIL_FROM_ADDRESS
-            EMAIL_FROM_NAME=EMAIL_FROM_NAME
-            SMTP_HOST=SMTP_HOST
-            SMTP_PORT=SMTP_PORT
-            SMTP_USER=SMTP_USER
-            SMTP_PASS=SMTP_PASS
-            SMTP_SECURE=SMTP_SECURE
-
-      - name: Deploy to Registry
+      - name: Build Docker image
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
         run: |
-          echo "Docker image built and published successfully."
+          set -euo pipefail
+
+          DOCKER_BUILDKIT=1 docker build \
+            --add-host \
+            host.docker.internal:host-gateway \
+            --secret \
+            id=BUILD_ENV,src=/tmp/build-env.json \
+            --build-arg \
+            CACHEBUST="${GITHUB_SHA}" \
+            --label \
+            "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            --label \
+            "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            -t "${IMAGE}:latest" \
+            -t "${IMAGE}:${GITHUB_SHA}" \
+            -f Dockerfile \
+            .
+
+
+      # =========================================================
+      # PUSH TO GHCR
+      # =========================================================
+
+      - name: Push Docker image
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
+        run: |
+          set -euo pipefail
+
+          docker push "${IMAGE}:latest"
+          docker push "${IMAGE}:${GITHUB_SHA}"
+
+          echo "Docker image published successfully."
+
+
+      # =========================================================
+      # DOKPLOY
+      # =========================================================
 
       - name: Deploy to Dokploy
-        env:
-          DOKPLOY_DEPLOY_URL: ${{ fromJSON(secrets.ENV).DOKPLOY_DEPLOY_URL }}
         run: |
           set -euo pipefail
 
@@ -515,10 +635,15 @@ jobs:
             --silent \
             --show-error \
             --max-time 30 \
-            "$DOKPLOY_DEPLOY_URL"
+            "$DOKPLOY_DEPLOY_URL" \
+            >/dev/null
 
-          echo
           echo "Dokploy deployment triggered successfully."
+
+
+      # =========================================================
+      # CLEANUP DATABASE TUNNEL
+      # =========================================================
 
       - name: Cleanup database tunnel
         if: always()
@@ -526,6 +651,10 @@ jobs:
           set +e
 
           echo "Cleaning up database connection..."
+
+          # -----------------------------------------------------
+          # Local SSH tunnel
+          # -----------------------------------------------------
 
           if [ -f /tmp/db-ssh-tunnel.pid ]; then
 
@@ -542,6 +671,7 @@ jobs:
                 fi
 
                 sleep 0.2
+
               done
 
               if kill -0 "$SSH_PID" 2>/dev/null; then
@@ -551,7 +681,13 @@ jobs:
             fi
 
             rm -f /tmp/db-ssh-tunnel.pid
+
           fi
+
+
+          # -----------------------------------------------------
+          # Remote VPS Docker proxy
+          # -----------------------------------------------------
 
           if [ -f /tmp/db-tunnel-session ]; then
 
@@ -567,9 +703,18 @@ jobs:
             fi
 
             rm -f /tmp/db-tunnel-session
+
           fi
 
+          rm -f /tmp/build-env.json
+          rm -f /tmp/source-env.json
+
           echo "Database cleanup complete."
+
+
+      # =========================================================
+      # SSH CLEANUP
+      # =========================================================
 
       - name: Cleanup SSH credentials
         if: always()
