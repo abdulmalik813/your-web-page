@@ -24,14 +24,6 @@ jobs:
     environment: prod
 
     env:
-      SSH_HOST: ${{ secrets.SSH_HOST }}
-      SSH_USER: ${{ secrets.SSH_USER }}
-
-      TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
-      TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
-
-      TUNNEL_TARGET_PORT_NETWORK: ${{ secrets.TUNNEL_TARGET_PORT_NETWORK }}
-
       DB_LOCAL_PORT: "27018"
 
     steps:
@@ -87,6 +79,12 @@ jobs:
             SMTP_USER
             SMTP_PASS
             SMTP_SECURE
+            CF_ACCESS_CLIENT_ID
+            CF_ACCESS_CLIENT_SECRET
+            SSH_PRIVATE_KEY
+            SSH_HOST
+            SSH_USER
+            TUNNEL_TARGET_PORT_NETWORK
           )
 
           for KEY in "${REQUIRED_ENV_VARS[@]}"; do
@@ -143,6 +141,20 @@ jobs:
             unset DELIMITER
           done
 
+          CF_ID="$(jq -r '.CF_ACCESS_CLIENT_ID | if type == "string" then . else tostring end' <<< "$ENV_JSON")"
+          CF_SECRET="$(jq -r '.CF_ACCESS_CLIENT_SECRET | if type == "string" then . else tostring end' <<< "$ENV_JSON")"
+
+          {
+            echo "TUNNEL_SERVICE_TOKEN_ID<<EOF_CF_ID"
+            printf '%s\n' "$CF_ID"
+            echo "EOF_CF_ID"
+            echo "TUNNEL_SERVICE_TOKEN_SECRET<<EOF_CF_SECRET"
+            printf '%s\n' "$CF_SECRET"
+            echo "EOF_CF_SECRET"
+          } >> "$GITHUB_ENV"
+
+          unset CF_ID
+          unset CF_SECRET
           unset ENV_JSON
           unset MASKED_ENV_JSON
 
@@ -161,8 +173,6 @@ jobs:
           echo "cloudflared installed."
 
       - name: Install SSH private key
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           set -euo pipefail
 
@@ -561,6 +571,12 @@ jobs:
             SMTP_USER=SMTP_USER
             SMTP_PASS=SMTP_PASS
             SMTP_SECURE=SMTP_SECURE
+            CF_ACCESS_CLIENT_ID=CF_ACCESS_CLIENT_ID
+            CF_ACCESS_CLIENT_SECRET=CF_ACCESS_CLIENT_SECRET
+            SSH_PRIVATE_KEY=SSH_PRIVATE_KEY
+            SSH_HOST=SSH_HOST
+            SSH_USER=SSH_USER
+            TUNNEL_TARGET_PORT_NETWORK=TUNNEL_TARGET_PORT_NETWORK
 
       - name: Deploy to Dokploy
         env:
