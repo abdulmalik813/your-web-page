@@ -453,14 +453,6 @@ jobs:
             exit 1
           fi
 
-          # If mongosh is available later, this can be upgraded to:
-          #
-          # mongosh "$DATABASE_URI" \
-          #   --quiet \
-          #   --eval 'db.adminCommand({ ping: 1 })'
-          #
-          # For now, confirm the tunnel is accepting connections.
-
           echo "Database connection test successful."
 
 
