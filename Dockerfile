@@ -15,6 +15,9 @@ FROM base AS deps
 
 COPY package.json pnpm-lock.yaml ./
 
+# Copy pnpm config files if they exist in your repo
+COPY pnpm-workspace.yaml .npmrc* ./
+
 RUN pnpm install --frozen-lockfile
 
 
