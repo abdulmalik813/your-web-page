@@ -26,7 +26,14 @@ jobs:
 
     steps:
       # =========================================================
-      # LOAD SINGLE JSON SECRET
+      # LOAD THE SINGLE JSON SECRET
+      #
+      # The only GitHub secret used by this workflow is:
+      #
+      #   secrets.ENV
+      #
+      # It is written directly to a protected temporary file.
+      # We do NOT unpack everything into GITHUB_ENV.
       # =========================================================
 
       - name: Load environment
@@ -44,14 +51,78 @@ jobs:
             | jq -e 'type == "object"' \
             >/dev/null
           then
-            echo "ERROR: ENV must be a valid JSON object."
+            echo "ERROR: ENV must contain a valid JSON object."
             exit 1
           fi
 
+          umask 077
+
           printf '%s' "$ENV_JSON" > /tmp/source-env.json
-          chmod 600 /tmp/source-env.json
 
           echo "Environment loaded."
+
+
+      # =========================================================
+      # MASK EVERY JSON VALUE
+      #
+      # GitHub recommends registering generated/derived sensitive
+      # values with add-mask before they could appear in logs.
+      #
+      # Multiline values such as SSH_PRIVATE_KEY are registered
+      # line-by-line.
+      #
+      # Very short values are skipped because values like:
+      #
+      #   0
+      #   1
+      #   true
+      #
+      # would make normal logs unreadable.
+      # =========================================================
+
+      - name: Configure log protection
+        run: |
+          set -euo pipefail
+
+          while IFS= read -r ENCODED; do
+
+            VALUE="$(
+              printf '%s' "$ENCODED" |
+              base64 --decode
+            )"
+
+            while IFS= read -r LINE || [ -n "$LINE" ]; do
+
+              [ -n "$LINE" ] || continue
+
+              # Avoid masking tiny/common strings.
+              if [ "${#LINE}" -lt 4 ]; then
+                continue
+              fi
+
+              printf '::add-mask::%s\n' "$LINE"
+
+            done <<< "$VALUE"
+
+          done < <(
+            jq -r '
+              [
+                ..
+                | scalars
+                | select(
+                    type == "string"
+                    or type == "number"
+                    or type == "boolean"
+                  )
+                | tostring
+                | select(length >= 4)
+                | @base64
+              ]
+              | unique[]
+            ' /tmp/source-env.json
+          )
+
+          echo "Log protection configured."
 
 
       # =========================================================
@@ -64,6 +135,9 @@ jobs:
 
       # =========================================================
       # VALIDATE ONLY CI/TUNNEL REQUIREMENTS
+      #
+      # Application values such as SMTP/S3 are intentionally
+      # not validated here.
       # =========================================================
 
       - name: Validate configuration
@@ -113,13 +187,15 @@ jobs:
             https://github.com/cloudflare/cloudflared/releases/download/2026.5.1/cloudflared-linux-amd64 \
             -o /usr/local/bin/cloudflared
 
-          sudo chmod +x /usr/local/bin/cloudflared
+          sudo chmod 0755 /usr/local/bin/cloudflared
 
           echo "cloudflared installed."
 
 
       # =========================================================
-      # CONFIGURE SSH
+      # SSH CONFIG
+      #
+      # Secrets remain local shell variables only for this step.
       # =========================================================
 
       - name: Configure SSH
@@ -190,7 +266,6 @@ jobs:
       # =========================================================
       # PARSE TUNNEL CONFIG
       #
-      # FORMAT:
       # target,port,network
       # =========================================================
 
@@ -257,7 +332,7 @@ jobs:
 
 
       # =========================================================
-      # CREATE VPS DATABASE PROXY
+      # PREPARE VPS DATABASE PROXY
       # =========================================================
 
       - name: Prepare database tunnel
@@ -330,6 +405,8 @@ jobs:
             exit 1
           fi
 
+          printf '::add-mask::%s\n' "$SESSION_ID"
+
           printf '%s\n' "$SESSION_ID" \
             > /tmp/db-tunnel-session
 
@@ -342,7 +419,7 @@ jobs:
 
 
       # =========================================================
-      # OPEN RUNNER -> VPS SSH TUNNEL
+      # OPEN RUNNER -> VPS SSH FORWARD
       # =========================================================
 
       - name: Open database SSH tunnel
@@ -359,6 +436,16 @@ jobs:
           export TUNNEL_SERVICE_TOKEN_SECRET="$(
             jq -r '.CF_ACCESS_CLIENT_SECRET' /tmp/source-env.json
           )"
+
+          if nc \
+            -z \
+            127.0.0.1 \
+            "$DB_LOCAL_PORT" \
+            2>/dev/null
+          then
+            echo "ERROR: Local database port is already in use."
+            exit 1
+          fi
 
           ssh \
             -N \
@@ -409,16 +496,12 @@ jobs:
 
 
       # =========================================================
-      # BUILD ENVIRONMENT
+      # PREPARE APPLICATION BUILD ENVIRONMENT
       #
-      # Starts with the single ENV JSON secret.
+      # CI-only secrets are removed.
       #
-      # CI-only settings are removed.
-      #
-      # DATABASE_URI:
-      #
-      # [DB_HOST] -> host.docker.internal
-      # [DB_PORT] -> 27018
+      # The application automatically receives every remaining
+      # JSON key.
       # =========================================================
 
       - name: Prepare build environment
@@ -441,6 +524,10 @@ jobs:
 
           BUILD_DATABASE_URI="${DATABASE_URI//\[DB_HOST\]/host.docker.internal}"
           BUILD_DATABASE_URI="${BUILD_DATABASE_URI//\[DB_PORT\]/$DB_LOCAL_PORT}"
+
+          # The rewritten value is derived and therefore needs
+          # its own mask.
+          printf '::add-mask::%s\n' "$BUILD_DATABASE_URI"
 
           jq \
             --arg databaseUri "$BUILD_DATABASE_URI" \
@@ -466,7 +553,7 @@ jobs:
 
 
       # =========================================================
-      # TEST DATABASE PATH
+      # VERIFY DATABASE TUNNEL FROM DOCKER
       # =========================================================
 
       - name: Test database connection
@@ -501,7 +588,7 @@ jobs:
 
 
       # =========================================================
-      # IMAGE NAME
+      # PREPARE IMAGE NAME
       # =========================================================
 
       - name: Prepare image name
@@ -563,7 +650,7 @@ jobs:
 
 
       # =========================================================
-      # DOKPLOY
+      # TRIGGER DOKPLOY
       # =========================================================
 
       - name: Deploy to Dokploy
@@ -571,9 +658,7 @@ jobs:
           set -euo pipefail
 
           DOKPLOY_DEPLOY_URL="$(
-            jq -r \
-              '.DOKPLOY_DEPLOY_URL' \
-              /tmp/source-env.json
+            jq -r '.DOKPLOY_DEPLOY_URL' /tmp/source-env.json
           )"
 
           curl \
@@ -652,7 +737,7 @@ jobs:
 
 
       # =========================================================
-      # CLEANUP CREDENTIALS
+      # CLEANUP ALL CREDENTIAL MATERIAL
       # =========================================================
 
       - name: Cleanup credentials
@@ -660,6 +745,15 @@ jobs:
         run: |
           rm -f "$HOME/.ssh/id_ed25519"
           rm -f "$HOME/.ssh/config"
-          rm -f /tmp/source-env.json
+
+          if [ -f /tmp/source-env.json ]; then
+            shred -u /tmp/source-env.json 2>/dev/null || \
+              rm -f /tmp/source-env.json
+          fi
+
+          if [ -f /tmp/build-env.json ]; then
+            shred -u /tmp/build-env.json 2>/dev/null || \
+              rm -f /tmp/build-env.json
+          fi
 
           echo "Credentials removed."

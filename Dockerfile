@@ -1,10 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
 
-# =============================================================
-# BASE
-# =============================================================
-
 FROM node:22-alpine AS base
 
 WORKDIR /app
@@ -52,7 +48,7 @@ RUN if find . \
 
 
 # =============================================================
-# PROJECT GENERATION
+# GENERATED PROJECT FILES
 # =============================================================
 
 RUN pnpm run export-css
@@ -68,10 +64,10 @@ ARG CACHEBUST=1
 # =============================================================
 # APPLICATION BUILD
 #
-# BUILD_ENV exists only during this RUN instruction.
+# BUILD_ENV exists only during this RUN.
 #
-# Values are never printed and are not persisted as ENV
-# variables in the resulting image.
+# Nothing from BUILD_ENV is intentionally printed.
+# Nothing from BUILD_ENV is stored via ENV or ARG.
 # =============================================================
 
 RUN --mount=type=secret,id=BUILD_ENV,required=true \
