@@ -1,5 +1,9 @@
 # syntax=docker/dockerfile:1.7
 
+# =============================================================
+# BASE
+# =============================================================
+
 FROM node:22-alpine AS base
 
 WORKDIR /app
@@ -7,23 +11,25 @@ WORKDIR /app
 RUN corepack enable
 
 
-# ---------------------------------------------------------
-# Dependencies
-# ---------------------------------------------------------
+# =============================================================
+# DEPENDENCIES
+# =============================================================
 
 FROM base AS deps
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
-# Install dependencies without running project lifecycle scripts yet.
-# postinstall calls scripts/export-css.js, which is not copied until
-# the builder stage.
-RUN pnpm install --frozen-lockfile --ignore-scripts
+# postinstall runs scripts/export-css.js.
+# Source files are not available yet, so lifecycle scripts
+# are intentionally skipped here.
+RUN pnpm install \
+    --frozen-lockfile \
+    --ignore-scripts
 
 
-# ---------------------------------------------------------
-# Build
-# ---------------------------------------------------------
+# =============================================================
+# BUILDER
+# =============================================================
 
 FROM base AS builder
 
@@ -31,11 +37,29 @@ COPY --from=deps /app/node_modules ./node_modules
 
 COPY . .
 
-# Run the project's postinstall-equivalent now that the source
-# and scripts directory are available.
+
+# -------------------------------------------------------------
+# Run export-css after source files exist.
+# -------------------------------------------------------------
+
 RUN pnpm run export-css
 
-RUN --network=host --mount=type=secret,id=NODE_ENV \
+
+# -------------------------------------------------------------
+# Application Build
+#
+# DATABASE_URI uses:
+#
+# host.docker.internal:<tunnel-port>
+#
+# GitHub Buildx adds:
+#
+# host.docker.internal=host-gateway
+#
+# Optional secrets safely become empty strings if absent.
+# -------------------------------------------------------------
+
+RUN --mount=type=secret,id=NODE_ENV \
     --mount=type=secret,id=DATABASE_URI \
     --mount=type=secret,id=CRON_SECRET \
     --mount=type=secret,id=NEXT_PUBLIC_SERVER_URL \
@@ -57,34 +81,48 @@ RUN --network=host --mount=type=secret,id=NODE_ENV \
     --mount=type=secret,id=SMTP_USER \
     --mount=type=secret,id=SMTP_PASS \
     --mount=type=secret,id=SMTP_SECURE \
-    export NODE_ENV="$(cat /run/secrets/NODE_ENV)" && \
-    export DATABASE_URI="$(cat /run/secrets/DATABASE_URI)" && \
-    export CRON_SECRET="$(cat /run/secrets/CRON_SECRET)" && \
-    export NEXT_PUBLIC_SERVER_URL="$(cat /run/secrets/NEXT_PUBLIC_SERVER_URL)" && \
-    export PAYLOAD_SECRET="$(cat /run/secrets/PAYLOAD_SECRET)" && \
-    export PREVIEW_SECRET="$(cat /run/secrets/PREVIEW_SECRET)" && \
-    export RESEND_API_KEY="$(cat /run/secrets/RESEND_API_KEY)" && \
-    export S3_ACCESS_KEY_ID="$(cat /run/secrets/S3_ACCESS_KEY_ID)" && \
-    export S3_SECRET_ACCESS_KEY="$(cat /run/secrets/S3_SECRET_ACCESS_KEY)" && \
-    export S3_BUCKET="$(cat /run/secrets/S3_BUCKET)" && \
-    export S3_ENDPOINT="$(cat /run/secrets/S3_ENDPOINT)" && \
-    export S3_REGION="$(cat /run/secrets/S3_REGION)" && \
-    export TAILWIND_GENERATOR="$(cat /run/secrets/TAILWIND_GENERATOR)" && \
-    export USE_RESEND="$(cat /run/secrets/USE_RESEND)" && \
-    export IMAGE_HOSTS="$(cat /run/secrets/IMAGE_HOSTS)" && \
-    export EMAIL_FROM_ADDRESS="$(cat /run/secrets/EMAIL_FROM_ADDRESS)" && \
-    export EMAIL_FROM_NAME="$(cat /run/secrets/EMAIL_FROM_NAME)" && \
-    export SMTP_HOST="$(cat /run/secrets/SMTP_HOST)" && \
-    export SMTP_PORT="$(cat /run/secrets/SMTP_PORT)" && \
-    export SMTP_USER="$(cat /run/secrets/SMTP_USER)" && \
-    export SMTP_PASS="$(cat /run/secrets/SMTP_PASS)" && \
-    export SMTP_SECURE="$(cat /run/secrets/SMTP_SECURE)" && \
+    set -eu; \
+    \
+    read_secret() { \
+      if [ -f "/run/secrets/$1" ]; then \
+        cat "/run/secrets/$1"; \
+      fi; \
+    }; \
+    \
+    export NODE_ENV="$(read_secret NODE_ENV)"; \
+    export DATABASE_URI="$(read_secret DATABASE_URI)"; \
+    export CRON_SECRET="$(read_secret CRON_SECRET)"; \
+    export NEXT_PUBLIC_SERVER_URL="$(read_secret NEXT_PUBLIC_SERVER_URL)"; \
+    export PAYLOAD_SECRET="$(read_secret PAYLOAD_SECRET)"; \
+    export PREVIEW_SECRET="$(read_secret PREVIEW_SECRET)"; \
+    export RESEND_API_KEY="$(read_secret RESEND_API_KEY)"; \
+    export S3_ACCESS_KEY_ID="$(read_secret S3_ACCESS_KEY_ID)"; \
+    export S3_SECRET_ACCESS_KEY="$(read_secret S3_SECRET_ACCESS_KEY)"; \
+    export S3_BUCKET="$(read_secret S3_BUCKET)"; \
+    export S3_ENDPOINT="$(read_secret S3_ENDPOINT)"; \
+    export S3_REGION="$(read_secret S3_REGION)"; \
+    export TAILWIND_GENERATOR="$(read_secret TAILWIND_GENERATOR)"; \
+    export USE_RESEND="$(read_secret USE_RESEND)"; \
+    export IMAGE_HOSTS="$(read_secret IMAGE_HOSTS)"; \
+    export EMAIL_FROM_ADDRESS="$(read_secret EMAIL_FROM_ADDRESS)"; \
+    export EMAIL_FROM_NAME="$(read_secret EMAIL_FROM_NAME)"; \
+    export SMTP_HOST="$(read_secret SMTP_HOST)"; \
+    export SMTP_PORT="$(read_secret SMTP_PORT)"; \
+    export SMTP_USER="$(read_secret SMTP_USER)"; \
+    export SMTP_PASS="$(read_secret SMTP_PASS)"; \
+    export SMTP_SECURE="$(read_secret SMTP_SECURE)"; \
+    \
+    if [ -z "$DATABASE_URI" ]; then \
+      echo "ERROR: DATABASE_URI build secret is required."; \
+      exit 1; \
+    fi; \
+    \
     pnpm build
 
 
-# ---------------------------------------------------------
-# Production
-# ---------------------------------------------------------
+# =============================================================
+# PRODUCTION
+# =============================================================
 
 FROM node:22-alpine AS runner
 
