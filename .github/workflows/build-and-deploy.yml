@@ -340,6 +340,8 @@ jobs:
 
           if [ "$EXIT_CODE" -ne 0 ]; then
             echo "ERROR: Unable to prepare database tunnel."
+            echo "Remote response:"
+            printf '%s\n' "$RESULT"
             exit 1
           fi
 
