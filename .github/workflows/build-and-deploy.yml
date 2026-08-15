@@ -475,15 +475,8 @@ jobs:
             exit 1
           fi
 
-          DATABASE_URI="$DATABASE_URI_TEMPLATE"
-
-          DATABASE_URI="${
-            DATABASE_URI//\[DB_HOST\]/host.docker.internal
-          }"
-
-          DATABASE_URI="${
-            DATABASE_URI//\[DB_PORT\]/$DB_LOCAL_PORT
-          }"
+          DATABASE_URI="${DATABASE_URI_TEMPLATE//\[DB_HOST\]/host.docker.internal}"
+          DATABASE_URI="${DATABASE_URI//\[DB_PORT\]/$DB_LOCAL_PORT}"
 
           if [[ "$DATABASE_URI" == *"[DB_HOST]"* ]] || \
              [[ "$DATABASE_URI" == *"[DB_PORT]"* ]]; then
@@ -491,7 +484,6 @@ jobs:
             exit 1
           fi
 
-          # Mask final generated URI.
           echo "::add-mask::$DATABASE_URI"
 
           {
