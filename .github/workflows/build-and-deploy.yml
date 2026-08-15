@@ -10,293 +10,229 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
 jobs:
-  connect:
-    name: Connect to Cloudflare
+  build-and-deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
+
     environment: prod
 
     env:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USER: ${{ secrets.SSH_USER }}
-      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
-      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    outputs:
-      ssh_proxy_port: ${{ steps.connection.outputs.ssh_proxy_port }}
+      TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
 
     steps:
+      # =========================================================
+      # CHECKOUT
+      # =========================================================
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      # =========================================================
+      # PNPM
+      # package.json provides:
+      # "packageManager": "pnpm@11.21.0"
+      # =========================================================
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+
+      # =========================================================
+      # NODE
+      # =========================================================
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+
+      # =========================================================
+      # INSTALL
+      # =========================================================
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+
+      # =========================================================
+      # BUILD
+      # =========================================================
+
+      - name: Build
+        run: pnpm build
+
+
+      # =========================================================
+      # INSTALL CLOUDFLARED
+      # =========================================================
+
       - name: Install cloudflared
         run: |
-          curl -fsSL \
+          sudo curl -fsSL \
             https://github.com/cloudflare/cloudflared/releases/download/2026.5.1/cloudflared-linux-amd64 \
             -o /usr/local/bin/cloudflared
 
-          chmod +x /usr/local/bin/cloudflared
+          sudo chmod +x /usr/local/bin/cloudflared
+
+          echo "Cloudflared:"
           cloudflared --version
 
-      - name: Install SSH private key
-        run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
 
-          printf '%s\n' "${SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+      # =========================================================
+      # SSH KEY
+      # =========================================================
 
-      - name: Start Cloudflare TCP tunnel
-        id: connection
-        run: |
-          set -euo pipefail
-
-          SSH_PROXY_PORT=2222
-
-          cloudflared access tcp \
-            --hostname "${SSH_HOST}" \
-            --url "127.0.0.1:${SSH_PROXY_PORT}" \
-            --service-token-id "${CF_ACCESS_CLIENT_ID}" \
-            --service-token-secret "${CF_ACCESS_CLIENT_SECRET}" \
-            > /tmp/cloudflared.log 2>&1 &
-
-          echo $! > /tmp/cloudflared.pid
-
-          sleep 5
-
-          if ! kill -0 "$(cat /tmp/cloudflared.pid)" 2>/dev/null; then
-            cat /tmp/cloudflared.log
-            exit 1
-          fi
-
-          ssh \
-            -i ~/.ssh/id_ed25519 \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=accept-new \
-            -o ConnectTimeout=15 \
-            -p "${SSH_PROXY_PORT}" \
-            "${SSH_USER}@127.0.0.1" \
-            'echo "Cloudflare SSH connection successful"'
-
-          echo "ssh_proxy_port=${SSH_PROXY_PORT}" >> "$GITHUB_OUTPUT"
-
-      - name: Save connection files
-        uses: actions/upload-artifact@v4
-        with:
-          name: connection-state
-          include-hidden-files: true
-          path: |
-            ~/.ssh/id_ed25519
-            /tmp/cloudflared.pid
-            /tmp/cloudflared.log
-
-
-  create-tunnel:
-    name: Create Database Tunnel
-    runs-on: ubuntu-latest
-    needs: connect
-    environment: prod
-
-    env:
-      SSH_USER: ${{ secrets.SSH_USER }}
-      TUNNEL_TARGET_PORT_NETWORK: ${{ secrets.TUNNEL_TARGET_PORT_NETWORK }}
-
-    outputs:
-      session_id: ${{ steps.tunnel.outputs.session_id }}
-      remote_port: ${{ steps.tunnel.outputs.remote_port }}
-
-    steps:
-      - name: Restore connection state
-        uses: actions/download-artifact@v4
-        with:
-          name: connection-state
-          path: /tmp/connection-state
-
-      - name: Restore SSH key
-        run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-
-          cp /tmp/connection-state/id_ed25519 ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-
-      - name: Install cloudflared
-        run: |
-          curl -fsSL \
-            https://github.com/cloudflare/cloudflared/releases/download/2026.5.1/cloudflared-linux-amd64 \
-            -o /usr/local/bin/cloudflared
-
-          chmod +x /usr/local/bin/cloudflared
-
-      - name: Reconnect Cloudflare
+      - name: Configure SSH private key
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
-          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          cloudflared access tcp \
-            --hostname "${SSH_HOST}" \
-            --url 127.0.0.1:2222 \
-            --service-token-id "${CF_ACCESS_CLIENT_ID}" \
-            --service-token-secret "${CF_ACCESS_CLIENT_SECRET}" \
-            > /tmp/cloudflared.log 2>&1 &
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
 
-          echo $! > /tmp/cloudflared.pid
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
 
-          sleep 5
+          chmod 600 "$HOME/.ssh/id_ed25519"
 
-      - name: Create VPS Docker tunnel
-        id: tunnel
+          echo "SSH private key installed."
+
+
+      # =========================================================
+      # SSH CONFIG
+      # =========================================================
+
+      - name: Configure Cloudflare SSH
         run: |
-          set -euo pipefail
+          cat > "$HOME/.ssh/config" <<EOF
+          Host production
+            HostName ${SSH_HOST}
+            User ${SSH_USER}
+            IdentityFile ${HOME}/.ssh/id_ed25519
+            IdentitiesOnly yes
+            ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h
+            StrictHostKeyChecking accept-new
+            ServerAliveInterval 30
+            ServerAliveCountMax 3
+            ConnectTimeout 30
+          EOF
 
-          IFS=',' read -r TARGET TARGET_PORT NETWORK \
-            <<< "${TUNNEL_TARGET_PORT_NETWORK}"
+          chmod 600 "$HOME/.ssh/config"
 
-          OUTPUT="$(
-            ssh \
-              -i ~/.ssh/id_ed25519 \
-              -o IdentitiesOnly=yes \
-              -o StrictHostKeyChecking=accept-new \
-              -p 2222 \
-              "${SSH_USER}@127.0.0.1" \
-              "docker-tunnel-helper prepare '${TARGET}' '${TARGET_PORT}' '${NETWORK}'"
-          )"
+          echo "SSH configuration:"
+          cat "$HOME/.ssh/config"
 
-          echo "${OUTPUT}"
 
-          STATUS="$(echo "${OUTPUT}" | awk -F= '/^STATUS=/{print $2}')"
-          SESSION_ID="$(echo "${OUTPUT}" | awk -F= '/^SESSION_ID=/{print $2}')"
-          REMOTE_PORT="$(echo "${OUTPUT}" | awk -F= '/^PORT=/{print $2}')"
+      # =========================================================
+      # VALIDATE SECRETS WITHOUT PRINTING THEM
+      # =========================================================
 
-          [ "${STATUS}" = "OK" ] || {
-            echo "Tunnel preparation failed"
+      - name: Validate connection configuration
+        run: |
+          test -n "$SSH_HOST" || {
+            echo "SSH_HOST is missing"
             exit 1
           }
 
-          [ -n "${SESSION_ID}" ] || exit 1
-          [ -n "${REMOTE_PORT}" ] || exit 1
+          test -n "$SSH_USER" || {
+            echo "SSH_USER is missing"
+            exit 1
+          }
 
-          echo "session_id=${SESSION_ID}" >> "$GITHUB_OUTPUT"
-          echo "remote_port=${REMOTE_PORT}" >> "$GITHUB_OUTPUT"
+          test -n "$TUNNEL_SERVICE_TOKEN_ID" || {
+            echo "CF_ACCESS_CLIENT_ID is missing"
+            exit 1
+          }
+
+          test -n "$TUNNEL_SERVICE_TOKEN_SECRET" || {
+            echo "CF_ACCESS_CLIENT_SECRET is missing"
+            exit 1
+          }
+
+          test -s "$HOME/.ssh/id_ed25519" || {
+            echo "SSH_PRIVATE_KEY is missing"
+            exit 1
+          }
+
+          echo "Connection configuration OK."
 
 
-  placeholder:
-    name: Placeholder
-    runs-on: ubuntu-latest
-    needs:
-      - connect
-      - create-tunnel
+      # =========================================================
+      # TEST CLOUDFLARE + SSH + VPS
+      # =========================================================
 
-    steps:
-      - name: Placeholder
+      - name: Test VPS connection
         run: |
-          echo "======================================"
-          echo " Cloudflare connection: OK"
-          echo " Database tunnel:       OK"
-          echo "======================================"
-          echo
-          echo "Tunnel session:"
-          echo "${{ needs.create-tunnel.outputs.session_id }}"
-          echo
-          echo "Real build/deploy steps will go here later."
+          ssh production '
+            set -e
+
+            echo "======================================"
+            echo " GitHub Actions SSH SUCCESS"
+            echo "======================================"
+            echo
+
+            echo "Hostname:"
+            hostname
+
+            echo
+            echo "User:"
+            whoami
+
+            echo
+            echo "Kernel:"
+            uname -r
+
+            echo
+            echo "Docker:"
+            docker --version
+
+            echo
+            echo "Docker services:"
+            docker service ls || true
+          '
 
 
-  cleanup:
-    name: Cleanup Tunnel
-    runs-on: ubuntu-latest
-    needs:
-      - connect
-      - create-tunnel
-      - placeholder
+      # =========================================================
+      # DEPLOY
+      # Replace contents later with actual deploy commands.
+      # =========================================================
 
-    if: always()
-
-    environment: prod
-
-    env:
-      SSH_HOST: ${{ secrets.SSH_HOST }}
-      SSH_USER: ${{ secrets.SSH_USER }}
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
-      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
-
-    steps:
-      - name: Skip if no tunnel session exists
-        if: ${{ needs.create-tunnel.outputs.session_id == '' }}
+      - name: Deploy
         run: |
-          echo "No tunnel session was created."
-          echo "Nothing to clean."
+          ssh production '
+            set -e
 
-      - name: Install cloudflared
-        if: ${{ needs.create-tunnel.outputs.session_id != '' }}
-        run: |
-          curl -fsSL \
-            https://github.com/cloudflare/cloudflared/releases/download/2026.5.1/cloudflared-linux-amd64 \
-            -o /usr/local/bin/cloudflared
+            echo "======================================"
+            echo " DEPLOY CONNECTION SUCCESS"
+            echo "======================================"
 
-          chmod +x /usr/local/bin/cloudflared
+            echo
+            echo "Build succeeded."
+            echo "SSH succeeded."
+            echo "Cloudflare Access succeeded."
+            echo
+            echo "Ready for real deployment commands."
+          '
 
-      - name: Install SSH private key
-        if: ${{ needs.create-tunnel.outputs.session_id != '' }}
-        run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
 
-          printf '%s\n' "${SSH_PRIVATE_KEY}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+      # =========================================================
+      # CLEANUP
+      # =========================================================
 
-      - name: Start Cloudflare TCP tunnel
-        if: ${{ needs.create-tunnel.outputs.session_id != '' }}
-        run: |
-          cloudflared access tcp \
-            --hostname "${SSH_HOST}" \
-            --url 127.0.0.1:2222 \
-            --service-token-id "${CF_ACCESS_CLIENT_ID}" \
-            --service-token-secret "${CF_ACCESS_CLIENT_SECRET}" \
-            > /tmp/cloudflared.log 2>&1 &
-
-          echo $! > /tmp/cloudflared.pid
-
-          sleep 5
-
-      - name: Cleanup VPS tunnel
-        if: ${{ needs.create-tunnel.outputs.session_id != '' }}
-        run: |
-          SESSION_ID="${{ needs.create-tunnel.outputs.session_id }}"
-
-          ssh \
-            -i ~/.ssh/id_ed25519 \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=accept-new \
-            -p 2222 \
-            "${SSH_USER}@127.0.0.1" \
-            "docker-tunnel-cleanup '${SESSION_ID}'"
-
-      - name: Cleanup local files
+      - name: Cleanup SSH credentials
         if: always()
         run: |
-          if [ -f /tmp/cloudflared.pid ]; then
-            kill "$(cat /tmp/cloudflared.pid)" 2>/dev/null || true
-          fi
+          rm -f "$HOME/.ssh/id_ed25519"
+          rm -f "$HOME/.ssh/config"
 
-          rm -f ~/.ssh/id_ed25519
-          rm -f /tmp/cloudflared.pid
-          rm -f /tmp/cloudflared.log
-
-
-  exit:
-    name: Exit
-    runs-on: ubuntu-latest
-    needs:
-      - connect
-      - create-tunnel
-      - placeholder
-      - cleanup
-
-    if: always()
-
-    steps:
-      - name: Finish
-        run: |
-          echo "======================================"
-          echo " Build and Deploy workflow finished"
-          echo "======================================"
+          echo "Temporary SSH credentials removed."
