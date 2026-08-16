@@ -71,25 +71,25 @@ export async function Hero({
             {/* Right Column: Structured Services Card from DB */}
             {cardData && (
               <div className="lg:col-span-5 w-full flex justify-center lg:justify-end">
-                <div className={joinStyles('w-full max-w-lg bg-card text-card-foreground border border-border shadow-2xl overflow-hidden', cardData.cardStyles)}>
+                <div className={joinStyles(cardData.cardStyles)}>
                   {/* Card Header */}
                   {(cardData.badgeText || cardData.heading || cardData.icon) && (
-                    <div className="p-6 sm:p-7 border-b border-border bg-muted/30">
+                    <div className="p-6 sm:p-7 border-b border-border bg-background">
                       <div className="flex items-center justify-between">
                         {cardData.badgeText && (
-                          <span className={joinStyles('text-[11px] font-bold uppercase tracking-widest text-accent', cardData.badgeStyles)}>
+                          <span className={joinStyles(cardData.badgeStyles)}>
                             {cardData.badgeText}
                           </span>
                         )}
                         {cardData.icon && (
                           <IconRender
                             icon={typeof cardData.icon === 'object' ? cardData.icon?.name ?? '' : ''}
-                            iconStyles={joinStyles('text-accent w-4 h-4 shrink-0', cardData.iconStyles)}
+                            iconStyles={joinStyles(cardData.iconStyles)}
                           />
                         )}
                       </div>
                       {cardData.heading && (
-                        <h2 className={joinStyles('mt-2 text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground', cardData.headingStyles)}>
+                        <h2 className={joinStyles(cardData.headingStyles)}>
                           {cardData.heading}
                         </h2>
                       )}
@@ -102,12 +102,12 @@ export async function Hero({
                       {cardData.items.map((item, idx) => (
                         <div
                           key={item.id || idx}
-                          className={joinStyles('p-6 sm:p-7 flex items-start gap-4 hover:bg-muted/40 transition-colors', item.itemStyles)}
+                          className={joinStyles(item.itemStyles)}
                         >
                           {item.icon && (
                             <IconRender
                               icon={typeof item.icon === 'object' ? item.icon?.name ?? '' : ''}
-                              iconStyles={joinStyles('mt-0.5 text-accent w-5 h-5 shrink-0', item.iconStyles)}
+                              iconStyles={joinStyles(item.iconStyles)}
                             />
                           )}
                           <div className="flex-1 min-w-0">
