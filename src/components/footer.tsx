@@ -38,7 +38,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
                   key={itemIndex}
                   {...item}
                   className={joinStyles(
-                    'text-xs font-bold uppercase tracking-[0.15em] text-zinc-400 hover:text-white transition-colors duration-200',
+                    'inline-block w-auto text-xs font-bold uppercase tracking-[0.15em] text-zinc-400 hover:text-white transition-colors duration-200',
                     footerData.linkStyles,
                   )}
                   pageContext={pageContext}
