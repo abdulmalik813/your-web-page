@@ -46,13 +46,16 @@ export default buildConfig({
       ],
     },
     components: {
+      graphics: {
+        Logo: '/components/admin/logo#default',
+      },
       afterNavLinks: [
         '/components/admin/invalidate-cache#CacheInvalidationButton',
         '/components/admin/refresh-styles#RefreshStylesButton',
       ],
     },
   },
-  email: EMAIL.RESEND_API_KEY 
+  email: EMAIL.RESEND_API_KEY
     ? resendAdapter({
         defaultFromAddress: EMAIL.FROM_ADDRESS,
         defaultFromName: EMAIL.FROM_NAME,
