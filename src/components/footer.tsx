@@ -19,7 +19,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
           </Link>
         </div>
 
-        <div className="flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-8 lg:mt-4">
+        <div className="flex flex-col lg:flex-row justify-between items-stretch gap-12 lg:gap-8 lg:mt-4">
           
           <div className="flex flex-col gap-6 max-w-2xl w-full">
             {footerData.tagLine && (
@@ -29,7 +29,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
             )}
           </div>
 
-          <div className="flex flex-col lg:items-end gap-12 lg:gap-8 w-full">
+          <div className="flex flex-col justify-end lg:items-end gap-12 lg:gap-8 w-full">
             <div className="flex flex-wrap gap-x-6 gap-y-4 lg:justify-end">
               {footerData.links?.map((item, itemIndex) => (
                 <NavigationBlockUI
