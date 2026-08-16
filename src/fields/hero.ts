@@ -1,6 +1,8 @@
 import { GroupField } from 'payload'
 import { media } from '@/fields/media'
 import { card } from '@/fields/card'
+import { navigation } from '@/fields/navigation'
+import { icon } from '@/fields/icon'
 
 export const hero: GroupField = {
   type: 'group',
@@ -10,10 +12,10 @@ export const hero: GroupField = {
       name: 'layout',
       type: 'select',
       required: true,
-      defaultValue: 'with-image',
+      defaultValue: 'home-page',
       label: 'Hero Layout',
       options: [
-        { label: 'Full Screen Hero', value: 'fullscreen' },
+        { label: 'Home Page Hero', value: 'home-page' },
         { label: 'Hero with Image', value: 'with-image' },
         { label: 'Simple Hero (Text Only)', value: 'text-only' },
       ],
@@ -22,37 +24,157 @@ export const hero: GroupField = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Content',
+          label: 'Headline & Intro',
+          admin: {
+            condition: (data, siblingData) => {
+              const layout = siblingData?.layout || data?.hero?.layout
+              return layout === 'home-page' || layout === 'text-only'
+            },
+          },
           fields: [
             {
-              name: 'heroTitle',
-              type: 'textarea',
-              admin: {
-                condition: (data, siblingData) => {
-                  const layout = siblingData?.layout || data?.hero?.layout
-                  return layout === 'text-only'
-                },
-              },
+              name: 'title',
+              type: 'text',
+              label: 'Main Headline',
+              required: true,
             },
             {
-              name: 'heroDescription',
+              name: 'description',
               type: 'textarea',
+              label: 'Subtitle / Description',
+            },
+            {
+              name: 'actions',
+              type: 'array',
+              label: 'Call to Action Buttons',
+              maxRows: 4,
               admin: {
                 condition: (data, siblingData) => {
                   const layout = siblingData?.layout || data?.hero?.layout
-                  return layout === 'text-only'
+                  return layout === 'home-page'
+                },
+              },
+              fields: [navigation()],
+            },
+            {
+              name: 'titleStyles',
+              type: 'relationship',
+              relationTo: 'styles',
+              hasMany: true,
+              label: 'Headline Styles',
+            },
+            {
+              name: 'descriptionStyles',
+              type: 'relationship',
+              relationTo: 'styles',
+              hasMany: true,
+              label: 'Description Styles',
+            },
+            {
+              name: 'actionsStyles',
+              type: 'relationship',
+              relationTo: 'styles',
+              hasMany: true,
+              label: 'Actions Wrapper Styles',
+              admin: {
+                condition: (data, siblingData) => {
+                  const layout = siblingData?.layout || data?.hero?.layout
+                  return layout === 'home-page'
                 },
               },
             },
+          ],
+        },
+        {
+          label: 'Services Card',
+          admin: {
+            condition: (data, siblingData) => {
+              const layout = siblingData?.layout || data?.hero?.layout
+              return layout === 'home-page'
+            },
+          },
+          fields: [
+            {
+              name: 'homePageCard',
+              type: 'group',
+              label: 'Right-Side Services Card',
+              fields: [
+                {
+                  name: 'badgeText',
+                  type: 'text',
+                  label: 'Badge / Tagline',
+                },
+                {
+                  name: 'heading',
+                  type: 'text',
+                  label: 'Card Heading',
+                },
+                ...icon(),
+                {
+                  name: 'items',
+                  type: 'array',
+                  label: 'Service Feature Items',
+                  minRows: 1,
+                  fields: [
+                    {
+                      name: 'title',
+                      type: 'text',
+                      required: true,
+                      label: 'Feature Title',
+                    },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      required: true,
+                      label: 'Feature Description',
+                    },
+                    ...icon(),
+                    {
+                      name: 'itemStyles',
+                      type: 'relationship',
+                      relationTo: 'styles',
+                      hasMany: true,
+                      label: 'Feature Item Row Styles',
+                    },
+                  ],
+                },
+                {
+                  name: 'cardStyles',
+                  type: 'relationship',
+                  relationTo: 'styles',
+                  hasMany: true,
+                  label: 'Card Container Styles',
+                },
+                {
+                  name: 'badgeStyles',
+                  type: 'relationship',
+                  relationTo: 'styles',
+                  hasMany: true,
+                  label: 'Badge Styles',
+                },
+                {
+                  name: 'headingStyles',
+                  type: 'relationship',
+                  relationTo: 'styles',
+                  hasMany: true,
+                  label: 'Heading Styles',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Card Content',
+          admin: {
+            condition: (data, siblingData) => {
+              const layout = siblingData?.layout || data?.hero?.layout
+              return layout === 'with-image'
+            },
+          },
+          fields: [
             {
               type: 'group',
               name: 'card',
-              admin: {
-                condition: (data, siblingData) => {
-                  const layout = siblingData?.layout || data?.hero?.layout
-                  return layout !== 'text-only'
-                },
-              },
               fields: card(),
             },
             {
@@ -60,12 +182,6 @@ export const hero: GroupField = {
               type: 'relationship',
               relationTo: 'styles',
               hasMany: true,
-              admin: {
-                condition: (data, siblingData) => {
-                  const layout = siblingData?.layout || data?.hero?.layout
-                  return layout === 'with-image'
-                },
-              },
             },
           ],
         },
@@ -74,101 +190,20 @@ export const hero: GroupField = {
           admin: {
             condition: (data, siblingData) => {
               const layout = siblingData?.layout || data?.hero?.layout
-              return layout !== 'text-only'
+              return layout === 'with-image'
             },
           },
           fields: media,
         },
         {
-          label: 'Styling',
-          admin: {
-            condition: (data, siblingData) => {
-              const layout = siblingData?.layout || data?.hero?.layout
-              return layout === 'text-only' || layout === 'fullscreen'
-            },
-          },
+          label: 'Layout Styles',
           fields: [
             {
-              name: 'fullscreenStyles',
+              name: 'sectionStyles',
               type: 'relationship',
               relationTo: 'styles',
               hasMany: true,
-              admin: {
-                condition: (data, siblingData) => {
-                  const layout = siblingData?.layout || data?.hero?.layout
-                  return layout === 'fullscreen'
-                },
-              },
-            },
-            {
-              type: 'group',
-              admin: {
-                condition: (data, siblingData) => {
-                  const layout = siblingData?.layout || data?.hero?.layout
-                  return layout === 'text-only'
-                },
-              },
-              fields: [
-                {
-                  name: 'containerStyles',
-                  type: 'relationship',
-                  relationTo: 'styles',
-                  hasMany: true,
-                  label: 'Hero Container Styles',
-                  admin: {
-                    description: 'Styles applied to the entire hero section',
-                  },
-                },
-                {
-                  name: 'heroTitleStyles',
-                  type: 'relationship',
-                  relationTo: 'styles',
-                  hasMany: true,
-                  label: 'Title Styles',
-                },
-                {
-                  name: 'heroDescriptionStyles',
-                  type: 'relationship',
-                  relationTo: 'styles',
-                  hasMany: true,
-                  label: 'Description Styles',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: 'Carousel',
-          admin: {
-            condition: (data, siblingData) => {
-              const layout = siblingData?.layout || data?.hero?.layout
-              return layout === 'fullscreen'
-            },
-          },
-          fields: [
-            {
-              name: 'enableCarousel',
-              type: 'checkbox',
-              label: 'Enable Carousel',
-              defaultValue: false,
-            },
-            {
-              name: 'slides',
-              type: 'array',
-              label: 'Carousel Slides',
-              admin: {
-                condition: (data, siblingData) => {
-                  return siblingData?.enableCarousel
-                },
-              },
-              fields: [
-                {
-                  type: 'group',
-                  name: 'card',
-                  fields: card(),
-                },
-                ...media,
-              ],
+              label: 'Overall Hero Section Styles',
             },
           ],
         },

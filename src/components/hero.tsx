@@ -1,9 +1,9 @@
 import { Page } from '@/payload-types'
 import { CallToActionBlockUI } from '@/blocks/call-to-action'
-import { CardBlockUI } from '@/blocks/card'
 import { joinStyles } from '@/lib/make-styles'
-import { Media } from '@/components/media'
 import { PageContext } from '@/types/page-context'
+import { NavigationBlockUI } from '@/blocks/navigation'
+import { IconRender } from '@/components/renderer/icon-renderer'
 
 export async function Hero({
   hero,
@@ -16,68 +16,124 @@ export async function Hero({
     return <CallToActionBlockUI {...hero} pageContext={pageContext} />
   }
 
-  if (hero.layout === 'fullscreen') {
+  if (hero.layout === 'text-only') {
     return (
-      <section className={joinStyles('relative overflow-hidden', hero.fullscreenStyles)}>
-        <div className="absolute inset-0 z-0">
-          {hero.media && (
-            <Media
-              fill
-              imgClassName="object-cover"
-              priority
-              resource={hero.media}
-              aria-hidden="true"
-            />
-          )}
-        </div>
+      <section className={joinStyles(hero.sectionStyles)}>
+        {hero.title && (
+          <h1 className={joinStyles(hero.titleStyles)}>
+            {hero.title}
+          </h1>
+        )}
+        {hero.description && (
+          <p className={joinStyles(hero.descriptionStyles)}>
+            {hero.description}
+          </p>
+        )}
+      </section>
+    )
+  }
 
-        <div className="relative z-10 hidden h-tall:grid md:grid-cols-2 h-full">
-          <div className="relative md:hidden h-[30vh] min-h-[200px]" aria-hidden="true"></div>
+  if (hero.layout === 'home-page') {
+    const cardData = hero.homePageCard
 
-          <div className="relative order-2 md:order-1 bg-background/90 backdrop-blur-sm flex items-center min-h-0 overflow-hidden">
-            <div className="w-full py-6 sm:py-8 md:py-12 px-4 sm:px-6 lg:px-8 overflow-y-auto max-h-[70vh] md:max-h-none">
-              <div className="mx-auto max-w-2xl overflow-hidden">
-                {hero.card && <CardBlockUI {...hero.card} pageContext={pageContext} />}
-              </div>
+    return (
+      <section className={joinStyles('w-full', hero.sectionStyles)}>
+        <div className="w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Column: Headline, Subtitle & Action Buttons */}
+            <div className="lg:col-span-7 flex flex-col justify-center">
+              {hero.title && (
+                <h1 className={joinStyles(hero.titleStyles)}>
+                  {hero.title}
+                </h1>
+              )}
+
+              {hero.description && (
+                <p className={joinStyles(hero.descriptionStyles)}>
+                  {hero.description}
+                </p>
+              )}
+
+              {/* Action Buttons from DB */}
+              {hero.actions && hero.actions.length > 0 && (
+                <div className={joinStyles(hero.actionsStyles)}>
+                  {hero.actions.map((action, index) => (
+                    <NavigationBlockUI
+                      key={action.id || index}
+                      {...action}
+                      pageContext={pageContext}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-          <div className="relative hidden md:block order-1 md:order-2" aria-hidden="true"></div>
-        </div>
 
-        <div className="relative z-10 hidden h-medium:grid h-tall:hidden md:grid-cols-2 h-full">
-          <div className="relative md:hidden h-[25vh] min-h-[150px]" aria-hidden="true"></div>
+            {/* Right Column: Structured Services Card from DB */}
+            {cardData && (
+              <div className="lg:col-span-5 w-full flex justify-center lg:justify-end">
+                <div className={joinStyles(cardData.cardStyles)}>
+                  {/* Card Header */}
+                  {(cardData.badgeText || cardData.heading || cardData.icon) && (
+                    <div>
+                      <div className="flex items-center justify-between">
+                        {cardData.badgeText && (
+                          <span className={joinStyles(cardData.badgeStyles)}>
+                            {cardData.badgeText}
+                          </span>
+                        )}
+                        {cardData.icon && (
+                          <IconRender
+                            icon={typeof cardData.icon === 'object' ? cardData.icon?.name ?? '' : ''}
+                            iconStyles={joinStyles(cardData.iconStyles)}
+                          />
+                        )}
+                      </div>
+                      {cardData.heading && (
+                        <h2 className={joinStyles(cardData.headingStyles)}>
+                          {cardData.heading}
+                        </h2>
+                      )}
+                    </div>
+                  )}
 
-          <div className="relative order-2 md:order-1 bg-background/90 backdrop-blur-sm flex items-center min-h-0 overflow-hidden">
-            <div className="w-full py-4 sm:py-6 md:py-8 px-4 sm:px-6 lg:px-8 overflow-y-auto max-h-[75vh] md:max-h-none">
-              <div className="mx-auto max-w-2xl overflow-hidden">
-                {hero.card && <CardBlockUI {...hero.card} pageContext={pageContext} />}
+                  {/* Feature Rows */}
+                  {cardData.items && cardData.items.length > 0 && (
+                    <div>
+                      {cardData.items.map((item, idx) => (
+                        <div
+                          key={item.id || idx}
+                          className={joinStyles(item.itemStyles)}
+                        >
+                          {item.icon && (
+                            <IconRender
+                              icon={typeof item.icon === 'object' ? item.icon?.name ?? '' : ''}
+                              iconStyles={joinStyles(item.iconStyles)}
+                            />
+                          )}
+                          <div>
+                            {item.title && (
+                              <h3>
+                                {item.title}
+                              </h3>
+                            )}
+                            {item.description && (
+                              <p>
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="relative hidden md:block order-1 md:order-2" aria-hidden="true"></div>
-        </div>
-
-        <div className="relative z-10 h-medium:hidden flex flex-col h-full">
-          <div className="relative h-[20vh] min-h-[120px]" aria-hidden="true"></div>
-
-          <div className="relative flex-1 bg-background/90 backdrop-blur-sm flex items-center overflow-hidden">
-            <div className="w-full py-3 sm:py-4 md:py-6 px-4 sm:px-6 lg:px-8 overflow-y-auto">
-              <div className="mx-auto max-w-2xl overflow-hidden">
-                {hero.card && <CardBlockUI {...hero.card} pageContext={pageContext} />}
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
     )
   }
 
-  return (
-    <section className={joinStyles(hero.containerStyles)}>
-      {hero.heroTitle && <h1 className={joinStyles(hero.heroTitleStyles)}>{hero.heroTitle}</h1>}
-      {hero.heroDescription && (
-        <p className={joinStyles(hero.heroDescriptionStyles)}>{hero.heroDescription}</p>
-      )}
-    </section>
-  )
+  return null
 }

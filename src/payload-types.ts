@@ -123,10 +123,85 @@ export interface Page {
   title: string;
   author?: (string | null) | User;
   hero: {
-    layout: 'fullscreen' | 'with-image' | 'text-only';
-    heroTitle?: string | null;
-    heroDescription?: string | null;
-    card?: {
+    layout: 'home-page' | 'with-image' | 'text-only';
+    title: string;
+    description?: string | null;
+    actions?:
+      | {
+          nav?: {
+            label?: string | null;
+            appearance?: ('link' | 'button' | 'dropdown') | null;
+            link?: {
+              type?: ('reference' | 'postListingPage' | 'custom') | null;
+              reference?:
+                | ({
+                    relationTo: 'pages';
+                    value: string | Page;
+                  } | null)
+                | ({
+                    relationTo: 'posts';
+                    value: string | Post;
+                  } | null);
+              url?: string | null;
+              newTab?: boolean | null;
+            };
+            items?:
+              | {
+                  label: string;
+                  type?: ('reference' | 'postListingPage' | 'custom') | null;
+                  reference?:
+                    | ({
+                        relationTo: 'pages';
+                        value: string | Page;
+                      } | null)
+                    | ({
+                        relationTo: 'posts';
+                        value: string | Post;
+                      } | null);
+                  url?: string | null;
+                  newTab?: boolean | null;
+                  icon?: (string | null) | Icon;
+                  axis?: ('before' | 'after') | null;
+                  iconStyles?: (string | Style)[] | null;
+                  id?: string | null;
+                }[]
+              | null;
+            buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
+            buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+            listStyle?: (string | Style)[] | null;
+            styles?: (string | Style)[] | null;
+            icon?: (string | null) | Icon;
+            axis?: ('before' | 'after') | null;
+            iconStyles?: (string | Style)[] | null;
+          };
+          id?: string | null;
+        }[]
+      | null;
+    titleStyles?: (string | Style)[] | null;
+    descriptionStyles?: (string | Style)[] | null;
+    actionsStyles?: (string | Style)[] | null;
+    homePageCard?: {
+      badgeText?: string | null;
+      heading?: string | null;
+      icon?: (string | null) | Icon;
+      axis?: ('before' | 'after') | null;
+      iconStyles?: (string | Style)[] | null;
+      items?:
+        | {
+            title: string;
+            description: string;
+            icon?: (string | null) | Icon;
+            axis?: ('before' | 'after') | null;
+            iconStyles?: (string | Style)[] | null;
+            itemStyles?: (string | Style)[] | null;
+            id?: string | null;
+          }[]
+        | null;
+      cardStyles?: (string | Style)[] | null;
+      badgeStyles?: (string | Style)[] | null;
+      headingStyles?: (string | Style)[] | null;
+    };
+    card: {
       enableTitle?: boolean | null;
       enableAction?: boolean | null;
       enableDescription?: boolean | null;
@@ -211,103 +286,7 @@ export interface Page {
     media?: (string | null) | Media;
     wrapperStyles?: (string | Style)[] | null;
     contentStyles?: (string | Style)[] | null;
-    fullscreenStyles?: (string | Style)[] | null;
-    /**
-     * Styles applied to the entire hero section
-     */
-    containerStyles?: (string | Style)[] | null;
-    heroTitleStyles?: (string | Style)[] | null;
-    heroDescriptionStyles?: (string | Style)[] | null;
-    enableCarousel?: boolean | null;
-    slides?:
-      | {
-          card: {
-            enableTitle?: boolean | null;
-            enableAction?: boolean | null;
-            enableDescription?: boolean | null;
-            enableContent?: boolean | null;
-            enableFooter?: boolean | null;
-            title?: string | null;
-            actionPlacement?: ('header' | 'footer') | null;
-            action: {
-              nav?: {
-                label?: string | null;
-                appearance?: ('link' | 'button' | 'dropdown') | null;
-                link?: {
-                  type?: ('reference' | 'postListingPage' | 'custom') | null;
-                  reference?:
-                    | ({
-                        relationTo: 'pages';
-                        value: string | Page;
-                      } | null)
-                    | ({
-                        relationTo: 'posts';
-                        value: string | Post;
-                      } | null);
-                  url?: string | null;
-                  newTab?: boolean | null;
-                };
-                items?:
-                  | {
-                      label: string;
-                      type?: ('reference' | 'postListingPage' | 'custom') | null;
-                      reference?:
-                        | ({
-                            relationTo: 'pages';
-                            value: string | Page;
-                          } | null)
-                        | ({
-                            relationTo: 'posts';
-                            value: string | Post;
-                          } | null);
-                      url?: string | null;
-                      newTab?: boolean | null;
-                      icon?: (string | null) | Icon;
-                      axis?: ('before' | 'after') | null;
-                      iconStyles?: (string | Style)[] | null;
-                      id?: string | null;
-                    }[]
-                  | null;
-                buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-                buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-                listStyle?: (string | Style)[] | null;
-                styles?: (string | Style)[] | null;
-                icon?: (string | null) | Icon;
-                axis?: ('before' | 'after') | null;
-                iconStyles?: (string | Style)[] | null;
-              };
-              id?: string | null;
-            }[];
-            description?: string | null;
-            content?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            footer?: string | null;
-            cardStyles?: (string | Style)[] | null;
-            titleStyles?: (string | Style)[] | null;
-            actionStyles?: (string | Style)[] | null;
-            descriptionStyles?: (string | Style)[] | null;
-            cardContentStyles?: (string | Style)[] | null;
-            footerStyles?: (string | Style)[] | null;
-          };
-          media?: (string | null) | Media;
-          wrapperStyles?: (string | Style)[] | null;
-          contentStyles?: (string | Style)[] | null;
-          id?: string | null;
-        }[]
-      | null;
+    sectionStyles?: (string | Style)[] | null;
   };
   layout?:
     | {
@@ -398,10 +377,85 @@ export interface Post {
   categories?: (string | Category)[] | null;
   readingTime: number;
   hero: {
-    layout: 'fullscreen' | 'with-image' | 'text-only';
-    heroTitle?: string | null;
-    heroDescription?: string | null;
-    card?: {
+    layout: 'home-page' | 'with-image' | 'text-only';
+    title: string;
+    description?: string | null;
+    actions?:
+      | {
+          nav?: {
+            label?: string | null;
+            appearance?: ('link' | 'button' | 'dropdown') | null;
+            link?: {
+              type?: ('reference' | 'postListingPage' | 'custom') | null;
+              reference?:
+                | ({
+                    relationTo: 'pages';
+                    value: string | Page;
+                  } | null)
+                | ({
+                    relationTo: 'posts';
+                    value: string | Post;
+                  } | null);
+              url?: string | null;
+              newTab?: boolean | null;
+            };
+            items?:
+              | {
+                  label: string;
+                  type?: ('reference' | 'postListingPage' | 'custom') | null;
+                  reference?:
+                    | ({
+                        relationTo: 'pages';
+                        value: string | Page;
+                      } | null)
+                    | ({
+                        relationTo: 'posts';
+                        value: string | Post;
+                      } | null);
+                  url?: string | null;
+                  newTab?: boolean | null;
+                  icon?: (string | null) | Icon;
+                  axis?: ('before' | 'after') | null;
+                  iconStyles?: (string | Style)[] | null;
+                  id?: string | null;
+                }[]
+              | null;
+            buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
+            buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+            listStyle?: (string | Style)[] | null;
+            styles?: (string | Style)[] | null;
+            icon?: (string | null) | Icon;
+            axis?: ('before' | 'after') | null;
+            iconStyles?: (string | Style)[] | null;
+          };
+          id?: string | null;
+        }[]
+      | null;
+    titleStyles?: (string | Style)[] | null;
+    descriptionStyles?: (string | Style)[] | null;
+    actionsStyles?: (string | Style)[] | null;
+    homePageCard?: {
+      badgeText?: string | null;
+      heading?: string | null;
+      icon?: (string | null) | Icon;
+      axis?: ('before' | 'after') | null;
+      iconStyles?: (string | Style)[] | null;
+      items?:
+        | {
+            title: string;
+            description: string;
+            icon?: (string | null) | Icon;
+            axis?: ('before' | 'after') | null;
+            iconStyles?: (string | Style)[] | null;
+            itemStyles?: (string | Style)[] | null;
+            id?: string | null;
+          }[]
+        | null;
+      cardStyles?: (string | Style)[] | null;
+      badgeStyles?: (string | Style)[] | null;
+      headingStyles?: (string | Style)[] | null;
+    };
+    card: {
       enableTitle?: boolean | null;
       enableAction?: boolean | null;
       enableDescription?: boolean | null;
@@ -486,103 +540,7 @@ export interface Post {
     media?: (string | null) | Media;
     wrapperStyles?: (string | Style)[] | null;
     contentStyles?: (string | Style)[] | null;
-    fullscreenStyles?: (string | Style)[] | null;
-    /**
-     * Styles applied to the entire hero section
-     */
-    containerStyles?: (string | Style)[] | null;
-    heroTitleStyles?: (string | Style)[] | null;
-    heroDescriptionStyles?: (string | Style)[] | null;
-    enableCarousel?: boolean | null;
-    slides?:
-      | {
-          card: {
-            enableTitle?: boolean | null;
-            enableAction?: boolean | null;
-            enableDescription?: boolean | null;
-            enableContent?: boolean | null;
-            enableFooter?: boolean | null;
-            title?: string | null;
-            actionPlacement?: ('header' | 'footer') | null;
-            action: {
-              nav?: {
-                label?: string | null;
-                appearance?: ('link' | 'button' | 'dropdown') | null;
-                link?: {
-                  type?: ('reference' | 'postListingPage' | 'custom') | null;
-                  reference?:
-                    | ({
-                        relationTo: 'pages';
-                        value: string | Page;
-                      } | null)
-                    | ({
-                        relationTo: 'posts';
-                        value: string | Post;
-                      } | null);
-                  url?: string | null;
-                  newTab?: boolean | null;
-                };
-                items?:
-                  | {
-                      label: string;
-                      type?: ('reference' | 'postListingPage' | 'custom') | null;
-                      reference?:
-                        | ({
-                            relationTo: 'pages';
-                            value: string | Page;
-                          } | null)
-                        | ({
-                            relationTo: 'posts';
-                            value: string | Post;
-                          } | null);
-                      url?: string | null;
-                      newTab?: boolean | null;
-                      icon?: (string | null) | Icon;
-                      axis?: ('before' | 'after') | null;
-                      iconStyles?: (string | Style)[] | null;
-                      id?: string | null;
-                    }[]
-                  | null;
-                buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-                buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-                listStyle?: (string | Style)[] | null;
-                styles?: (string | Style)[] | null;
-                icon?: (string | null) | Icon;
-                axis?: ('before' | 'after') | null;
-                iconStyles?: (string | Style)[] | null;
-              };
-              id?: string | null;
-            }[];
-            description?: string | null;
-            content?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            footer?: string | null;
-            cardStyles?: (string | Style)[] | null;
-            titleStyles?: (string | Style)[] | null;
-            actionStyles?: (string | Style)[] | null;
-            descriptionStyles?: (string | Style)[] | null;
-            cardContentStyles?: (string | Style)[] | null;
-            footerStyles?: (string | Style)[] | null;
-          };
-          media?: (string | null) | Media;
-          wrapperStyles?: (string | Style)[] | null;
-          contentStyles?: (string | Style)[] | null;
-          id?: string | null;
-        }[]
-      | null;
+    sectionStyles?: (string | Style)[] | null;
   };
   layout?:
     | {
@@ -1961,8 +1919,73 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         layout?: T;
-        heroTitle?: T;
-        heroDescription?: T;
+        title?: T;
+        description?: T;
+        actions?:
+          | T
+          | {
+              nav?:
+                | T
+                | {
+                    label?: T;
+                    appearance?: T;
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          reference?: T;
+                          url?: T;
+                          newTab?: T;
+                        };
+                    items?:
+                      | T
+                      | {
+                          label?: T;
+                          type?: T;
+                          reference?: T;
+                          url?: T;
+                          newTab?: T;
+                          icon?: T;
+                          axis?: T;
+                          iconStyles?: T;
+                          id?: T;
+                        };
+                    buttonType?: T;
+                    buttonSize?: T;
+                    listStyle?: T;
+                    styles?: T;
+                    icon?: T;
+                    axis?: T;
+                    iconStyles?: T;
+                  };
+              id?: T;
+            };
+        titleStyles?: T;
+        descriptionStyles?: T;
+        actionsStyles?: T;
+        homePageCard?:
+          | T
+          | {
+              badgeText?: T;
+              heading?: T;
+              icon?: T;
+              axis?: T;
+              iconStyles?: T;
+              items?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    icon?: T;
+                    axis?: T;
+                    iconStyles?: T;
+                    itemStyles?: T;
+                    id?: T;
+                  };
+              cardStyles?: T;
+              badgeStyles?: T;
+              headingStyles?: T;
+            };
         card?:
           | T
           | {
@@ -2026,78 +2049,7 @@ export interface PagesSelect<T extends boolean = true> {
         media?: T;
         wrapperStyles?: T;
         contentStyles?: T;
-        fullscreenStyles?: T;
-        containerStyles?: T;
-        heroTitleStyles?: T;
-        heroDescriptionStyles?: T;
-        enableCarousel?: T;
-        slides?:
-          | T
-          | {
-              card?:
-                | T
-                | {
-                    enableTitle?: T;
-                    enableAction?: T;
-                    enableDescription?: T;
-                    enableContent?: T;
-                    enableFooter?: T;
-                    title?: T;
-                    actionPlacement?: T;
-                    action?:
-                      | T
-                      | {
-                          nav?:
-                            | T
-                            | {
-                                label?: T;
-                                appearance?: T;
-                                link?:
-                                  | T
-                                  | {
-                                      type?: T;
-                                      reference?: T;
-                                      url?: T;
-                                      newTab?: T;
-                                    };
-                                items?:
-                                  | T
-                                  | {
-                                      label?: T;
-                                      type?: T;
-                                      reference?: T;
-                                      url?: T;
-                                      newTab?: T;
-                                      icon?: T;
-                                      axis?: T;
-                                      iconStyles?: T;
-                                      id?: T;
-                                    };
-                                buttonType?: T;
-                                buttonSize?: T;
-                                listStyle?: T;
-                                styles?: T;
-                                icon?: T;
-                                axis?: T;
-                                iconStyles?: T;
-                              };
-                          id?: T;
-                        };
-                    description?: T;
-                    content?: T;
-                    footer?: T;
-                    cardStyles?: T;
-                    titleStyles?: T;
-                    actionStyles?: T;
-                    descriptionStyles?: T;
-                    cardContentStyles?: T;
-                    footerStyles?: T;
-                  };
-              media?: T;
-              wrapperStyles?: T;
-              contentStyles?: T;
-              id?: T;
-            };
+        sectionStyles?: T;
       };
   layout?:
     | T
@@ -2557,8 +2509,73 @@ export interface PostsSelect<T extends boolean = true> {
     | T
     | {
         layout?: T;
-        heroTitle?: T;
-        heroDescription?: T;
+        title?: T;
+        description?: T;
+        actions?:
+          | T
+          | {
+              nav?:
+                | T
+                | {
+                    label?: T;
+                    appearance?: T;
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          reference?: T;
+                          url?: T;
+                          newTab?: T;
+                        };
+                    items?:
+                      | T
+                      | {
+                          label?: T;
+                          type?: T;
+                          reference?: T;
+                          url?: T;
+                          newTab?: T;
+                          icon?: T;
+                          axis?: T;
+                          iconStyles?: T;
+                          id?: T;
+                        };
+                    buttonType?: T;
+                    buttonSize?: T;
+                    listStyle?: T;
+                    styles?: T;
+                    icon?: T;
+                    axis?: T;
+                    iconStyles?: T;
+                  };
+              id?: T;
+            };
+        titleStyles?: T;
+        descriptionStyles?: T;
+        actionsStyles?: T;
+        homePageCard?:
+          | T
+          | {
+              badgeText?: T;
+              heading?: T;
+              icon?: T;
+              axis?: T;
+              iconStyles?: T;
+              items?:
+                | T
+                | {
+                    title?: T;
+                    description?: T;
+                    icon?: T;
+                    axis?: T;
+                    iconStyles?: T;
+                    itemStyles?: T;
+                    id?: T;
+                  };
+              cardStyles?: T;
+              badgeStyles?: T;
+              headingStyles?: T;
+            };
         card?:
           | T
           | {
@@ -2622,78 +2639,7 @@ export interface PostsSelect<T extends boolean = true> {
         media?: T;
         wrapperStyles?: T;
         contentStyles?: T;
-        fullscreenStyles?: T;
-        containerStyles?: T;
-        heroTitleStyles?: T;
-        heroDescriptionStyles?: T;
-        enableCarousel?: T;
-        slides?:
-          | T
-          | {
-              card?:
-                | T
-                | {
-                    enableTitle?: T;
-                    enableAction?: T;
-                    enableDescription?: T;
-                    enableContent?: T;
-                    enableFooter?: T;
-                    title?: T;
-                    actionPlacement?: T;
-                    action?:
-                      | T
-                      | {
-                          nav?:
-                            | T
-                            | {
-                                label?: T;
-                                appearance?: T;
-                                link?:
-                                  | T
-                                  | {
-                                      type?: T;
-                                      reference?: T;
-                                      url?: T;
-                                      newTab?: T;
-                                    };
-                                items?:
-                                  | T
-                                  | {
-                                      label?: T;
-                                      type?: T;
-                                      reference?: T;
-                                      url?: T;
-                                      newTab?: T;
-                                      icon?: T;
-                                      axis?: T;
-                                      iconStyles?: T;
-                                      id?: T;
-                                    };
-                                buttonType?: T;
-                                buttonSize?: T;
-                                listStyle?: T;
-                                styles?: T;
-                                icon?: T;
-                                axis?: T;
-                                iconStyles?: T;
-                              };
-                          id?: T;
-                        };
-                    description?: T;
-                    content?: T;
-                    footer?: T;
-                    cardStyles?: T;
-                    titleStyles?: T;
-                    actionStyles?: T;
-                    descriptionStyles?: T;
-                    cardContentStyles?: T;
-                    footerStyles?: T;
-                  };
-              media?: T;
-              wrapperStyles?: T;
-              contentStyles?: T;
-              id?: T;
-            };
+        sectionStyles?: T;
       };
   layout?:
     | T

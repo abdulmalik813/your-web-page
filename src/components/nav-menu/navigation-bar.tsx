@@ -204,7 +204,7 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
     >
       <Banner {...navBarData.banner} pageContext={pageContext} />
       <header className={joinStyles(navBarData.stickyBar ? 'sticky' : '', 'top-0 z-50 w-full bg-background text-foreground border-b border-border')} role="navigation">
-        <div className="container mx-auto max-w-7xl flex items-center justify-between gap-4 px-4 py-4">
+        <div className="w-full flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center min-w-0 shrink">
             <LogoLink
               lightLogo={lightLogo}
