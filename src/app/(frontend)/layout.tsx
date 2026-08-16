@@ -91,7 +91,13 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       {isEnabled && <LivePreviewListener />}
       <body className="flex flex-col" suppressHydrationWarning>
         <PreloadResources href={stylesheetHref} />
-        <link href={stylesheetHref} rel="stylesheet" precedence="default" />
+        <link
+          id="global-stylesheet"
+          data-live-stylesheet="true"
+          href={stylesheetHref}
+          rel="stylesheet"
+          precedence="default"
+        />
         <NextTopLoader color="hsl(var(--primary))" showSpinner={false} />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}

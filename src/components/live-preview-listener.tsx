@@ -6,20 +6,51 @@ import { useEffect } from 'react'
 
 export function LivePreviewListener() {
   const router = useRouter()
-  
+
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (
-        event.data?.type === 'payload-live-preview' &&
-        (event.data?.globalSlug === 'settings' || event.data?.collectionSlug === 'styles')
-      ) {
-        window.location.reload()
+    const fetchAndApplyStylesheet = async () => {
+      try {
+        const response = await fetch(`/api/stylesheet?draft=1&t=${Date.now()}`, {
+          cache: 'no-store',
+        })
+        if (response.ok) {
+          const css = await response.text()
+          let styleEl = document.getElementById('payload-live-stylesheet') as HTMLStyleElement
+          if (!styleEl) {
+            styleEl = document.createElement('style')
+            styleEl.id = 'payload-live-stylesheet'
+            document.head.appendChild(styleEl)
+          }
+          styleEl.innerHTML = css
+        }
+      } catch (err) {
+        console.error('Failed to reload live preview stylesheet:', err)
       }
     }
-    
+
+    const handleMessage = async (event: MessageEvent) => {
+      const data = event.data
+      if (!data) return
+
+      // Global Settings change
+      if (data.type === 'payload-live-preview' && data.globalSlug === 'settings') {
+        window.location.reload()
+        return
+      }
+
+      // If a Style was saved or updated anywhere (including inside a drawer / popup)
+      if (
+        data.collectionSlug === 'styles' ||
+        data.type === 'payload-live-preview'
+      ) {
+        await fetchAndApplyStylesheet()
+        router.refresh()
+      }
+    }
+
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
-  }, [])
-  
+  }, [router])
+
   return <PayloadLivePreview refresh={router.refresh} serverURL={getClientSideURL()} />
 }
