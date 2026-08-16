@@ -43,20 +43,20 @@ export async function Hero({
             {/* Left Column: Headline, Subtitle & Action Buttons */}
             <div className="lg:col-span-7 flex flex-col justify-center">
               {hero.title && (
-                <h1 className={joinStyles('text-4xl sm:text-6xl md:text-7xl lg:text-[5.25rem] font-black uppercase tracking-tight text-foreground leading-[0.92] text-left break-words', hero.titleStyles)}>
+                <h1 className={joinStyles(hero.titleStyles)}>
                   {hero.title}
                 </h1>
               )}
 
               {hero.description && (
-                <p className={joinStyles('mt-6 sm:mt-8 text-base sm:text-lg md:text-xl text-muted-foreground font-normal max-w-2xl leading-relaxed text-left', hero.descriptionStyles)}>
+                <p className={joinStyles(hero.descriptionStyles)}>
                   {hero.description}
                 </p>
               )}
 
               {/* Action Buttons from DB */}
               {hero.actions && hero.actions.length > 0 && (
-                <div className={joinStyles('mt-8 sm:mt-10 flex flex-wrap items-center gap-4', hero.actionsStyles)}>
+                <div className={joinStyles(hero.actionsStyles)}>
                   {hero.actions.map((action, index) => (
                     <NavigationBlockUI
                       key={action.id || index}
@@ -102,7 +102,7 @@ export async function Hero({
                       {cardData.items.map((item, idx) => (
                         <div
                           key={item.id || idx}
-                          className={joinStyles(item.itemStyles)}
+                          className='p-6 sm:p-7 flex items-start gap-4 hover:bg-muted/40 transition-colors border-b border-border last:border-b-0'
                         >
                           {item.icon && (
                             <IconRender
@@ -112,12 +112,12 @@ export async function Hero({
                           )}
                           <div className="flex-1 min-w-0">
                             {item.title && (
-                              <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-foreground">
+                              <h3 className={joinStyles(item.titleStyles)}>
                                 {item.title}
                               </h3>
                             )}
                             {item.description && (
-                              <p className="mt-1 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                              <p className={joinStyles(item.descriptionStyles)}>
                                 {item.description}
                               </p>
                             )}

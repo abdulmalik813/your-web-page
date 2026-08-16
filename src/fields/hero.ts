@@ -130,11 +130,16 @@ export const hero: GroupField = {
                     },
                     ...icon(),
                     {
-                      name: 'itemStyles',
+                      name: 'titleStyles',
                       type: 'relationship',
                       relationTo: 'styles',
                       hasMany: true,
-                      label: 'Feature Item Row Styles',
+                    },
+                    {
+                      name: 'descriptionStyles',
+                      type: 'relationship',
+                      relationTo: 'styles',
+                      hasMany: true,
                     },
                   ],
                 },

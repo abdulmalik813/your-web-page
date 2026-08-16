@@ -193,7 +193,8 @@ export interface Page {
             icon?: (string | null) | Icon;
             axis?: ('before' | 'after') | null;
             iconStyles?: (string | Style)[] | null;
-            itemStyles?: (string | Style)[] | null;
+            titleStyles?: (string | Style)[] | null;
+            descriptionStyles?: (string | Style)[] | null;
             id?: string | null;
           }[]
         | null;
@@ -447,7 +448,8 @@ export interface Post {
             icon?: (string | null) | Icon;
             axis?: ('before' | 'after') | null;
             iconStyles?: (string | Style)[] | null;
-            itemStyles?: (string | Style)[] | null;
+            titleStyles?: (string | Style)[] | null;
+            descriptionStyles?: (string | Style)[] | null;
             id?: string | null;
           }[]
         | null;
@@ -1979,7 +1981,8 @@ export interface PagesSelect<T extends boolean = true> {
                     icon?: T;
                     axis?: T;
                     iconStyles?: T;
-                    itemStyles?: T;
+                    titleStyles?: T;
+                    descriptionStyles?: T;
                     id?: T;
                   };
               cardStyles?: T;
@@ -2569,7 +2572,8 @@ export interface PostsSelect<T extends boolean = true> {
                     icon?: T;
                     axis?: T;
                     iconStyles?: T;
-                    itemStyles?: T;
+                    titleStyles?: T;
+                    descriptionStyles?: T;
                     id?: T;
                   };
               cardStyles?: T;
