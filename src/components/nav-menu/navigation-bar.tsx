@@ -203,7 +203,7 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
       idleTimeout={navBarData.idleTimeout}
     >
       <Banner {...navBarData.banner} pageContext={pageContext} />
-      <header className="sticky top-0 z-50 w-full bg-transparent" role="navigation">
+      <header className={joinStyles(navBarData.stickyBar ? 'sticky' : '', 'top-0 z-50 w-full bg-transparent')} role="navigation">
         <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-4">
           <div className="flex items-center min-w-0 shrink">
             <LogoLink

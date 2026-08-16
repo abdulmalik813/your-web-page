@@ -18,6 +18,12 @@ export const NavigationBar: GlobalConfig = {
   },
   fields: [
     {
+      name: 'stickyBar',
+      label: 'Enable Sticky Bar',
+      type: 'checkbox',
+      defaultValue: true,
+    },
+    {
       type: 'tabs',
       tabs: [
         {

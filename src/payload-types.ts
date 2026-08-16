@@ -3309,6 +3309,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface NavigationBar {
   id: string;
+  stickyBar?: boolean | null;
   navigation?:
     | {
         nav?: {
@@ -3657,6 +3658,7 @@ export interface Social {
  * via the `definition` "navigationBar_select".
  */
 export interface NavigationBarSelect<T extends boolean = true> {
+  stickyBar?: T;
   navigation?:
     | T
     | {
