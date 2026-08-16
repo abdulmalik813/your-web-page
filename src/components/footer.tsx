@@ -11,32 +11,32 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
   const footerData = (await getCachedGlobal('footer', 1, pageContext.draft)) as FooterType
 
   return (
-    <footer className="w-full mt-auto bg-black text-white py-16 sm:py-24 border-t-4 border-primary">
+    <footer className="w-full mt-auto bg-background text-foreground py-8 lg:py-12 border-t-4 border-primary">
       <div className="container mx-auto px-4 max-w-7xl">
-        <div className="flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-8">
-          {/* Left Column: Big Title & Tagline */}
-          <div className="flex flex-col gap-6 max-w-2xl">
-            <Link href="/" className="group inline-block">
-              <span className={joinStyles(footerData.logoStyles)}>{setting.appTitle}</span>
-            </Link>
+        <div className="mb-12 lg:mb-16">
+          <Link href="/" className="group inline-block">
+            <span className={joinStyles(footerData.logoStyles)}>{setting.appTitle}</span>
+          </Link>
+        </div>
 
+        <div className="flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-8 lg:mt-4">
+          
+          <div className="flex flex-col gap-6 max-w-2xl w-full">
             {footerData.tagLine && (
-              <div className="text-sm md:text-base text-zinc-400 [&_p]:mb-2 [&_p]:last:mb-0 space-y-2 font-medium tracking-wide">
+              <div className="text-sm md:text-base text-muted-foreground [&_p]:mb-2 [&_p]:last:mb-0 space-y-2 font-medium tracking-wide">
                 <LexicalRenderer content={footerData.tagLine} pageContext={pageContext} />
               </div>
             )}
           </div>
 
-          {/* Right Column: Links & Copyright */}
-          <div className="flex flex-col lg:items-end justify-between lg:min-h-[160px] gap-12 lg:gap-8 lg:pt-4">
-            {/* Horizontal Links */}
+          <div className="flex flex-col lg:items-end gap-12 lg:gap-8 w-full">
             <div className="flex flex-wrap gap-x-6 gap-y-4 lg:justify-end">
               {footerData.links?.map((item, itemIndex) => (
                 <NavigationBlockUI
                   key={itemIndex}
                   {...item}
                   className={joinStyles(
-                    'inline-block w-auto text-xs font-bold uppercase tracking-[0.15em] text-zinc-400 hover:text-white transition-colors duration-200',
+                    'inline-block w-auto text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors duration-200',
                     footerData.linkStyles,
                   )}
                   pageContext={pageContext}
@@ -45,7 +45,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
             </div>
 
             {/* Copyright */}
-            <p className="text-xs font-medium text-zinc-500 uppercase tracking-widest text-left lg:text-right">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest text-left lg:text-right">
               © {new Date().getFullYear()} {setting.appTitle}. All rights reserved.
             </p>
           </div>
