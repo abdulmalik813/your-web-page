@@ -3,6 +3,7 @@ import { navigation } from '@/fields/navigation'
 import { revalidateFooter } from '@/hooks/revalidate-globals'
 import { generatePreviewPath } from '@/lib/generate-preview-path'
 import { GlobalConfig } from 'payload'
+import { ContentBlock } from '@/blocks/content/config'
 
 export const Footer: GlobalConfig = {
   slug: 'footer',
@@ -26,7 +27,13 @@ export const Footer: GlobalConfig = {
               name: 'tagLine',
               type: 'richText',
               label: 'Tag Line',
-              editor: defaultLexical(),
+              editor: defaultLexical({
+                features: {
+                  blocks: {
+                    blocks: [ContentBlock('footerBlock')],
+                  },
+                },
+              }),
             },
             {
               name: 'links',

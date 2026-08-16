@@ -17,9 +17,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
           {/* Left Column: Big Title & Tagline */}
           <div className="flex flex-col gap-6 max-w-2xl">
             <Link href="/" className="group inline-block">
-              <span className={joinStyles(footerData.logoStyles)}>
-                {setting.appTitle}
-              </span>
+              <span className={joinStyles(footerData.logoStyles)}>{setting.appTitle}</span>
             </Link>
 
             {footerData.tagLine && (
