@@ -52,7 +52,7 @@ function collectFontsCSS(setting: Setting): string {
 
 async function compileStylesheet(draft: boolean) {
   const setting = (await getCachedGlobal('settings', 1, draft)) as Setting
-  const styles = (await getCachedDocuments('styles', draft, 10000)()) as Style[]
+  const styles = (await getCachedDocuments('styles', draft, 10000)) as Style[]
 
   const fontsourceCSS = collectFontsCSS(setting)
 

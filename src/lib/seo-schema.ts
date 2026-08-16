@@ -177,7 +177,7 @@ const buildOrganizationSchema = async (setting: Setting, social: Social) => {
 
 const faqSchema = async (page: Page | Post) => {
   if (!checkBlock(page, 'faqBlock')) return null
-  const faqs = (await getCachedDocuments('faqs')()) as Faq[]
+  const faqs = (await getCachedDocuments('faqs')) as Faq[]
 
   if (!faqs || faqs.length === 0) {
     return null
@@ -199,7 +199,7 @@ const faqSchema = async (page: Page | Post) => {
 
 const testimonialSchema = async (page: Page | Post, setting: Setting) => {
   if (!checkBlock(page, 'testimonialBlock')) return null
-  const testimonials = (await getCachedDocuments('testimonials')()) as Testimonial[]
+  const testimonials = (await getCachedDocuments('testimonials')) as Testimonial[]
 
   if (!testimonials || testimonials.length === 0) {
     return null

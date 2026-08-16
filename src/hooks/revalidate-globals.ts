@@ -3,6 +3,12 @@ import { Style } from '@/payload-types'
 import { GlobalAfterChangeHook } from 'payload'
 
 export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) => {
+  // Skip all side-effects (including font style DB writes) for draft saves.
+  // This prevents DB churn on every autosave keystroke (100ms interval).
+  if (doc._status === 'draft') {
+    return doc
+  }
+
   const additionalFonts = doc.additionalFonts || []
 
   const existingStyles = await req.payload.find({
@@ -13,6 +19,7 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
       },
     },
     limit: 1000,
+    req,
   })
 
   const currentFontIds = new Set(additionalFonts.map((font: any) => font.id))
@@ -54,11 +61,7 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
     })
   }
 
-  if (doc._status === 'draft') {
-    return doc
-  }
-
-  await revalidateAll()
+  await revalidateAll(req)
   return doc
 }
 

@@ -1,12 +1,14 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
-import { revalidateAll } from '@/lib/revalidate'
+import { revalidateTag } from 'next/cache'
 
 export const revalidateRedirects: CollectionAfterChangeHook = async ({ doc }) => {
-  await revalidateAll()
+  // Only invalidate the redirects cache — no need for full-site revalidation.
+  // The redirect lookup is cached under the 'redirects' tag exclusively.
+  revalidateTag('redirects', 'max')
   return doc
 }
 
 export const revalidateDeletedRedirects: CollectionAfterDeleteHook = async ({ doc }) => {
-  await revalidateAll()
+  revalidateTag('redirects', 'max')
   return doc
 }

@@ -36,7 +36,8 @@ async function getAllDocuments(collection: Collection, draft = false, limit = 10
 }
 
 /**
- * Returns a unstable_cache function mapped with the cache tag for the slug
+ * Returns the document directly (cached when not in draft mode).
+ * API is consistent with getCachedGlobal — always returns a Promise of the value.
  */
 export const getCachedDocument = (
   collection: Collection,
@@ -45,7 +46,7 @@ export const getCachedDocument = (
   draft = false
 ) => {
   if (draft) {
-    return () => getDocument(collection, slug, depth, draft)
+    return getDocument(collection, slug, depth, draft)
   }
 
   return unstable_cache(
@@ -54,11 +55,12 @@ export const getCachedDocument = (
     {
       tags: [`collection-${collection}`],
     }
-  )
+  )()
 }
 
 /**
- * Returns a unstable_cache function mapped with the cache tag for the collection
+ * Returns all documents directly (cached when not in draft mode).
+ * API is consistent with getCachedGlobal — always returns a Promise of the value.
  */
 export const getCachedDocuments = (
   collection: Collection,
@@ -66,7 +68,7 @@ export const getCachedDocuments = (
   limit = 10000
 ) => {
   if (draft) {
-    return () => getAllDocuments(collection, draft, limit)
+    return getAllDocuments(collection, draft, limit)
   }
 
   return unstable_cache(
@@ -75,5 +77,5 @@ export const getCachedDocuments = (
     {
       tags: [`collection-${collection}`],
     }
-  )
+  )()
 }
