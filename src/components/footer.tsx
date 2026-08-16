@@ -17,7 +17,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
   const hasLogo = typeof lightLogo === 'object' && typeof darkLogo === 'object'
 
   return (
-    <footer className="w-full mt-auto bg-background text-foreground py-8 lg:py-12 border-t-4 border-primary">
+    <footer className="w-full mt-auto bg-background text-foreground py-8 lg:py-12 border-t border-primary">
       <div className="container mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
         {hasLogo && (
           <div className="mb-12 lg:mb-16">
