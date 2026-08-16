@@ -18,7 +18,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
 
   return (
     <footer className="w-full mt-auto bg-background text-foreground py-8 lg:py-12 border-t-4 border-primary">
-      <div className="container mx-auto px-4 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
         {hasLogo && (
           <div className="mb-12 lg:mb-16">
             <Link
@@ -27,11 +27,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
               className="group inline-flex items-center"
               aria-label="Home"
             >
-              <MediaBlockUI
-                media={lightLogo}
-                pageContext={pageContext}
-                className="dark:hidden"
-              />
+              <MediaBlockUI media={lightLogo} pageContext={pageContext} className="dark:hidden" />
 
               <MediaBlockUI
                 media={darkLogo}
@@ -57,9 +53,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
                 <NavigationBlockUI
                   key={itemIndex}
                   {...item}
-                  className={joinStyles(
-                    footerData.linkStyles,
-                  )}
+                  className={joinStyles(footerData.linkStyles)}
                   pageContext={pageContext}
                 />
               ))}
