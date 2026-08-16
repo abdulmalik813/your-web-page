@@ -45,6 +45,12 @@ export const Footer: GlobalConfig = {
                       label: 'Group Label',
                     },
                     {
+                      name: 'groupStyles',
+                      type: 'relationship',
+                      relationTo: 'styles',
+                      hasMany: true
+                    },
+                    {
                       name: 'items',
                       type: 'array',
                       label: 'Links',

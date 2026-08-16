@@ -5,7 +5,6 @@ import { MediaBlockUI } from '@/blocks/media'
 import { NavigationBlockUI } from '@/blocks/navigation'
 import { LexicalRenderer } from '@/components/renderer/lexical-renderer'
 import { joinStyles } from '@/lib/make-styles'
-import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { PageContext } from '@/types/page-context'
 
 export async function Footer({ pageContext }: { pageContext: PageContext }) {
@@ -104,12 +103,9 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
 
       <div className="w-full border-t border-border" />
 
-      <div className="container mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground text-center sm:text-left">
-          © {new Date().getFullYear()} {setting.appTitle}. All rights reserved.
-        </p>
-        <ThemeToggle />
-      </div>
+      <p className="text-sm text-muted-foreground text-center">
+        © {new Date().getFullYear()} {setting.appTitle}. All rights reserved.
+      </p>
     </footer>
   )
 }

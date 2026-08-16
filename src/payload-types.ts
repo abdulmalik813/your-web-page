@@ -3466,6 +3466,7 @@ export interface Footer {
         groups?:
           | {
               groupLabel?: string | null;
+              groupStyles?: (string | Style)[] | null;
               items?:
                 | {
                     nav?: {
@@ -3764,6 +3765,7 @@ export interface FooterSelect<T extends boolean = true> {
           | T
           | {
               groupLabel?: T;
+              groupStyles?: T;
               items?:
                 | T
                 | {
