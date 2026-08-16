@@ -3447,7 +3447,6 @@ export interface NavigationBar {
  */
 export interface Footer {
   id: string;
-  showLogo?: boolean | null;
   tagLine?: {
     root: {
       type: string;
@@ -3463,86 +3462,59 @@ export interface Footer {
     };
     [k: string]: unknown;
   } | null;
-  columns?:
+  links?:
     | {
-        groups?:
-          | {
-              groupLabel?: string | null;
-              groupStyles?: (string | Style)[] | null;
-              items?:
-                | {
-                    nav?: {
-                      label?: string | null;
-                      appearance?: ('link' | 'button' | 'dropdown') | null;
-                      link?: {
-                        type?: ('reference' | 'postListingPage' | 'custom') | null;
-                        reference?:
-                          | ({
-                              relationTo: 'pages';
-                              value: string | Page;
-                            } | null)
-                          | ({
-                              relationTo: 'posts';
-                              value: string | Post;
-                            } | null);
-                        url?: string | null;
-                        newTab?: boolean | null;
-                      };
-                      items?:
-                        | {
-                            label: string;
-                            type?: ('reference' | 'postListingPage' | 'custom') | null;
-                            reference?:
-                              | ({
-                                  relationTo: 'pages';
-                                  value: string | Page;
-                                } | null)
-                              | ({
-                                  relationTo: 'posts';
-                                  value: string | Post;
-                                } | null);
-                            url?: string | null;
-                            newTab?: boolean | null;
-                            icon?: (string | null) | Icon;
-                            axis?: ('before' | 'after') | null;
-                            iconStyles?: (string | Style)[] | null;
-                            id?: string | null;
-                          }[]
-                        | null;
-                      buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-                      buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
-                      listStyle?: (string | Style)[] | null;
-                      styles?: (string | Style)[] | null;
-                      icon?: (string | null) | Icon;
-                      axis?: ('before' | 'after') | null;
-                      iconStyles?: (string | Style)[] | null;
-                    };
-                    id?: string | null;
-                  }[]
-                | null;
-              id?: string | null;
-            }[]
-          | null;
+        nav?: {
+          label?: string | null;
+          appearance?: ('link' | 'button' | 'dropdown') | null;
+          link?: {
+            type?: ('reference' | 'postListingPage' | 'custom') | null;
+            reference?:
+              | ({
+                  relationTo: 'pages';
+                  value: string | Page;
+                } | null)
+              | ({
+                  relationTo: 'posts';
+                  value: string | Post;
+                } | null);
+            url?: string | null;
+            newTab?: boolean | null;
+          };
+          items?:
+            | {
+                label: string;
+                type?: ('reference' | 'postListingPage' | 'custom') | null;
+                reference?:
+                  | ({
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'posts';
+                      value: string | Post;
+                    } | null);
+                url?: string | null;
+                newTab?: boolean | null;
+                icon?: (string | null) | Icon;
+                axis?: ('before' | 'after') | null;
+                iconStyles?: (string | Style)[] | null;
+                id?: string | null;
+              }[]
+            | null;
+          buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
+          buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+          listStyle?: (string | Style)[] | null;
+          styles?: (string | Style)[] | null;
+          icon?: (string | null) | Icon;
+          axis?: ('before' | 'after') | null;
+          iconStyles?: (string | Style)[] | null;
+        };
         id?: string | null;
       }[]
     | null;
-  /**
-   * Styles for the logo
-   */
   logoStyles?: (string | Style)[] | null;
-  useLabelWithLogo?: boolean | null;
-  labelStyles?: (string | Style)[] | null;
-  /**
-   * Styles for the tagline text
-   */
   tagLineStyles?: (string | Style)[] | null;
-  /**
-   * Styles for column group labels
-   */
-  groupLabelStyles?: (string | Style)[] | null;
-  /**
-   * Styles for footer links
-   */
   linkStyles?: (string | Style)[] | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -3760,64 +3732,48 @@ export interface NavigationBarSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
-  showLogo?: T;
   tagLine?: T;
-  columns?:
+  links?:
     | T
     | {
-        groups?:
+        nav?:
           | T
           | {
-              groupLabel?: T;
-              groupStyles?: T;
+              label?: T;
+              appearance?: T;
+              link?:
+                | T
+                | {
+                    type?: T;
+                    reference?: T;
+                    url?: T;
+                    newTab?: T;
+                  };
               items?:
                 | T
                 | {
-                    nav?:
-                      | T
-                      | {
-                          label?: T;
-                          appearance?: T;
-                          link?:
-                            | T
-                            | {
-                                type?: T;
-                                reference?: T;
-                                url?: T;
-                                newTab?: T;
-                              };
-                          items?:
-                            | T
-                            | {
-                                label?: T;
-                                type?: T;
-                                reference?: T;
-                                url?: T;
-                                newTab?: T;
-                                icon?: T;
-                                axis?: T;
-                                iconStyles?: T;
-                                id?: T;
-                              };
-                          buttonType?: T;
-                          buttonSize?: T;
-                          listStyle?: T;
-                          styles?: T;
-                          icon?: T;
-                          axis?: T;
-                          iconStyles?: T;
-                        };
+                    label?: T;
+                    type?: T;
+                    reference?: T;
+                    url?: T;
+                    newTab?: T;
+                    icon?: T;
+                    axis?: T;
+                    iconStyles?: T;
                     id?: T;
                   };
-              id?: T;
+              buttonType?: T;
+              buttonSize?: T;
+              listStyle?: T;
+              styles?: T;
+              icon?: T;
+              axis?: T;
+              iconStyles?: T;
             };
         id?: T;
       };
   logoStyles?: T;
-  useLabelWithLogo?: T;
-  labelStyles?: T;
   tagLineStyles?: T;
-  groupLabelStyles?: T;
   linkStyles?: T;
   _status?: T;
   updatedAt?: T;
