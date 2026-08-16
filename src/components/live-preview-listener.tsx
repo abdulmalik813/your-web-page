@@ -32,13 +32,11 @@ export function LivePreviewListener() {
       const data = event.data
       if (!data) return
 
-      // Global Settings change
       if (data.type === 'payload-live-preview' && data.globalSlug === 'settings') {
         window.location.reload()
         return
       }
 
-      // If a Style was saved or updated anywhere (including inside a drawer / popup)
       if (
         data.collectionSlug === 'styles' ||
         data.type === 'payload-live-preview'

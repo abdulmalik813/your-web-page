@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useField } from '@payloadcms/ui'
 import { getServerSideURL } from '@/lib/get-url'
 
@@ -203,6 +203,18 @@ const styles = {
     backgroundColor: 'var(--theme-elevation-900)',
     transition: 'width 0.3s ease',
   },
+}
+
+// Track which font families have had a preview <link> injected
+const injectedPreviewFonts = new Set<string>()
+
+function injectFontPreview(family: string) {
+  if (injectedPreviewFonts.has(family)) return
+  injectedPreviewFonts.add(family)
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}&display=swap`
+  document.head.appendChild(link)
 }
 
 export function FontFamilySearchField({ path }: { path: string }) {
@@ -494,23 +506,33 @@ export function FontFamilySearchField({ path }: { path: string }) {
               {isLoadingFonts ? (
                 <div style={styles.centerText}>Loading fonts...</div>
               ) : filteredFonts.length > 0 ? (
-                filteredFonts.map((font) => (
-                  <div
-                    key={font.id}
-                    onClick={() => handleFontSelect(font)}
-                    style={styles.dropdownItem}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.backgroundColor = 'var(--theme-elevation-50)')
-                    }
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                  >
-                    <div style={styles.dropdownTitle}>{font.family}</div>
-                    <div style={styles.dropdownMeta}>
-                      {font.category} • {font.variable ? 'Variable' : 'Static'} •{' '}
-                      {font.weights.length} weights
+                filteredFonts.map((font) => {
+                  injectFontPreview(font.family)
+                  return (
+                    <div
+                      key={font.id}
+                      onClick={() => handleFontSelect(font)}
+                      style={styles.dropdownItem}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = 'var(--theme-elevation-50)')
+                      }
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                    >
+                      <div
+                        style={{
+                          ...styles.dropdownTitle,
+                          fontFamily: `'${font.family}', sans-serif`,
+                        }}
+                      >
+                        {font.family}
+                      </div>
+                      <div style={styles.dropdownMeta}>
+                        {font.category} • {font.variable ? 'Variable' : 'Static'} •{' '}
+                        {font.weights.length} weights
+                      </div>
                     </div>
-                  </div>
-                ))
+                  )
+                })
               ) : (
                 <div style={styles.centerText}>No fonts found</div>
               )}
@@ -522,7 +544,9 @@ export function FontFamilySearchField({ path }: { path: string }) {
       {selectedFont && (
         <div style={styles.configPanel}>
           <div style={styles.section}>
-            <h3 style={styles.fontTitle}>{selectedFont.family}</h3>
+            <h3 style={{ ...styles.fontTitle, fontFamily: `'${selectedFont.family}', sans-serif` }}>
+              {selectedFont.family}
+            </h3>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               <span style={{ ...styles.badge, ...styles.badgeDefault }}>
                 {selectedFont.category}
@@ -544,13 +568,16 @@ export function FontFamilySearchField({ path }: { path: string }) {
             </label>
             {selectedFont.variable ? (
               <input
-                type="number"
-                min="100"
-                max="900"
-                value={selectedWeight || 400}
+                type="text"
+                inputMode="numeric"
+                value={selectedWeight?.toString() ?? ''}
                 onChange={(e) => {
-                  const val = parseInt(e.target.value)
-                  if (val >= 100 && val <= 900) setSelectedWeight(val)
+                  const raw = e.target.value.replace(/\D/g, '')
+                  setSelectedWeight(raw === '' ? null : parseInt(raw, 10))
+                }}
+                onBlur={() => {
+                  const val = selectedWeight ?? 400
+                  setSelectedWeight(Math.min(900, Math.max(100, val)))
                 }}
                 style={styles.input}
                 placeholder="Enter weight (100-900)"
