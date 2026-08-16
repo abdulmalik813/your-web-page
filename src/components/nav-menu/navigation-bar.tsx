@@ -65,7 +65,7 @@ function LogoLink({
     <Link
       href="/"
       prefetch={true}
-      className="group flex items-center gap-2 min-w-0 max-w-full shrink transition-transform duration-200 hover:scale-105 active:scale-95"
+      className="group flex items-center gap-2 min-w-0 max-w-full shrink transition-transform duration-200"
       aria-label="Home"
     >
       <MediaBlockUI

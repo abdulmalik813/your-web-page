@@ -17,6 +17,12 @@ export const Footer: GlobalConfig = {
   },
   fields: [
     {
+      type: 'checkbox',
+      name: 'showLogo',
+      label: 'Show Logo',
+      defaultValue: true,
+    },
+    {
       type: 'tabs',
       tabs: [
         {
@@ -26,7 +32,10 @@ export const Footer: GlobalConfig = {
               name: 'tagLine',
               type: 'richText',
               label: 'Tag Line',
-              editor: defaultLexical()
+              editor: defaultLexical(),
+              admin: {
+                condition: (_, data) => data?.showLogo === true,
+              },
             },
             {
               name: 'columns',
@@ -48,7 +57,7 @@ export const Footer: GlobalConfig = {
                       name: 'groupStyles',
                       type: 'relationship',
                       relationTo: 'styles',
-                      hasMany: true
+                      hasMany: true,
                     },
                     {
                       name: 'items',

@@ -3446,6 +3446,7 @@ export interface NavigationBar {
  */
 export interface Footer {
   id: string;
+  showLogo?: boolean | null;
   tagLine?: {
     root: {
       type: string;
@@ -3757,6 +3758,7 @@ export interface NavigationBarSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
+  showLogo?: T;
   tagLine?: T;
   columns?:
     | T

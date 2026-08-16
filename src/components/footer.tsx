@@ -37,7 +37,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
 
       <div className="container mx-auto px-4 py-6">
         <div className={joinStyles('grid grid-cols-1 gap-6 lg:gap-8', getGridClass())}>
-          <div className="flex flex-col gap-3">
+          {footerData.showLogo && (<div className="flex flex-col gap-3">
             <Link href="/" className="flex items-center gap-3 shrink-0 group">
               <MediaBlockUI
                 media={lightLogo}
@@ -65,12 +65,12 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
                 <LexicalRenderer content={footerData.tagLine} pageContext={pageContext} />
               </div>
             )}
-          </div>
+          </div>)}
 
           {footerData.columns?.map((column, columnIndex) => (
             <div key={columnIndex} className="flex flex-col gap-4">
               {column.groups?.map((group, groupIndex) => (
-                <div key={groupIndex} className="flex flex-col gap-2">
+                <div key={groupIndex} className={joinStyles("flex flex-col gap-2", group.groupStyles)}>
                   {group.groupLabel && (
                     <h3
                       className={joinStyles(
@@ -103,9 +103,11 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
 
       <div className="w-full border-t border-border" />
 
-      <p className="text-sm text-muted-foreground text-center">
-        © {new Date().getFullYear()} {setting.appTitle}. All rights reserved.
-      </p>
+      <div className="container mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground text-center sm:text-left">
+          © {new Date().getFullYear()} {setting.appTitle}. All rights reserved.
+        </p>
+      </div>
     </footer>
   )
 }
