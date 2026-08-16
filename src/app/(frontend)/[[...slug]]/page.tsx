@@ -221,7 +221,7 @@ export default async function PageRoute({ params, searchParams }: Readonly<SlugP
                 <div
                   key={i}
                   className={joinStyles(
-                    cn(layout.container && 'container mx-auto'),
+                    cn(layout.container && 'container mx-auto px-4 sm:px-6 lg:px-12 xl:px-16'),
                     layout.styles,
                   )}
                 >
