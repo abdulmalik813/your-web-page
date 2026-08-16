@@ -21,13 +21,13 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
   const getGridClass = () => {
     switch (numColumns) {
       case 1:
-        return 'sm:grid-cols-2'
+        return footerData.showLogo ? 'sm:grid-cols-2' : 'grid-cols-1'
       case 2:
-        return 'sm:grid-cols-3'
+        return footerData.showLogo ? 'sm:grid-cols-3' : 'grid-cols-2'
       case 3:
-        return 'sm:grid-cols-2 lg:grid-cols-4'
+        return footerData.showLogo ? 'sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-3 lg:grid-cols-4'
       default:
-        return 'sm:grid-cols-2'
+        return footerData.showLogo ? 'sm:grid-cols-2' : 'grid-cols-1'
     }
   }
 
