@@ -33,22 +33,22 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
   }
 
   return (
-    <footer className="container mx-auto px-4 mt-auto bg-transparent">
-      <div className="border-t" />
+    <footer className="w-full mt-auto bg-transparent">
+      <div className="w-full border-t border-border" />
 
-      <div className="py-6">
+      <div className="container mx-auto px-4 py-6">
         <div className={joinStyles('grid grid-cols-1 gap-6 lg:gap-8', getGridClass())}>
           <div className="flex flex-col gap-3">
             <Link href="/" className="flex items-center gap-3 shrink-0 group">
               <MediaBlockUI
                 media={lightLogo}
                 priority
-                className={joinStyles('dark:hidden', footerData.logoStyles)}
+                className={joinStyles('dark:hidden max-h-8 sm:max-h-10 w-auto object-contain max-w-[140px] sm:max-w-[200px] md:max-w-none', footerData.logoStyles)}
                 pageContext={pageContext}
               />
               <MediaBlockUI
                 media={darkLogo}
-                className={joinStyles('hidden dark:block', footerData.logoStyles)}
+                className={joinStyles('hidden dark:block max-h-8 sm:max-h-10 w-auto object-contain max-w-[140px] sm:max-w-[200px] md:max-w-none', footerData.logoStyles)}
                 pageContext={pageContext}
               />
               {footerData.useLabelWithLogo && setting.appTitle && (
@@ -102,9 +102,9 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
         </div>
       </div>
 
-      <div className="border-t" />
+      <div className="w-full border-t border-border" />
 
-      <div className="py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="container mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground text-center sm:text-left">
           © {new Date().getFullYear()} {setting.appTitle}. All rights reserved.
         </p>
