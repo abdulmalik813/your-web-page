@@ -10,15 +10,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-  SheetDescription,
-} from '@/components/ui/sheet'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Accordion,
   AccordionContent,
@@ -73,7 +65,7 @@ function LogoLink({
     <Link
       href="/"
       prefetch={true}
-      className="group flex items-center gap-2 shrink-0"
+      className="group flex items-center gap-2 min-w-0 max-w-full shrink transition-transform duration-200 hover:scale-105 active:scale-95"
       aria-label="Home"
     >
       <MediaBlockUI
@@ -89,26 +81,28 @@ function LogoLink({
         className={joinStyles('hidden dark:block', logoStyles)}
       />
       {useTitleWithLogo && appTitle && (
-        <span className={joinStyles('text-lg font-semibold tracking-tight', titleStyles)}>
+        <span
+          className={joinStyles(
+            'text-lg font-semibold tracking-tight truncate shrink',
+            titleStyles,
+          )}
+        >
           {appTitle}
         </span>
       )}
     </Link>
   )
 }
-
 function MobileMenu({
   navBarData,
   pageContext,
-  appTitle,
 }: {
   navBarData: NavigationBar
   pageContext: PageContext
-  appTitle?: string | null
 }) {
   return (
-    <Sheet>
-      <SheetTrigger asChild>
+    <Popover>
+      <PopoverTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
@@ -118,91 +112,79 @@ function MobileMenu({
           <Menu className="w-5 h-5" />
           <span className="sr-only">Menu</span>
         </Button>
-      </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto p-0 border-l">
-        <div className="px-6 py-6">
-          <SheetHeader className="mb-6">
-            <SheetTitle className="text-left text-lg font-semibold">
-              {appTitle || 'Menu'}
-            </SheetTitle>
-            <SheetDescription />
-          </SheetHeader>
-          <nav>
-            <div className="space-y-1">
-              {navBarData.navigation?.map((item, index) => {
-                const appearance = item.nav?.appearance
+      </PopoverTrigger>
+      <PopoverContent
+        side="bottom"
+        sideOffset={14}
+        collisionPadding={16}
+        className="w-[calc(100vw-2rem)] max-w-md max-h-[80vh] overflow-y-auto p-4 rounded-xl shadow-xl border bg-popover text-popover-foreground lg:hidden"
+      >
+        <nav className="space-y-3">
+          <div className="space-y-1">
+            {navBarData.navigation?.map((item, index) => {
+              const appearance = item.nav?.appearance
 
-                if (appearance === 'link' || appearance === 'button') {
-                  return (
-                    <SheetClose asChild key={item.id || index}>
-                      <div>
-                        <NavigationBlockUI
-                          {...item}
-                          pageContext={pageContext}
-                          className="flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-accent transition-colors duration-200 w-full justify-start"
-                        />
-                      </div>
-                    </SheetClose>
-                  )
-                }
+              if (appearance === 'link' || appearance === 'button') {
+                return (
+                  <div key={item.id || index}>
+                    <NavigationBlockUI
+                      {...item}
+                      pageContext={pageContext}
+                      className="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-accent transition-colors duration-200 w-full justify-start"
+                    />
+                  </div>
+                )
+              }
 
-                if (appearance === 'dropdown') {
-                  return (
-                    <Accordion
-                      key={item.id || index}
-                      type="single"
-                      collapsible
-                      className="border-none"
-                    >
-                      <AccordionItem value={`item-${index}`} className="border-none">
-                        <AccordionTrigger className="px-3 py-2 text-sm font-medium hover:bg-accent rounded-lg hover:no-underline transition-colors duration-200">
-                          {item.nav?.label}
-                        </AccordionTrigger>
-                        <AccordionContent className="pb-1 pt-1">
-                          <ul className="space-y-1 ml-2">
-                            {item.nav?.items?.map((dropdownItem, i) => (
-                              <li key={dropdownItem.id || i}>
-                                <SheetClose asChild>
-                                  <div>
-                                    <NavigationBlockUI
-                                      dropdownItem={dropdownItem}
-                                      pageContext={pageContext}
-                                      className="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-accent transition-colors duration-200"
-                                    />
-                                  </div>
-                                </SheetClose>
-                              </li>
-                            ))}
-                          </ul>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-                  )
-                }
+              if (appearance === 'dropdown') {
+                return (
+                  <Accordion
+                    key={item.id || index}
+                    type="single"
+                    collapsible
+                    className="border-none"
+                  >
+                    <AccordionItem value={`item-${index}`} className="border-none">
+                      <AccordionTrigger className="px-3 py-2 text-sm font-medium hover:bg-accent rounded-lg hover:no-underline transition-colors duration-200">
+                        {item.nav?.label}
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-1 pt-1">
+                        <ul className="space-y-1 ml-2">
+                          {item.nav?.items?.map((dropdownItem, i) => (
+                            <li key={dropdownItem.id || i}>
+                              <NavigationBlockUI
+                                dropdownItem={dropdownItem}
+                                pageContext={pageContext}
+                                className="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-accent transition-colors duration-200"
+                              />
+                            </li>
+                          ))}
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                )
+              }
 
-                return null
-              })}
+              return null
+            })}
+          </div>
+
+          {navBarData?.cta && navBarData.cta.length > 0 && (
+            <div className="pt-3 border-t flex flex-col gap-2">
+              {navBarData.cta.map((ctaItem, index) => (
+                <NavigationBlockUI
+                  key={ctaItem.id || index}
+                  {...ctaItem}
+                  pageContext={pageContext}
+                  className="w-full justify-center text-sm h-10 rounded-lg"
+                />
+              ))}
             </div>
-
-            {navBarData?.cta && navBarData.cta.length > 0 && (
-              <div className="mt-6 pt-6 border-t">
-                {navBarData.cta.map((ctaItem, index) => (
-                  <SheetClose asChild key={ctaItem.id || index}>
-                    <div>
-                      <NavigationBlockUI
-                        {...ctaItem}
-                        pageContext={pageContext}
-                        className="w-full justify-center text-sm h-10 rounded-lg my-4"
-                      />
-                    </div>
-                  </SheetClose>
-                ))}
-              </div>
-            )}
-          </nav>
-        </div>
-      </SheetContent>
-    </Sheet>
+          )}
+        </nav>
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -223,7 +205,7 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
       <Banner {...navBarData.banner} pageContext={pageContext} />
       <header className="sticky top-0 z-50 w-full bg-transparent" role="navigation">
         <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-4">
-          <div className="flex items-center min-w-0 flex-shrink-0">
+          <div className="flex items-center min-w-0 shrink">
             <LogoLink
               lightLogo={lightLogo}
               darkLogo={darkLogo}
@@ -301,11 +283,7 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
                 ))}
               </div>
             )}
-            <MobileMenu
-              navBarData={navBarData}
-              pageContext={pageContext}
-              appTitle={setting.appTitle}
-            />
+            <MobileMenu navBarData={navBarData} pageContext={pageContext} />
           </div>
         </div>
       </header>
