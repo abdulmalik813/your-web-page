@@ -1,4 +1,4 @@
-import type { Faq, FaqBlock } from '@/payload-types'
+import type { FaqBlock } from '@/payload-types'
 import { PageContext } from '@/types/page-context'
 import {
   Accordion,

@@ -1,4 +1,4 @@
-import { Page, Post, Setting, User } from '@/payload-types'
+import { Page, Post, Setting } from '@/payload-types'
 import { SearchParams } from '@/types/search-params'
 
 export type PageContext = {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { X } from 'lucide-react'
-import type { GalleryBlock, Media as MediaType } from '@/payload-types'
+import type { GalleryBlock } from '@/payload-types'
 import { cn } from '@/lib/utils'
 import { Media } from '@/components/media'
 import { PageContext } from '@/types/page-context'

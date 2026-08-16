@@ -45,7 +45,7 @@ function TestimonialCarousel({
     if (validTestimonials.length === 0) return
     const interval = setInterval(handleNext, 7000)
     return () => clearInterval(interval)
-  }, [validTestimonials.length])
+  }, [handleNext, validTestimonials.length])
 
   if (validTestimonials.length === 0) return null
 

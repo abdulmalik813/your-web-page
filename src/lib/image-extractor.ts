@@ -65,6 +65,5 @@ export const mediaExtractor = (page: Post | Page): Media[] => {
   }
 
   traverse(page)
-  mediaItems
   return mediaItems
 }

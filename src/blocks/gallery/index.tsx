@@ -7,4 +7,4 @@ export async function GalleryBlockUI({
   ...galleryBlock
 }: GalleryBlock & { pageContext: PageContext }) {
   return <GalleryBlockClient galleryBlock={galleryBlock} pageContext={pageContext} />
-}1
+}
