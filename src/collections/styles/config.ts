@@ -7,12 +7,22 @@ export const Styles: CollectionConfig<'styles'> = {
   slug: 'styles',
   access: {
     create: authenticated,
-    delete: authenticated,
+    delete: ({ req: { user }, data }) => {
+      if (!user) return false
+      if (data?.className?.startsWith('font-')) return false
+      return true
+    },
     read: anyone,
-    update: authenticated,
+    update: ({ req: { user }, data }) => {
+      if (!user) return false
+      if (data?.className?.startsWith('font-')) return false
+      return true
+    },
   },
   admin: {
     useAsTitle: 'alias',
+    hideAPIURL: true,
+    defaultColumns: ['alias', 'className', 'tailwind'],
   },
   fields: [
     {
@@ -21,12 +31,18 @@ export const Styles: CollectionConfig<'styles'> = {
       required: true,
       unique: true,
       label: 'Alias',
+      access: {
+        update: ({ data }) => !data?.className?.startsWith('font-'),
+      },
     },
     {
       name: 'tailwind',
       type: 'checkbox',
       label: 'Tailwind',
       defaultValue: true,
+      access: {
+        update: ({ data }) => !data?.className?.startsWith('font-'),
+      },
     },
     {
       name: 'className',
@@ -36,6 +52,9 @@ export const Styles: CollectionConfig<'styles'> = {
       admin: {
         description: 'Changing this will require Site revalidation.',
       },
+      access: {
+        update: ({ data }) => !data?.className?.startsWith('font-'),
+      },
     },
     {
       name: 'stylesheet',
@@ -43,6 +62,9 @@ export const Styles: CollectionConfig<'styles'> = {
       label: 'Stylesheet',
       admin: {
         description: 'CSS stylesheet (if tailwind, the content will be overridden)',
+      },
+      access: {
+        update: ({ data }) => !data?.className?.startsWith('font-'),
       },
     },
   ],

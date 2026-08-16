@@ -6,28 +6,6 @@ import { getCachedDocuments } from '@/lib/get-document'
 import { isFontData } from '@/lib/is-font-data'
 import { unstable_cache } from 'next/cache'
 
-function generateFontClass(font: any): string | null {
-  if (!font.id || !font.family || !font.fontData || !isFontData(font.fontData)) {
-    return null
-  }
-
-  const fontData = font.fontData
-
-  const family = fontData.variable
-    ? `'${fontData.family} Variable', sans-serif`
-    : `'${fontData.family}', sans-serif`
-
-  const weight = fontData.weight
-  const style = fontData.style || 'normal'
-
-  return `.font-${font.id} {
-  font-family: ${family} !important;
-  font-weight: ${weight} !important;
-  font-style: ${style} !important;
-  font-display: swap;
-}`
-}
-
 function collectFontsCSS(setting: Setting): string {
   let css = ''
 
@@ -56,15 +34,12 @@ async function compileStylesheet(draft: boolean) {
 
   const fontsourceCSS = collectFontsCSS(setting)
 
-  const fontClasses =
-    setting.additionalFonts?.map(generateFontClass).filter(Boolean).join('\n\n') || ''
-
   const stylesCSS = styles
     .map((s) => s.stylesheet || '')
     .filter((css) => css.trim())
     .join('\n\n')
 
-  const css = [fontsourceCSS, fontClasses, setting.theme, stylesCSS].filter(Boolean).join('\n\n')
+  const css = [fontsourceCSS, setting.theme, stylesCSS].filter(Boolean).join('\n\n')
 
   return css
 }

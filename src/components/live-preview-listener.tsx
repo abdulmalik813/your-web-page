@@ -9,7 +9,10 @@ export function LivePreviewListener() {
   
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'payload-live-preview' && event.data?.globalSlug === 'settings') {
+      if (
+        event.data?.type === 'payload-live-preview' &&
+        (event.data?.globalSlug === 'settings' || event.data?.collectionSlug === 'styles')
+      ) {
         window.location.reload()
       }
     }
