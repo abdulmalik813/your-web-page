@@ -130,7 +130,7 @@ function MobileMenu({
                     <NavigationBlockUI
                       {...item}
                       pageContext={pageContext}
-                      className="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-accent transition-colors duration-200 w-full justify-start"
+                      className="flex items-center w-full px-3 py-2"
                     />
                   </div>
                 )
@@ -155,7 +155,7 @@ function MobileMenu({
                               <NavigationBlockUI
                                 dropdownItem={dropdownItem}
                                 pageContext={pageContext}
-                                className="flex items-center px-3 py-2 text-sm rounded-lg hover:bg-accent transition-colors duration-200"
+                                className="flex items-center w-full px-3 py-2"
                               />
                             </li>
                           ))}
@@ -177,7 +177,7 @@ function MobileMenu({
                   key={ctaItem.id || index}
                   {...ctaItem}
                   pageContext={pageContext}
-                  className="w-full justify-center text-sm h-10 rounded-lg"
+                  className="flex items-center w-full px-3 py-2"
                 />
               ))}
             </div>
@@ -235,7 +235,6 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
                         <NavigationBlockUI
                           {...item}
                           pageContext={pageContext}
-                          className="inline-flex items-center justify-center px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors duration-200"
                         />
                       </NavigationMenuItem>
                     )
@@ -246,8 +245,7 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
                       <NavigationMenuItem key={item.id}>
                         <NavigationMenuTrigger
                           className={joinStyles(
-                            'text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:bg-transparent data-[state=open]:text-foreground',
-                            item?.nav?.styles,
+                            item?.nav?.styles
                           )}
                         >
                           {item.nav?.label}
@@ -264,7 +262,6 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
                                 <NavigationBlockUI
                                   dropdownItem={dropdownItem}
                                   pageContext={pageContext}
-                                  className="block rounded-lg p-2.5 hover:bg-accent transition-colors duration-200 font-medium text-sm hover:text-primary"
                                 />
                               </li>
                             ))}
@@ -289,7 +286,6 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
                     key={ctaItem.id || index}
                     {...ctaItem}
                     pageContext={pageContext}
-                    className="text-base h-10 px-6 rounded-lg transition-colors duration-200"
                   />
                 ))}
               </div>
