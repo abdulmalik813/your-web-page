@@ -7,6 +7,7 @@ import Handlebars from 'handlebars'
 import { FormattedEmail } from 'node_modules/@payloadcms/plugin-form-builder/dist/types'
 import { BasePayload } from 'payload'
 import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
+import { TIMEZONES } from '@/constants/init'
 
 type SubmissionField = {
   field: string
@@ -41,17 +42,32 @@ function processWithHandlebars(
 Handlebars.registerHelper('script', function (codeString: string, options) {
   try {
     const context = options.data.root || {}
-    const evalFn = new Function('context', `
+    const evalFn = new Function(
+      'context',
+      `
       with (context) {
         return (${codeString});
       }
-    `)
+    `,
+    )
 
     return evalFn(context) ?? ''
   } catch (error) {
     console.error(`Handlebars script helper error for expression: "${codeString}"`, error)
     return ''
   }
+})
+
+Handlebars.registerHelper('now', function () {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIMEZONES.DEFAULT_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).format(new Date())
 })
 
 export const formPlugin = formBuilderPlugin({
@@ -99,6 +115,7 @@ export const formPlugin = formBuilderPlugin({
         replyTo: processWithHandlebars(emailConfig.replyTo || '', submissionData, payload),
       } as FormattedEmail)
     }
+    console.log('Processed Emails:', emails)
     return emails
   },
 })

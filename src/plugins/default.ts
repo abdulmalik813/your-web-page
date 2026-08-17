@@ -1,5 +1,4 @@
 import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
-import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'

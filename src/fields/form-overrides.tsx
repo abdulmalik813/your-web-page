@@ -175,7 +175,7 @@ export const formOverrides = ({ defaultFields }: { defaultFields: Field[] }): Fi
               {
                 name: 'htmlMessage',
                 type: 'code',
-                label: 'Custom HTML Message (Wildcards are not supported in HTML messages)',
+                label: 'HTML Message',
                 localized: true,
                 admin: {
                   condition: (_: any, siblingData: any) => siblingData?.messageType === 'html',
