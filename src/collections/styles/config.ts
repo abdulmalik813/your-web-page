@@ -3,31 +3,33 @@ import { authenticated } from '@/access/authenticated'
 import { CollectionConfig } from 'payload'
 import { generateStylesheet, revalidateCache, revalidateDelete } from '@/collections/styles/hooks'
 
+const isFontStyle = ({ data, doc }: any) => {
+  const className = data?.className ?? doc?.className
+  return className?.startsWith('font-')
+}
+
+const canManageStyle = (args: any) => {
+  if (!authenticated(args)) return false
+
+  if (isFontStyle(args)) {
+    return false
+  }
+
+  return true
+}
+
+const canUpdateNonFontField = ({ data, doc }: any) => {
+  const className = data?.className ?? doc?.className
+  return !className?.startsWith('font-')
+}
+
 export const Styles: CollectionConfig<'styles'> = {
   slug: 'styles',
   access: {
-    create: (args) => {
-      if (!authenticated(args)) return false
-      if (args.data?.className?.startsWith('font-')) {
-        return args.req.context?.fromSettings === true
-      }
-      return true
-    },
+    create: canManageStyle,
     read: anyone,
-    update: (args) => {
-      if (!authenticated(args)) return false
-      if (args.data?.className?.startsWith('font-')) {
-        return args.req.context?.fromSettings === true
-      }
-      return true
-    },
-    delete: (args) => {
-      if (!authenticated(args)) return false
-      if (args.data?.className?.startsWith('font-')) {
-        return args.req.context?.fromSettings === true
-      }
-      return true
-    },
+    update: canManageStyle,
+    delete: canManageStyle,
   },
   admin: {
     useAsTitle: 'alias',
@@ -42,7 +44,7 @@ export const Styles: CollectionConfig<'styles'> = {
       unique: true,
       label: 'Alias',
       access: {
-        update: ({ data }) => !data?.className?.startsWith('font-'),
+        update: canUpdateNonFontField,
       },
     },
     {
@@ -51,7 +53,7 @@ export const Styles: CollectionConfig<'styles'> = {
       label: 'Tailwind',
       defaultValue: true,
       access: {
-        update: ({ data }) => !data?.className?.startsWith('font-'),
+        update: canUpdateNonFontField,
       },
     },
     {
@@ -63,7 +65,7 @@ export const Styles: CollectionConfig<'styles'> = {
         description: 'Changing this will require Site revalidation.',
       },
       access: {
-        update: ({ data }) => !data?.className?.startsWith('font-'),
+        update: canUpdateNonFontField,
       },
     },
     {
@@ -74,7 +76,7 @@ export const Styles: CollectionConfig<'styles'> = {
         description: 'CSS stylesheet (if tailwind, the content will be overridden)',
       },
       access: {
-        update: ({ data }) => !data?.className?.startsWith('font-'),
+        update: canUpdateNonFontField,
       },
     },
   ],

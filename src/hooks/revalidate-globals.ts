@@ -4,8 +4,6 @@ import { isFontData } from '@/lib/is-font-data'
 import { GlobalAfterChangeHook } from 'payload'
 
 export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) => {
-  // Skip all side-effects (including font style DB writes) for draft saves.
-  // This prevents DB churn on every autosave keystroke (100ms interval).
   if (doc._status === 'draft') {
     return doc
   }
@@ -13,40 +11,123 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
   const additionalFonts = doc.additionalFonts || []
   const currentFontIds = new Set(additionalFonts.map((font: any) => font.id))
 
-  const settingsReq = {
-    ...req,
-    context: {
-      ...req.context,
-      fromSettings: true,
-    },
-  }
-
-  const existingStyles = await req.payload.find({
-    collection: 'styles',
-    where: {
-      className: {
-        like: 'font-%',
-      },
-    },
-    limit: 1000,
-    req,
-  })
-
   const generateFontCSS = (font: any): string => {
     if (!font.id || !font.family || !font.fontData || !isFontData(font.fontData)) {
       return ''
     }
+
     const fontData = font.fontData
+
     const family = fontData.variable
       ? `'${fontData.family} Variable', sans-serif`
       : `'${fontData.family}', sans-serif`
+
     const weight = fontData.weight
     const style = fontData.style || 'normal'
-    return `.font-${font.id} {\n  font-family: ${family} !important;\n  font-weight: ${weight} !important;\n  font-style: ${style} !important;\n  font-display: swap;\n}`
+
+    return `.font-${font.id} {
+  font-family: ${family} !important;
+  font-weight: ${weight} !important;
+  font-style: ${style} !important;
+  font-display: swap;
+}`
+  }
+
+  const upsertFontStyle = async ({
+    alias,
+    className,
+    stylesheet,
+  }: {
+    alias: string
+    className: string
+    stylesheet: string
+  }) => {
+    const existingByClass = await req.payload.find({
+      collection: 'styles',
+      where: {
+        className: {
+          equals: className,
+        },
+      },
+      limit: 1,
+      req,
+      overrideAccess: true,
+    })
+
+    const existingByAlias = await req.payload.find({
+      collection: 'styles',
+      where: {
+        alias: {
+          equals: alias,
+        },
+      },
+      limit: 1,
+      req,
+      overrideAccess: true,
+    })
+
+    const styleByClass = existingByClass.docs[0]
+    const styleByAlias = existingByAlias.docs[0]
+
+    if (styleByClass && styleByAlias && styleByClass.id !== styleByAlias.id) {
+      await req.payload.update({
+        collection: 'styles',
+        id: styleByAlias.id,
+        data: {
+          alias,
+          className,
+          tailwind: false,
+          stylesheet,
+        },
+        req,
+        overrideAccess: true,
+      })
+
+      await req.payload.delete({
+        collection: 'styles',
+        id: styleByClass.id,
+        req,
+        overrideAccess: true,
+      })
+
+      return
+    }
+
+    const existingStyle = styleByClass || styleByAlias
+
+    if (existingStyle) {
+      await req.payload.update({
+        collection: 'styles',
+        id: existingStyle.id,
+        data: {
+          alias,
+          className,
+          tailwind: false,
+          stylesheet,
+        },
+        req,
+        overrideAccess: true,
+      })
+
+      return
+    }
+
+    await req.payload.create({
+      collection: 'styles',
+      data: {
+        alias,
+        className,
+        tailwind: false,
+        stylesheet,
+      },
+      req,
+      overrideAccess: true,
+    })
   }
 
   if (doc.default?.fontData && isFontData(doc.default.fontData) && doc.default.fontData.id) {
     const className = 'font-default'
+    const alias = 'Font Default'
 
     const family = doc.default.fontData.variable
       ? `'${doc.default.fontData.family} Variable', sans-serif`
@@ -59,64 +140,37 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
   font-display: swap;
 }`
 
-    const existingStyle = existingStyles.docs.find((style) => style.className === className)
-
-    const alias = 'Font Default'
-
-    if (!existingStyle) {
-      await req.payload.create({
-        collection: 'styles',
-        data: {
-          alias,
-          className,
-          tailwind: false,
-          stylesheet,
-        },
-        req: settingsReq,
-      })
-    } else if (existingStyle.stylesheet !== stylesheet || existingStyle.alias !== alias) {
-      await req.payload.update({
-        collection: 'styles',
-        id: existingStyle.id,
-        data: {
-          alias,
-          stylesheet,
-        },
-        req: settingsReq,
-      })
-    }
+    await upsertFontStyle({
+      alias,
+      className,
+      stylesheet,
+    })
   }
 
   for (const font of additionalFonts) {
-    if (font?.title != null && font?.title?.trim() !== '') {
+    if (font?.title != null && font.title.trim() !== '') {
       const className = `font-${font.id}`
       const stylesheet = generateFontCSS(font)
-      const existingStyle = existingStyles.docs.find((style) => style.className === className)
 
-      if (!existingStyle) {
-        await req.payload.create({
-          collection: 'styles',
-          data: {
-            alias: font.title,
-            className: className,
-            tailwind: false,
-            stylesheet: stylesheet,
-          },
-          req: settingsReq,
-        })
-      } else if (existingStyle.stylesheet !== stylesheet || existingStyle.alias !== font.title) {
-        await req.payload.update({
-          collection: 'styles',
-          id: existingStyle.id,
-          data: {
-            alias: font.title,
-            stylesheet: stylesheet,
-          },
-          req: settingsReq,
-        })
-      }
+      await upsertFontStyle({
+        alias: font.title,
+        className,
+        stylesheet,
+      })
     }
   }
+
+  const existingStyles = await req.payload.find({
+    collection: 'styles',
+    where: {
+      className: {
+        like: 'font-%',
+      },
+    },
+    limit: 1000,
+    req,
+    overrideAccess: true,
+  })
 
   const fontStyles = existingStyles.docs.filter((style: Style) =>
     style.className.startsWith('font-'),
@@ -135,14 +189,17 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
     await req.payload.delete({
       collection: 'styles',
       id: style.id,
-      req: settingsReq,
+      req,
+      overrideAccess: true,
     })
   }
 
   const activeFontSlugs = new Set<string>()
+
   if (doc.default?.fontData && isFontData(doc.default.fontData) && doc.default.fontData.id) {
     activeFontSlugs.add(doc.default.fontData.id)
   }
+
   for (const font of additionalFonts) {
     if (font?.fontData && isFontData(font.fontData) && font.fontData.id) {
       activeFontSlugs.add(font.fontData.id)
@@ -153,6 +210,7 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
     collection: 'font-files',
     limit: 1000,
     req,
+    overrideAccess: true,
   })
 
   for (const fontFile of allFontFiles.docs) {
@@ -161,6 +219,7 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
         collection: 'font-files',
         id: fontFile.id,
         req,
+        overrideAccess: true,
       })
     }
   }
