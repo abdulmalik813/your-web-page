@@ -15,7 +15,7 @@ export const MapBlock = (dbPrefix: string = ''): Block => ({
       name: 'text',
       type: 'text',
       label: 'Overlay Text',
-    }
+    },
   ],
   graphQL: {
     singularName: 'MapBlock',
