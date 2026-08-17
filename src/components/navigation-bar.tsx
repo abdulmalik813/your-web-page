@@ -103,12 +103,12 @@ function MobileMenu({
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="ghost"
+          variant="secondary"
           size="icon"
-          className="lg:hidden h-9 w-9 rounded-lg hover:bg-accent transition-colors duration-200"
+          className="lg:hidden h-12 w-12"
           aria-label="Open menu"
         >
-          <Menu className="w-5 h-5" />
+          <Menu className="w-6 h-6" />
           <span className="sr-only">Menu</span>
         </Button>
       </PopoverTrigger>
@@ -228,10 +228,7 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
                   if (appearance === 'link' || appearance === 'button') {
                     return (
                       <NavigationMenuItem key={item.id}>
-                        <NavigationBlockUI
-                          {...item}
-                          pageContext={pageContext}
-                        />
+                        <NavigationBlockUI {...item} pageContext={pageContext} />
                       </NavigationMenuItem>
                     )
                   }
@@ -239,11 +236,7 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
                   if (appearance === 'dropdown') {
                     return (
                       <NavigationMenuItem key={item.id}>
-                        <NavigationMenuTrigger
-                          className={joinStyles(
-                            item?.nav?.styles
-                          )}
-                        >
+                        <NavigationMenuTrigger className={joinStyles(item?.nav?.styles)}>
                           {item.nav?.label}
                         </NavigationMenuTrigger>
                         <NavigationMenuContent className="left-0">
@@ -272,9 +265,9 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
               </NavigationMenuList>
             </NavigationMenu>
           </nav>
-
           <div className="flex items-center gap-2 flex-shrink-0">
             <ThemeToggle />
+            <MobileMenu navBarData={navBarData} pageContext={pageContext} />
             {navBarData?.cta && navBarData.cta.length > 0 && (
               <div className="hidden sm:flex gap-2">
                 {navBarData.cta.map((ctaItem, index) => (
@@ -286,10 +279,9 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
                 ))}
               </div>
             )}
-            <MobileMenu navBarData={navBarData} pageContext={pageContext} />
           </div>
         </div>
       </header>
-      </ >
+    </>
   )
 }
