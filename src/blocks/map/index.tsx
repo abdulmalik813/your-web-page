@@ -24,7 +24,7 @@ export function MapBlockUI({
       />
 
       {text && (
-        <div className="absolute bottom-4 left-4 bg-black px-5 py-3 font-bold uppercase shadow-lg">
+        <div className="absolute bottom-4 left-4 bg-background px-5 py-3 font-bold uppercase shadow-lg">
           {text}
         </div>
       )}
