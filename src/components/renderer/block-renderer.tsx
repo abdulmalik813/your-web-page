@@ -17,6 +17,7 @@ import { HeadingBlockUI } from '@/blocks/heading'
 import { ContactCardBlockUI } from '@/blocks/contact-card'
 import { FaqBlockUI } from '@/blocks/faq'
 import { ImageCarouselBlockUI } from '@/blocks/image-carousel'
+import { MapBlockUI } from '@/blocks/map'
 
 const blockComponents = {
   contentBlock: ContentBlockUI,
@@ -35,6 +36,7 @@ const blockComponents = {
   headingBlock: HeadingBlockUI,
   contactCardBlock: ContactCardBlockUI,
   faqBlock: FaqBlockUI,
+  mapBlock: MapBlockUI,
 }
 
 type BlockRendererProps = {

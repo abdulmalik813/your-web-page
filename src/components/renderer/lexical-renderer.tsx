@@ -15,6 +15,7 @@ import type {
   TestimonialBlock,
   IconBlock,
   ContentBlock,
+  MapBlock,
 } from '@/payload-types'
 import {
   DefaultNodeTypes,
@@ -41,6 +42,7 @@ import { FaqBlockUI } from '@/blocks/faq'
 import { ContactCardBlockUI } from '@/blocks/contact-card'
 import { IconBlockUI } from '@/blocks/icon'
 import { ContentBlockUI } from '@/blocks/content'
+import { MapBlockUI } from '@/blocks/map'
 
 interface LexicalRendererProps {
   content?: DefaultTypedEditorState | null
@@ -66,6 +68,7 @@ type NodeTypes =
       | ContactCardBlock
       | IconBlock
       | ContentBlock
+      | MapBlock
     >
 
 function jsxConverters(pageContext: PageContext): JSXConvertersFunction<NodeTypes> {
@@ -155,6 +158,7 @@ function jsxConverters(pageContext: PageContext): JSXConvertersFunction<NodeType
           <ContactCardBlockUI {...node.fields} pageContext={pageContext} />
         ),
         contentBlock: ({ node }) => <ContentBlockUI {...node.fields} pageContext={pageContext} />,
+        mapBlock: ({ node }) => <MapBlockUI {...node.fields} pageContext={pageContext} />,
       },
     }
   }

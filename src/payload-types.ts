@@ -313,6 +313,7 @@ export interface Page {
                     | HeadingBlock
                     | ContactCardBlock
                     | FaqBlock
+                    | MapBlock
                   )[]
                 | null;
               id?: string | null;
@@ -570,6 +571,7 @@ export interface Post {
                     | ContactCardBlock
                     | FaqBlock
                     | RecentPostsBlock
+                    | MapBlock
                   )[]
                 | null;
               id?: string | null;
@@ -1266,6 +1268,33 @@ export interface Form {
       )[]
     | null;
   confirmationType?: ('message' | 'redirect') | null;
+  confirmationMessage?: {
+    contentStyles?: (string | Style)[] | null;
+    content?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  submitButton?: {
+    label?: string | null;
+    buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
+    buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
+    styles?: (string | Style)[] | null;
+    icon?: (string | null) | Icon;
+    axis?: ('before' | 'after') | null;
+    iconStyles?: (string | Style)[] | null;
+  };
   redirect?: {
     url: string;
   };
@@ -1295,33 +1324,6 @@ export interface Form {
         id?: string | null;
       }[]
     | null;
-  submitButton?: {
-    label?: string | null;
-    buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-    buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
-    styles?: (string | Style)[] | null;
-    icon?: (string | null) | Icon;
-    axis?: ('before' | 'after') | null;
-    iconStyles?: (string | Style)[] | null;
-  };
-  confirmationMessage?: {
-    contentStyles?: (string | Style)[] | null;
-    content?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1626,6 +1628,18 @@ export interface RecentPostsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'recentPostsBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MapBlock".
+ */
+export interface MapBlock {
+  mapUrl: string;
+  text?: string | null;
+  styles?: (string | Style)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mapBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2093,6 +2107,7 @@ export interface PagesSelect<T extends boolean = true> {
                     headingBlock?: T | HeadingBlockSelect<T>;
                     contactCardBlock?: T | ContactCardBlockSelect<T>;
                     faqBlock?: T | FaqBlockSelect<T>;
+                    mapBlock?: T | MapBlockSelect<T>;
                   };
               id?: T;
             };
@@ -2514,6 +2529,17 @@ export interface FaqBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MapBlock_select".
+ */
+export interface MapBlockSelect<T extends boolean = true> {
+  mapUrl?: T;
+  text?: T;
+  styles?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
@@ -2685,6 +2711,7 @@ export interface PostsSelect<T extends boolean = true> {
                     contactCardBlock?: T | ContactCardBlockSelect<T>;
                     faqBlock?: T | FaqBlockSelect<T>;
                     recentPostsBlock?: T | RecentPostsBlockSelect<T>;
+                    mapBlock?: T | MapBlockSelect<T>;
                   };
               id?: T;
             };
@@ -3157,6 +3184,23 @@ export interface FormsSelect<T extends boolean = true> {
             };
       };
   confirmationType?: T;
+  confirmationMessage?:
+    | T
+    | {
+        contentStyles?: T;
+        content?: T;
+      };
+  submitButton?:
+    | T
+    | {
+        label?: T;
+        buttonType?: T;
+        buttonSize?: T;
+        styles?: T;
+        icon?: T;
+        axis?: T;
+        iconStyles?: T;
+      };
   redirect?:
     | T
     | {
@@ -3173,23 +3217,6 @@ export interface FormsSelect<T extends boolean = true> {
         subject?: T;
         message?: T;
         id?: T;
-      };
-  submitButton?:
-    | T
-    | {
-        label?: T;
-        buttonType?: T;
-        buttonSize?: T;
-        styles?: T;
-        icon?: T;
-        axis?: T;
-        iconStyles?: T;
-      };
-  confirmationMessage?:
-    | T
-    | {
-        contentStyles?: T;
-        content?: T;
       };
   updatedAt?: T;
   createdAt?: T;

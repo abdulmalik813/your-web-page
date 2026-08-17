@@ -15,6 +15,7 @@ import { ContactCardBlock } from '@/blocks/contact-card/config'
 import { FaqBlock } from '@/blocks/faq/config'
 import { RecentPostsBlock } from '@/blocks/recent-posts/config'
 import { ImageCarouselBlock } from '@/blocks/image-carousel/config'
+import { MapBlock } from '@/blocks/map/config'
 
 export type BlockSlug =
   | 'content'
@@ -33,6 +34,7 @@ export type BlockSlug =
   | 'faq'
   | 'recent-posts'
   | 'image-carousel'
+  | 'mapBlock'
 interface GetBlocksOptions {
   dbPrefix?: string
   exclude?: BlockSlug[]
@@ -58,6 +60,7 @@ export function Blocks(options: GetBlocksOptions = {}): Block[] {
     { slug: 'contact-card', block: ContactCardBlock },
     { slug: 'faq', block: FaqBlock },
     { slug: 'recent-posts', block: RecentPostsBlock },
+    { slug: 'mapBlock', block: MapBlock },
   ]
 
   return allBlocks.filter(({ slug }) => !exclude.includes(slug)).map(({ block }) => block(dbPrefix))
