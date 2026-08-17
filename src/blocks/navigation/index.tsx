@@ -97,7 +97,7 @@ export function NavigationBlockUI({
         <Button
           asChild
           className={joinStyles(className, navigationBlock.nav.styles)}
-          size={navigationBlock.nav.buttonSize}
+          size={navigationBlock.nav.buttonSize ?? 'default'}
           variant={navigationBlock.nav.buttonType}
         >
           <LinkWithIcon
@@ -138,7 +138,7 @@ export function NavigationBlockUI({
       <Button
         asChild
         className={joinStyles(className, navigationBlock.nav?.styles)}
-        size={navigationBlock.nav?.buttonSize}
+        size={navigationBlock.nav?.buttonSize ?? 'default'}
         variant={navigationBlock.nav?.buttonType}
       >
         <DropdownMenuTrigger className={hasIcon ? 'flex items-center gap-2' : ''}>
