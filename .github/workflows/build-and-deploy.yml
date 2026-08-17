@@ -643,10 +643,22 @@ jobs:
           cache-dir: .buildkit-cache-mounts
           dockerfile: Dockerfile
 
+      - name: Get Docker host gateway
+        id: docker-host
+        run: |
+          set -euo pipefail
 
-      # =========================================================
-      # BUILD AND PUSH
-      # =========================================================
+          HOST_GATEWAY="$(
+            docker network inspect bridge \
+              --format '{{(index .IPAM.Config 0).Gateway}}'
+          )"
+
+          if [ -z "$HOST_GATEWAY" ]; then
+            echo "ERROR: Unable to determine Docker host gateway."
+            exit 1
+          fi
+
+          echo "gateway=$HOST_GATEWAY" >> "$GITHUB_OUTPUT"
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
@@ -654,22 +666,23 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
+
           add-hosts: |
-            host.docker.internal:host-gateway
+            host.docker.internal:${{ steps.docker-host.outputs.gateway }}
+
           secret-files: |
             BUILD_ENV=/tmp/build-env.json
+
           tags: |
             ${{ steps.image.outputs.name }}:latest
             ${{ steps.image.outputs.name }}:${{ github.sha }}
+
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
+
           cache-from: type=gha,scope=production
           cache-to: type=gha,scope=production,mode=max
-
-      - name: Docker image published
-        run: echo "Docker image published."
-
 
       # =========================================================
       # TRIGGER DOKPLOY
