@@ -13,6 +13,14 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
   const additionalFonts = doc.additionalFonts || []
   const currentFontIds = new Set(additionalFonts.map((font: any) => font.id))
 
+  const settingsReq = {
+    ...req,
+    context: {
+      ...req.context,
+      fromSettings: true,
+    },
+  }
+
   const existingStyles = await req.payload.find({
     collection: 'styles',
     where: {
@@ -37,6 +45,48 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
     return `.font-${font.id} {\n  font-family: ${family} !important;\n  font-weight: ${weight} !important;\n  font-style: ${style} !important;\n  font-display: swap;\n}`
   }
 
+  if (doc.default?.fontData && isFontData(doc.default.fontData) && doc.default.fontData.id) {
+    const className = 'font-default'
+
+    const family = doc.default.fontData.variable
+      ? `'${doc.default.fontData.family} Variable', sans-serif`
+      : `'${doc.default.fontData.family}', sans-serif`
+
+    const stylesheet = `.${className} {
+  font-family: ${family} !important;
+  font-weight: ${doc.default.fontData.weight} !important;
+  font-style: ${doc.default.fontData.style || 'normal'} !important;
+  font-display: swap;
+}`
+
+    const existingStyle = existingStyles.docs.find((style) => style.className === className)
+
+    const alias = 'Font Default'
+
+    if (!existingStyle) {
+      await req.payload.create({
+        collection: 'styles',
+        data: {
+          alias,
+          className,
+          tailwind: false,
+          stylesheet,
+        },
+        req: settingsReq,
+      })
+    } else if (existingStyle.stylesheet !== stylesheet || existingStyle.alias !== alias) {
+      await req.payload.update({
+        collection: 'styles',
+        id: existingStyle.id,
+        data: {
+          alias,
+          stylesheet,
+        },
+        req: settingsReq,
+      })
+    }
+  }
+
   for (const font of additionalFonts) {
     if (font?.title != null && font?.title?.trim() !== '') {
       const className = `font-${font.id}`
@@ -52,7 +102,7 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
             tailwind: false,
             stylesheet: stylesheet,
           },
-          req,
+          req: settingsReq,
         })
       } else if (existingStyle.stylesheet !== stylesheet || existingStyle.alias !== font.title) {
         await req.payload.update({
@@ -62,7 +112,7 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
             alias: font.title,
             stylesheet: stylesheet,
           },
-          req,
+          req: settingsReq,
         })
       }
     }
@@ -73,6 +123,10 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
   )
 
   const orphanedFontStyles = fontStyles.filter((style: Style) => {
+    if (style.className === 'font-default') {
+      return false
+    }
+
     const styleId = style.className.replace('font-', '')
     return !currentFontIds.has(styleId)
   })
@@ -81,7 +135,7 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
     await req.payload.delete({
       collection: 'styles',
       id: style.id,
-      req,
+      req: settingsReq,
     })
   }
 

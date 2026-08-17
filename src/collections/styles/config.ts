@@ -6,16 +6,26 @@ import { generateStylesheet, revalidateCache, revalidateDelete } from '@/collect
 export const Styles: CollectionConfig<'styles'> = {
   slug: 'styles',
   access: {
-    create: authenticated,
-    delete: ({ req: { user }, data }) => {
-      if (!user) return false
-      if (data?.className?.startsWith('font-')) return false
+    create: (args) => {
+      if (!authenticated(args)) return false
+      if (args.data?.className?.startsWith('font-')) {
+        return args.req.context?.fromSettings === true
+      }
       return true
     },
     read: anyone,
-    update: ({ req: { user }, data }) => {
-      if (!user) return false
-      if (data?.className?.startsWith('font-')) return false
+    update: (args) => {
+      if (!authenticated(args)) return false
+      if (args.data?.className?.startsWith('font-')) {
+        return args.req.context?.fromSettings === true
+      }
+      return true
+    },
+    delete: (args) => {
+      if (!authenticated(args)) return false
+      if (args.data?.className?.startsWith('font-')) {
+        return args.req.context?.fromSettings === true
+      }
       return true
     },
   },
