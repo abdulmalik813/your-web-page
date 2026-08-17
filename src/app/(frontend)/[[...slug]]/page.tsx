@@ -258,15 +258,15 @@ export default async function PageRoute({ params, searchParams }: Readonly<SlugP
                       <AlertCircle className="h-10 w-10 text-destructive" />
                     </div>
                   </div>
-                  <CardTitle className="text-3xl font-bold">404 - Page Not Found</CardTitle>
-                  <CardDescription className="text-base mt-2">
+                  <CardTitle className="text-3xl font-bold uppercase">404 - Page Not Found</CardTitle>
+                  <CardDescription className="text-base mt-2 uppercase">
                     The page you&apos;re looking for doesn&apos;t exist or has been moved.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3">
                   <Button asChild className="w-full">
                     <Link href="/">
-                      <Home className="mr-2 h-4 w-4" />
+                      <Home className="mr-2 h-4 w-4 uppercase" />
                       Go to Homepage
                     </Link>
                   </Button>
