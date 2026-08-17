@@ -23,7 +23,6 @@ import { PageContext } from '@/types/page-context'
 import { LexicalRenderer } from '@/components/renderer/lexical-renderer'
 import { NavigationBlockUI } from '@/blocks/navigation'
 import { Button } from '@/components/button'
-import { NavigationBarWrapper } from '@/components/nav-menu/navigation-wrapper'
 
 function Banner({
   pageContext,
@@ -198,10 +197,7 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
   if (typeof lightLogo !== 'object' || typeof darkLogo !== 'object') return null
 
   return (
-    <NavigationBarWrapper
-      hideWhenIdle={navBarData.hideWhenIdle}
-      idleTimeout={navBarData.idleTimeout}
-    >
+    <>
       <Banner {...navBarData.banner} pageContext={pageContext} />
       <header
         className={joinStyles(
@@ -294,6 +290,6 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
           </div>
         </div>
       </header>
-    </NavigationBarWrapper>
+      </ >
   )
 }

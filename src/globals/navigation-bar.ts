@@ -119,18 +119,6 @@ export const NavigationBar: GlobalConfig = {
                 condition: (_, data) => data?.useTitleWithLogo === true,
               },
             },
-            {
-              name: 'hideWhenIdle',
-              type: 'checkbox',
-            },
-            {
-              name: 'idleTimeout',
-              type: 'number',
-              defaultValue: 3000,
-              admin: {
-                condition: (_, data) => data?.hideWhenIdle === true,
-              },
-            },
           ],
         },
       ],
