@@ -10,9 +10,9 @@ import { getServerSideURL } from '@/lib/get-url'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { revalidateDeletedRedirects, revalidateRedirects } from '@/hooks/revalidate-redirects'
 import { TimeBlock } from '@/fields/time'
-import { defaultLexical } from '@/fields/lexical-field'
-import { S3 } from './constants/init'
+import { S3 } from '@/constants/init'
 import { navLocation } from '@/fields/nav-location'
+import { formOverrides } from '@/fields/form-overrides'
 
 const generateTitle: GenerateTitle<Page | Post> = async ({ doc, req }) => {
   const setting = await req.payload.findGlobal({
@@ -96,17 +96,20 @@ export const plugins: Plugin[] = [
     },
     formOverrides: {
       fields: ({ defaultFields }) => {
-        return [
-          ...defaultFields.map((field) => {
-            if ('name' in field && field.name === 'confirmationMessage') {
-              return {
-                ...field,
-                editor: defaultLexical(),
-              }
-            }
-            return field
-          }),
-        ]
+        return defaultFields.flatMap((field) => {
+          if (
+            'name' in field &&
+            (field.name === 'submitButtonLabel' || field.name === 'confirmationMessage')
+          ) {
+            return []
+          }
+
+          if ('name' in field && field.name === 'confirmationType') {
+            return [field, ...formOverrides]
+          }
+
+          return [field]
+        })
       },
     },
   }),

@@ -1,4 +1,3 @@
-import { Button } from '@/components/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -22,13 +21,19 @@ import { UseFormReturn } from 'react-hook-form'
 import { LexicalRenderer } from '@/components/renderer/lexical-renderer'
 import { FieldType } from '@/blocks/form/utils'
 import { PageContext } from '@/types/page-context'
+import type { FormBlock } from '@/payload-types'
+import { IconRender } from '@/components/renderer/icon-renderer'
+import { joinStyles } from '@/lib/make-styles'
+import { Button } from '@/components/button'
+
+type PayloadForm = Exclude<FormBlock['form'], string>
 
 interface FormRegistrationProps {
   fields: FieldType[]
   form: UseFormReturn<any>
   onSubmit: (values: any) => Promise<void>
   isSubmitting: boolean
-  submitButtonLabel: string
+  submitButton?: PayloadForm['submitButton']
   pageContext: PageContext
 }
 
@@ -37,7 +42,7 @@ export function FormRegistration({
   form,
   onSubmit,
   isSubmitting,
-  submitButtonLabel,
+  submitButton,
   pageContext,
 }: FormRegistrationProps) {
   return (
@@ -287,8 +292,38 @@ export function FormRegistration({
           })}
         </div>
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting && <Spinner />} {submitButtonLabel}
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className={joinStyles(submitButton?.styles)}
+          size={submitButton?.buttonSize ?? 'default'}
+          variant={submitButton?.buttonType}
+        >
+          {isSubmitting && <Spinner />}
+
+          {!isSubmitting &&
+            submitButton?.axis !== 'after' &&
+            typeof submitButton?.icon === 'object' &&
+            submitButton.icon?.name && (
+              <IconRender
+                icon={submitButton.icon.name}
+                iconStyles={joinStyles(submitButton.iconStyles)}
+              />
+            )}
+
+          <span className="wrap-break-word whitespace-normal">
+            {submitButton?.label || 'Submit'}
+          </span>
+
+          {!isSubmitting &&
+            submitButton?.axis === 'after' &&
+            typeof submitButton?.icon === 'object' &&
+            submitButton.icon?.name && (
+              <IconRender
+                icon={submitButton.icon.name}
+                iconStyles={joinStyles(submitButton.iconStyles)}
+              />
+            )}
         </Button>
       </form>
     </Form>

@@ -103,7 +103,7 @@ export function FormBlockClient({
           pageContext={pageContext}
           onSubmit={onSubmit}
           isSubmitting={isSubmitting}
-          submitButtonLabel={payloadForm.submitButtonLabel || 'Submit'}
+          submitButton={payloadForm.submitButton}
         />
       </CardContent>
       {(hasSubmitted || error) && (

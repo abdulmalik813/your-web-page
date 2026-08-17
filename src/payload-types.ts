@@ -1265,23 +1265,7 @@ export interface Form {
           }
       )[]
     | null;
-  submitButtonLabel?: string | null;
   confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
   redirect?: {
     url: string;
   };
@@ -1311,6 +1295,33 @@ export interface Form {
         id?: string | null;
       }[]
     | null;
+  submitButton?: {
+    label?: string | null;
+    buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
+    buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
+    styles?: (string | Style)[] | null;
+    icon?: (string | null) | Icon;
+    axis?: ('before' | 'after') | null;
+    iconStyles?: (string | Style)[] | null;
+  };
+  confirmationMessage?: {
+    contentStyles?: (string | Style)[] | null;
+    content?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -3145,9 +3156,7 @@ export interface FormsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
-  submitButtonLabel?: T;
   confirmationType?: T;
-  confirmationMessage?: T;
   redirect?:
     | T
     | {
@@ -3164,6 +3173,23 @@ export interface FormsSelect<T extends boolean = true> {
         subject?: T;
         message?: T;
         id?: T;
+      };
+  submitButton?:
+    | T
+    | {
+        label?: T;
+        buttonType?: T;
+        buttonSize?: T;
+        styles?: T;
+        icon?: T;
+        axis?: T;
+        iconStyles?: T;
+      };
+  confirmationMessage?:
+    | T
+    | {
+        contentStyles?: T;
+        content?: T;
       };
   updatedAt?: T;
   createdAt?: T;
