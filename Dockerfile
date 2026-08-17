@@ -1,9 +1,11 @@
 # syntax=docker/dockerfile:1.7
 
-
 FROM node:22-alpine AS base
 
 WORKDIR /app
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 
 RUN corepack enable
 
@@ -16,9 +18,10 @@ FROM base AS deps
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
-RUN pnpm install \
-    --frozen-lockfile \
-    --ignore-scripts
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install \
+      --frozen-lockfile \
+      --ignore-scripts
 
 
 # =============================================================
@@ -55,22 +58,11 @@ RUN pnpm run export-css
 
 
 # =============================================================
-# CACHE BUSTER
-# =============================================================
-
-ARG CACHEBUST=1
-
-
-# =============================================================
 # APPLICATION BUILD
-#
-# BUILD_ENV exists only during this RUN.
-#
-# Nothing from BUILD_ENV is intentionally printed.
-# Nothing from BUILD_ENV is stored via ENV or ARG.
 # =============================================================
 
 RUN --mount=type=secret,id=BUILD_ENV,required=true \
+    --mount=type=cache,id=next-cache,target=/app/.next/cache \
     node <<'NODE'
 const fs = require("fs");
 const { spawnSync } = require("child_process");
@@ -107,7 +99,6 @@ if (
 const buildEnv = {};
 
 for (const [key, value] of Object.entries(parsed)) {
-
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) {
     console.error(
       "ERROR: Invalid environment variable."
@@ -123,7 +114,6 @@ for (const [key, value] of Object.entries(parsed)) {
   } else {
     buildEnv[key] = String(value);
   }
-
 }
 
 if (!buildEnv.DATABASE_URI) {
@@ -169,12 +159,14 @@ FROM node:22-alpine AS runner
 
 WORKDIR /app
 
-RUN corepack enable
-
 ENV NODE_ENV=production
+ENV HOSTNAME="0.0.0.0"
+ENV PORT=3000
 
-COPY --from=builder /app ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
 
-CMD ["pnpm", "start"]
+CMD ["node", "server.js"]

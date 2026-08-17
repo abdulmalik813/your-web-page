@@ -32,6 +32,7 @@ const getImageRemotePatterns = () => {
 }
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   images: {
     remotePatterns: getImageRemotePatterns(),
     unoptimized: process.env.NODE_ENV === 'development',
