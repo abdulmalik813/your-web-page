@@ -9,7 +9,6 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
   }
 
   const additionalFonts = doc.additionalFonts || []
-  const currentFontIds = new Set(additionalFonts.map((font: any) => font.id))
 
   const settingsReq = {
     ...req,
@@ -168,11 +167,21 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
     }
   }
 
+  const validFontClassNames = new Set<string>()
+
+  validFontClassNames.add('font-default')
+
+  for (const font of additionalFonts) {
+    if (font?.id && font?.title != null && font.title.trim() !== '') {
+      validFontClassNames.add(`font-${font.id}`)
+    }
+  }
+
   const existingStyles = await req.payload.find({
     collection: 'styles',
     where: {
       className: {
-        like: 'font-%',
+        contains: 'font-',
       },
     },
     limit: 1000,
@@ -185,19 +194,14 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
   )
 
   const orphanedFontStyles = fontStyles.filter((style: Style) => {
-    if (style.className === 'font-default') {
-      return false
-    }
-
-    const styleId = style.className.replace('font-', '')
-    return !currentFontIds.has(styleId)
+    return !validFontClassNames.has(style.className)
   })
 
   for (const style of orphanedFontStyles) {
     await req.payload.delete({
       collection: 'styles',
       id: style.id,
-      req,
+      req: settingsReq,
       overrideAccess: true,
     })
   }
