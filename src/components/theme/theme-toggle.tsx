@@ -1,11 +1,23 @@
 'use client'
 
+import { useSyncExternalStore } from 'react'
 import { Moon, Sun, Monitor } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/button'
 
+const subscribe = () => () => {}
+
+function useMounted() {
+  return useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  )
+}
+
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
+  const mounted = useMounted()
 
   const cycleTheme = () => {
     let nextTheme = 'system'
@@ -24,23 +36,21 @@ export function ThemeToggle() {
       className="w-12 h-12"
     >
       <span className="relative flex h-[1.4rem] w-[1.4rem] items-center justify-center">
-        <Monitor
-          className={`absolute h-[1.4rem] w-[1.4rem] ${
-            theme === 'system' ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
+        {mounted && (
+          <>
+            {theme === 'system' && (
+              <Monitor className="absolute h-[1.4rem] w-[1.4rem]" />
+            )}
 
-        <Moon
-          className={`absolute h-[1.4rem] w-[1.4rem] ${
-            theme === 'dark' ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
+            {theme === 'dark' && (
+              <Moon className="absolute h-[1.4rem] w-[1.4rem]" />
+            )}
 
-        <Sun
-          className={`absolute h-[1.4rem] w-[1.4rem] ${
-            theme === 'light' ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
+            {theme === 'light' && (
+              <Sun className="absolute h-[1.4rem] w-[1.4rem]" />
+            )}
+          </>
+        )}
       </span>
 
       <span className="sr-only">Toggle theme</span>
