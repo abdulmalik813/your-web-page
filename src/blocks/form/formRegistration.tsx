@@ -73,7 +73,7 @@ export function FormRegistration({
                             value={formField.value as string}
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-accent"  />
                       </FormItem>
                     )}
                   />
@@ -101,7 +101,7 @@ export function FormRegistration({
                             value={formField.value as string}
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-accent"  />
                       </FormItem>
                     )}
                   />
@@ -128,7 +128,7 @@ export function FormRegistration({
                             value={formField.value as string}
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-accent"  />
                       </FormItem>
                     )}
                   />
@@ -156,7 +156,7 @@ export function FormRegistration({
                             value={formField.value as string}
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-accent"  />
                       </FormItem>
                     )}
                   />
@@ -179,7 +179,7 @@ export function FormRegistration({
                         <FormControl>
                           <Input type="date" {...formField} value={formField.value as string} />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-accent"  />
                       </FormItem>
                     )}
                   />
@@ -202,7 +202,7 @@ export function FormRegistration({
                         <FormControl>
                           <Input type="time" {...formField} value={formField.value as string} />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-accent"  />
                       </FormItem>
                     )}
                   />
@@ -231,7 +231,7 @@ export function FormRegistration({
                             {field.required && <span className="text-red-500 ml-1">*</span>}
                           </FormLabel>
                         )}
-                        <FormMessage />
+                        <FormMessage className="text-accent"  />
                       </FormItem>
                     )}
                   />
@@ -268,7 +268,7 @@ export function FormRegistration({
                             ))}
                           </SelectContent>
                         </Select>
-                        <FormMessage />
+                        <FormMessage className="text-accent"  />
                       </FormItem>
                     )}
                   />

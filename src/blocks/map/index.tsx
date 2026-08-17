@@ -13,14 +13,16 @@ export function MapBlockUI({
   if (!mapUrl) return null
 
   return (
-    <div className={joinStyles('relative', styles)}>
+    <div className="relative overflow-hidden">
       <iframe
         src={mapUrl}
         title={text || 'Map'}
         loading="lazy"
         allowFullScreen
         referrerPolicy="no-referrer-when-downgrade"
+        className={joinStyles('block w-full h-full', styles)}
       />
+
       {text && (
         <div className="absolute bottom-4 left-4 bg-black px-5 py-3 font-bold uppercase text-white shadow-lg">
           {text}
