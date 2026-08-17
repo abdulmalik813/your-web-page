@@ -20,7 +20,7 @@ import { SlugProps } from '@/types/slug-props'
 import { AdminBar } from '@/components/admin-bar'
 import { AlertCircle, Home } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/button'
 import Link from 'next/link'
 import { unstable_cache } from 'next/cache'
 

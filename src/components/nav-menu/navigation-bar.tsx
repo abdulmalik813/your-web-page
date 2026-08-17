@@ -22,7 +22,7 @@ import { joinStyles } from '@/lib/make-styles'
 import { PageContext } from '@/types/page-context'
 import { LexicalRenderer } from '@/components/renderer/lexical-renderer'
 import { NavigationBlockUI } from '@/blocks/navigation'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/button'
 import { NavigationBarWrapper } from '@/components/nav-menu/navigation-wrapper'
 
 function Banner({
@@ -203,7 +203,13 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
       idleTimeout={navBarData.idleTimeout}
     >
       <Banner {...navBarData.banner} pageContext={pageContext} />
-      <header className={joinStyles(navBarData.stickyBar ? 'sticky' : '', 'top-0 z-50 w-full bg-background text-foreground border-b border-border')} role="navigation">
+      <header
+        className={joinStyles(
+          navBarData.stickyBar ? 'sticky' : '',
+          'top-0 z-50 w-full bg-background text-foreground border-b border-border',
+        )}
+        role="navigation"
+      >
         <div className="w-full flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center min-w-0 shrink">
             <LogoLink
@@ -238,7 +244,12 @@ export async function NavigationBarUI({ pageContext }: { pageContext: PageContex
                   if (appearance === 'dropdown') {
                     return (
                       <NavigationMenuItem key={item.id}>
-                        <NavigationMenuTrigger className={joinStyles('text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:bg-transparent data-[state=open]:text-foreground', item?.nav?.styles)}>
+                        <NavigationMenuTrigger
+                          className={joinStyles(
+                            'text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:bg-transparent data-[state=open]:text-foreground',
+                            item?.nav?.styles,
+                          )}
+                        >
                           {item.nav?.label}
                         </NavigationMenuTrigger>
                         <NavigationMenuContent className="left-0">

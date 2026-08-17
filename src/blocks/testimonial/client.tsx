@@ -1,13 +1,13 @@
 'use client'
 
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/button'
 import { TestimonialBlock, Testimonial } from '@/payload-types'
 import { joinStyles } from '@/lib/make-styles'
 import { NavigationBlockUI } from '@/blocks/navigation'
 import { PageContext } from '@/types/page-context'
 import { Star, User, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Media } from '@/components/media'
 
 export function TestimonialBlockClient({
@@ -33,9 +33,9 @@ function TestimonialCarousel({
     (t): t is Testimonial => typeof t !== 'number',
   )
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setActive((prev) => (prev + 1) % validTestimonials.length)
-  }
+  }, [validTestimonials.length])
 
   const handlePrev = () => {
     setActive((prev) => (prev - 1 + validTestimonials.length) % validTestimonials.length)
@@ -77,7 +77,7 @@ function TestimonialCarousel({
 
   const getCardClasses = (index: number) => {
     const offset = (index - active + validTestimonials.length) % validTestimonials.length
-    
+
     if (offset === 0) {
       return 'scale-100 rotate-0 translate-y-0 translate-x-0 opacity-100 z-30 blur-0'
     }

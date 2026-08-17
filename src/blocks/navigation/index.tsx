@@ -1,5 +1,5 @@
 import { NavigationBlock } from '@/payload-types'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/button'
 import { joinStyles } from '@/lib/make-styles'
 import Link from 'next/link'
 import {

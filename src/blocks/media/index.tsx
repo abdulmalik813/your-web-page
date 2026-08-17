@@ -4,7 +4,7 @@ import { joinStyles } from '@/lib/make-styles'
 import type { Media as MediaCollection } from '@/payload-types'
 import Link from 'next/link'
 import { getServerSideURL } from '@/lib/get-url'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/button'
 import { browserPlayableTypes } from '@/constants/browser-media'
 import { PageContext } from '@/types/page-context'
 
@@ -13,7 +13,9 @@ export function MediaBlockUI({
   className,
   priority,
   ...mediaBlock
-}: Partial<MediaBlock> & { className?: string } & { pageContext: PageContext } & { priority?: boolean | false }) {
+}: Partial<MediaBlock> & { className?: string } & { pageContext: PageContext } & {
+  priority?: boolean | false
+}) {
   if (!mediaBlock.media) return null
 
   const media: MediaCollection = mediaBlock.media as MediaCollection

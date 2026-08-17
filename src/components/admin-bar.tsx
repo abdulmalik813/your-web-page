@@ -2,7 +2,7 @@ import { PageContext } from '@/types/page-context'
 import { getServerSideURL } from '@/lib/get-url'
 import { PlusCircle, LayoutDashboard, XCircle, Eye } from 'lucide-react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/button'
 import { Separator } from '@/components/ui/separator'
 import { generatePreviewPath } from '@/lib/generate-preview-path'
 import { getPayload } from 'payload'
@@ -32,24 +32,14 @@ export async function AdminBar({ pageContext }: { pageContext: PageContext }) {
           <Separator orientation="vertical" className="h-6" />
 
           {pageContext.draft ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2"
-              asChild
-            >
+            <Button variant="ghost" size="sm" className="gap-2" asChild>
               <a href={`/api/draft/disable?path=${encodeURIComponent(pageContext.slug || '')}`}>
                 <XCircle className="h-4 w-4" />
                 <span>Exit Preview</span>
               </a>
             </Button>
           ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2"
-              asChild
-            >
+            <Button variant="ghost" size="sm" className="gap-2" asChild>
               <a href={generatePreviewPath(pageContext.slug || '')}>
                 <Eye className="h-4 w-4" />
                 <span>Enable Preview</span>

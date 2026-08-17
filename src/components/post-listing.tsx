@@ -13,7 +13,7 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from '@/components/ui/pagination'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/button'
 import {
   Card,
   CardContent,

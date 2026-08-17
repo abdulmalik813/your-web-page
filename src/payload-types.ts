@@ -167,7 +167,8 @@ export interface Page {
                 }[]
               | null;
             buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-            buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+            buttonSize?:
+              ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
             listStyle?: (string | Style)[] | null;
             styles?: (string | Style)[] | null;
             icon?: (string | null) | Icon;
@@ -250,7 +251,7 @@ export interface Page {
               }[]
             | null;
           buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-          buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+          buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
           listStyle?: (string | Style)[] | null;
           styles?: (string | Style)[] | null;
           icon?: (string | null) | Icon;
@@ -422,7 +423,8 @@ export interface Post {
                 }[]
               | null;
             buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-            buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+            buttonSize?:
+              ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
             listStyle?: (string | Style)[] | null;
             styles?: (string | Style)[] | null;
             icon?: (string | null) | Icon;
@@ -505,7 +507,7 @@ export interface Post {
               }[]
             | null;
           buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-          buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+          buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
           listStyle?: (string | Style)[] | null;
           styles?: (string | Style)[] | null;
           icon?: (string | null) | Icon;
@@ -887,7 +889,7 @@ export interface CallToActionBlock {
             }[]
           | null;
         buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-        buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+        buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
         listStyle?: (string | Style)[] | null;
         styles?: (string | Style)[] | null;
         icon?: (string | null) | Icon;
@@ -980,7 +982,7 @@ export interface CardBlock {
           }[]
         | null;
       buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-      buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+      buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
       listStyle?: (string | Style)[] | null;
       styles?: (string | Style)[] | null;
       icon?: (string | null) | Icon;
@@ -1454,7 +1456,7 @@ export interface TestimonialBlock {
         }[]
       | null;
     buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-    buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+    buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
     listStyle?: (string | Style)[] | null;
     styles?: (string | Style)[] | null;
     icon?: (string | null) | Icon;
@@ -1528,7 +1530,7 @@ export interface GalleryBlock {
         }[]
       | null;
     buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-    buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+    buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
     listStyle?: (string | Style)[] | null;
     styles?: (string | Style)[] | null;
     icon?: (string | null) | Icon;
@@ -3301,7 +3303,7 @@ export interface NavigationBar {
               }[]
             | null;
           buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-          buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+          buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
           listStyle?: (string | Style)[] | null;
           styles?: (string | Style)[] | null;
           icon?: (string | null) | Icon;
@@ -3352,7 +3354,7 @@ export interface NavigationBar {
               }[]
             | null;
           buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-          buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+          buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
           listStyle?: (string | Style)[] | null;
           styles?: (string | Style)[] | null;
           icon?: (string | null) | Icon;
@@ -3453,7 +3455,7 @@ export interface Footer {
               }[]
             | null;
           buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-          buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+          buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
           listStyle?: (string | Style)[] | null;
           styles?: (string | Style)[] | null;
           icon?: (string | null) | Icon;
@@ -3902,7 +3904,7 @@ export interface NavigationBlock {
         }[]
       | null;
     buttonType?: ('default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link') | null;
-    buttonSize?: ('sm' | 'default' | 'lg' | 'icon') | null;
+    buttonSize?: ('sm' | 'default' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | 'icon' | 'icon-sm' | 'icon-lg') | null;
     listStyle?: (string | Style)[] | null;
     styles?: (string | Style)[] | null;
     icon?: (string | null) | Icon;
