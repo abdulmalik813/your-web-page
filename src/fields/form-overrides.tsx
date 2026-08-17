@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import type { Field, ArrayField } from 'payload'
 import { icon } from '@/fields/icon'
 import { defaultLexical } from '@/fields/lexical-field'
 import { MediaBlock } from '@/blocks/media/config'
@@ -12,7 +12,7 @@ import { TableBlock } from '@/blocks/table/config'
 import { IconBlock } from '@/blocks/icon/config'
 import { defaultLexicalValue } from '@/constants/default-lexical'
 
-export const formOverrides: Field[] = [
+const customFields: Field[] = [
   {
     name: 'confirmationMessage',
     type: 'group',
@@ -128,3 +128,67 @@ export const formOverrides: Field[] = [
     ],
   },
 ]
+
+export const formOverrides = ({ defaultFields }: { defaultFields: Field[] }): Field[] => {
+  return defaultFields.flatMap((field) => {
+    if (
+      'name' in field &&
+      (field.name === 'submitButtonLabel' || field.name === 'confirmationMessage')
+    ) {
+      return []
+    }
+
+    if ('name' in field && field.name === 'confirmationType') {
+      return [field, ...customFields]
+    }
+
+    if ('name' in field && field.name === 'emails' && field.type === 'array') {
+      const emailsField = { ...field } as ArrayField
+      emailsField.admin = {
+        ...emailsField.admin,
+        description: "Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. Handlebars expressions are supported.",
+      }
+
+      if (Array.isArray(emailsField.fields)) {
+        emailsField.fields = emailsField.fields.flatMap((f: any) => {
+          if (f.name === 'message') {
+            const modifiedMessage = {
+              ...f,
+              admin: {
+                ...f.admin,
+                condition: (_: any, siblingData: any) => siblingData?.messageType !== 'html',
+              },
+            }
+
+            return [
+              {
+                name: 'messageType',
+                type: 'select',
+                options: [
+                  { label: 'Rich Text', value: 'rich_text' },
+                  { label: 'Custom HTML', value: 'html' },
+                ],
+                defaultValue: 'rich_text',
+                required: true,
+              },
+              modifiedMessage,
+              {
+                name: 'htmlMessage',
+                type: 'code',
+                label: 'Custom HTML Message (Wildcards are not supported in HTML messages)',
+                localized: true,
+                admin: {
+                  condition: (_: any, siblingData: any) => siblingData?.messageType === 'html',
+                  language: 'html',
+                },
+              },
+            ]
+          }
+          return [f]
+        }) as any
+      }
+      return [emailsField]
+    }
+    return [field]
+  })
+}

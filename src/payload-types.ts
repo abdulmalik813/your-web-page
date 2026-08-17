@@ -1298,6 +1298,9 @@ export interface Form {
   redirect?: {
     url: string;
   };
+  /**
+   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. Handlebars expressions are supported.
+   */
   emails?:
     | {
         emailTo?: string | null;
@@ -1306,6 +1309,7 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
+        messageType: 'rich_text' | 'html';
         message?: {
           root: {
             type: string;
@@ -1321,6 +1325,7 @@ export interface Form {
           };
           [k: string]: unknown;
         } | null;
+        htmlMessage?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -3213,7 +3218,9 @@ export interface FormsSelect<T extends boolean = true> {
         replyTo?: T;
         emailFrom?: T;
         subject?: T;
+        messageType?: T;
         message?: T;
+        htmlMessage?: T;
         id?: T;
       };
   updatedAt?: T;

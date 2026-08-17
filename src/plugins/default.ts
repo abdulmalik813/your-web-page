@@ -9,11 +9,9 @@ import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/lib/get-url'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { revalidateDeletedRedirects, revalidateRedirects } from '@/hooks/revalidate-redirects'
-import { TimeBlock } from '@/fields/time'
 import { S3 } from '@/constants/init'
 import { navLocation } from '@/fields/nav-location'
-import { formOverrides } from '@/fields/form-overrides'
-import { FormattedEmail } from 'node_modules/@payloadcms/plugin-form-builder/dist/types'
+import { formPlugin } from '@/plugins/form-plugin'
 
 const generateTitle: GenerateTitle<Page | Post> = async ({ doc, req }) => {
   const setting = await req.payload.findGlobal({
@@ -87,50 +85,7 @@ export const plugins: Plugin[] = [
       return searchDoc
     },
   }),
-  formBuilderPlugin({
-    fields: {
-      payment: false,
-      state: false,
-      country: false,
-      date: true,
-      time: TimeBlock,
-    },
-    formOverrides: {
-      fields: ({ defaultFields }) => {
-        return defaultFields.flatMap((field) => {
-          if (
-            'name' in field &&
-            (field.name === 'submitButtonLabel' || field.name === 'confirmationMessage')
-          ) {
-            return []
-          }
-
-          if ('name' in field && field.name === 'confirmationType') {
-            return [field, ...formOverrides]
-          }
-
-          return [field]
-        })
-      },
-    },
-    beforeEmail: (emailsToSend, _submissionData) => {
-      return emailsToSend.map((email): FormattedEmail => {
-        // 1. Strip all HTML tags from the existing html field content
-        const plainTextContent = (email.html || '').replace(/<[^>]*>?/gm, '')
-
-        return {
-          to: email.to,
-          from: email.from,
-          subject: email.subject,
-          replyTo: email.replyTo,
-          cc: email.cc,
-          bcc: email.bcc,
-          // 2. Assign the clean plain text string to 'html' to satisfy the interface type
-          html: plainTextContent,
-        }
-      })
-    },
-  }),
+  formPlugin,
   s3Storage({
     collections: {
       media: {
