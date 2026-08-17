@@ -20,16 +20,13 @@ import { FormRegistration } from '@/blocks/form/formRegistration'
 import { getClientSideURL } from '@/lib/get-url'
 import { PageContext } from '@/types/page-context'
 import { joinStyles } from '@/lib/make-styles'
+import { LexicalRenderer } from '@/components/renderer/lexical-renderer'
 
 export function FormBlockClient({
   pageContext,
-  renderedDescription,
-  renderedConfirmation,
   ...formBlock
 }: FormBlock & {
   pageContext: PageContext
-  renderedDescription?: React.ReactNode
-  renderedConfirmation?: React.ReactNode
 }) {
   const payloadForm = typeof formBlock.form === 'string' ? null : formBlock.form
   const router = useRouter()
@@ -90,11 +87,15 @@ export function FormBlockClient({
     <Card className={joinStyles(formBlock.cardStyles)}>
       <CardHeader>
         <CardTitle className={joinStyles(formBlock.titleStyles)}>{payloadForm?.title}</CardTitle>
-        {formBlock?.enableDescription && (
+        {formBlock?.enableDescription && payloadForm.confirmationMessage ? (
           <CardDescription className={joinStyles(formBlock.descriptionStyles)}>
-            {renderedDescription}
+            <LexicalRenderer
+              content={payloadForm.confirmationMessage.content}
+              className={joinStyles(payloadForm.confirmationMessage.contentStyles)}
+              pageContext={pageContext}
+            />
           </CardDescription>
-        )}
+        ) : null}
       </CardHeader>
       <CardContent>
         <FormRegistration
@@ -110,14 +111,20 @@ export function FormBlockClient({
         <CardFooter>
           {hasSubmitted && payloadForm.confirmationType === 'message' && (
             <Alert>
-              <AlertDescription className="text-foreground">
-                {renderedConfirmation}
+              <AlertDescription>
+                {payloadForm?.confirmationMessage?.content ? (
+                  <LexicalRenderer
+                    content={payloadForm.confirmationMessage.content}
+                    className={joinStyles(payloadForm.confirmationMessage.contentStyles)}
+                    pageContext={pageContext}
+                  />
+                ) : null}
               </AlertDescription>
             </Alert>
           )}
           {error && (
             <Alert variant="destructive">
-              <AlertDescription className="text-foreground">{`${error.status || '500'}: ${error.message || ''}`}</AlertDescription>
+              <AlertDescription className={joinStyles(payloadForm.confirmationMessage ? payloadForm.confirmationMessage.contentStyles : '' )}>{`${error.status || '500'}: ${error.message || ''}`}</AlertDescription>
             </Alert>
           )}
         </CardFooter>
