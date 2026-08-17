@@ -11,6 +11,14 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
   const additionalFonts = doc.additionalFonts || []
   const currentFontIds = new Set(additionalFonts.map((font: any) => font.id))
 
+  const settingsReq = {
+    ...req,
+    context: {
+      ...req.context,
+      allowFontStyleDelete: true,
+    },
+  }
+
   const generateFontCSS = (font: any): string => {
     if (!font.id || !font.family || !font.fontData || !isFontData(font.fontData)) {
       return ''
@@ -86,7 +94,7 @@ export const revalidateSettings: GlobalAfterChangeHook = async ({ doc, req }) =>
       await req.payload.delete({
         collection: 'styles',
         id: styleByClass.id,
-        req,
+        req: settingsReq,
         overrideAccess: true,
       })
 

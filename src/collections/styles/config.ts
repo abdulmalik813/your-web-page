@@ -61,8 +61,8 @@ const canUpdateNonFontField = ({ data, doc }: any) => {
   return !className?.startsWith('font-')
 }
 
-const preventDeletingFontStyle = async ({ id, req, overrideAccess }: any) => {
-  if (overrideAccess === true) {
+const preventDeletingFontStyle = async ({ id, req }: any) => {
+  if (req.context?.allowFontStyleDelete === true) {
     return
   }
 
