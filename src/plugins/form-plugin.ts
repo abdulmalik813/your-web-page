@@ -34,9 +34,25 @@ function processWithHandlebars(
     return template(context)
   } catch (error) {
     payload.logger.error('Handlebars compilation error: ' + error)
-    return ""
+    return ''
   }
 }
+
+Handlebars.registerHelper('script', function (codeString: string, options) {
+  try {
+    const context = options.data.root || {}
+    const evalFn = new Function('context', `
+      with (context) {
+        return (${codeString});
+      }
+    `)
+
+    return evalFn(context) ?? ''
+  } catch (error) {
+    console.error(`Handlebars script helper error for expression: "${codeString}"`, error)
+    return ''
+  }
+})
 
 export const formPlugin = formBuilderPlugin({
   fields: {
