@@ -1,6 +1,6 @@
 import { anyone } from '@/access/anyone'
 import { authenticated } from '@/access/authenticated'
-import { CollectionConfig } from 'payload'
+import { CollectionConfig, APIError } from 'payload'
 import { generateStylesheet, revalidateCache, revalidateDelete } from '@/collections/styles/hooks'
 
 const isFontStyle = ({ data, doc }: any) => {
@@ -8,7 +8,25 @@ const isFontStyle = ({ data, doc }: any) => {
   return className?.startsWith('font-')
 }
 
-const canManageStyle = (args: any) => {
+const getFontStyleIds = async ({ req }: any) => {
+  const fontStyles = await req.payload.find({
+    collection: 'styles',
+    where: {
+      className: {
+        contains: 'font-',
+      },
+    },
+    limit: 1000,
+    req,
+    overrideAccess: true,
+  })
+
+  return fontStyles.docs
+    .filter((style: any) => style.className?.startsWith('font-'))
+    .map((style: any) => style.id)
+}
+
+const canCreateStyle = (args: any) => {
   if (!authenticated(args)) return false
 
   if (isFontStyle(args)) {
@@ -18,18 +36,58 @@ const canManageStyle = (args: any) => {
   return true
 }
 
+const canUpdateStyle = async (args: any) => {
+  if (!authenticated(args)) return false
+
+  const fontStyleIds = await getFontStyleIds(args)
+
+  if (fontStyleIds.length === 0) {
+    return true
+  }
+
+  return {
+    id: {
+      not_in: fontStyleIds,
+    },
+  }
+}
+
+const canDeleteStyle = (args: any) => {
+  return authenticated(args)
+}
+
 const canUpdateNonFontField = ({ data, doc }: any) => {
   const className = data?.className ?? doc?.className
   return !className?.startsWith('font-')
 }
 
+const preventDeletingFontStyle = async ({ id, req, overrideAccess }: any) => {
+  if (overrideAccess === true) {
+    return
+  }
+
+  const style = await req.payload.findByID({
+    collection: 'styles',
+    id,
+    req,
+    overrideAccess: true,
+  })
+
+  if (style?.className?.startsWith('font-')) {
+    throw new APIError(
+      'Font styles are managed from Settings and cannot be deleted from the Styles collection.',
+      400,
+    )
+  }
+}
+
 export const Styles: CollectionConfig<'styles'> = {
   slug: 'styles',
   access: {
-    create: canManageStyle,
+    create: canCreateStyle,
     read: anyone,
-    update: canManageStyle,
-    delete: canManageStyle,
+    update: canUpdateStyle,
+    delete: canDeleteStyle,
   },
   admin: {
     useAsTitle: 'alias',
@@ -81,6 +139,7 @@ export const Styles: CollectionConfig<'styles'> = {
     },
   ],
   hooks: {
+    beforeDelete: [preventDeletingFontStyle],
     beforeChange: [generateStylesheet],
     afterChange: [revalidateCache],
     afterDelete: [revalidateDelete],

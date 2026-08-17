@@ -9,6 +9,7 @@ import axios from 'axios'
 import { revalidateTag } from 'next/cache'
 import { globalCSS } from '@/constants/global-css'
 import { TAILWIND_GENERATOR } from '@/constants/init'
+
 export const generateStylesheet: CollectionBeforeChangeHook<Style> = async ({ data }) => {
   if (data.tailwind !== false) {
     const endpoint = TAILWIND_GENERATOR + "/generate"
