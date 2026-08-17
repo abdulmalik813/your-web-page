@@ -20,13 +20,16 @@ import { FormRegistration } from '@/blocks/form/formRegistration'
 import { getClientSideURL } from '@/lib/get-url'
 import { PageContext } from '@/types/page-context'
 import { joinStyles } from '@/lib/make-styles'
-import { LexicalRenderer } from '@/components/renderer/lexical-renderer'
 
 export function FormBlockClient({
   pageContext,
+  renderedDescription,
+  renderedConfirmation,
   ...formBlock
 }: FormBlock & {
   pageContext: PageContext
+  renderedDescription?: React.ReactNode
+  renderedConfirmation?: React.ReactNode
 }) {
   const payloadForm = typeof formBlock.form === 'string' ? null : formBlock.form
   const router = useRouter()
@@ -87,15 +90,11 @@ export function FormBlockClient({
     <Card className={joinStyles(formBlock.cardStyles)}>
       <CardHeader>
         <CardTitle className={joinStyles(formBlock.titleStyles)}>{payloadForm?.title}</CardTitle>
-        {formBlock?.enableDescription && payloadForm.confirmationMessage ? (
+        {formBlock?.enableDescription && (
           <CardDescription className={joinStyles(formBlock.descriptionStyles)}>
-            <LexicalRenderer
-              content={payloadForm.confirmationMessage.content}
-              className={joinStyles(payloadForm.confirmationMessage.contentStyles)}
-              pageContext={pageContext}
-            />
+            {renderedDescription}
           </CardDescription>
-        ) : null}
+        )}
       </CardHeader>
       <CardContent>
         <FormRegistration
@@ -112,19 +111,13 @@ export function FormBlockClient({
           {hasSubmitted && payloadForm.confirmationType === 'message' && (
             <Alert>
               <AlertDescription>
-                {payloadForm?.confirmationMessage?.content ? (
-                  <LexicalRenderer
-                    content={payloadForm.confirmationMessage.content}
-                    className={joinStyles(payloadForm.confirmationMessage.contentStyles)}
-                    pageContext={pageContext}
-                  />
-                ) : null}
+                {renderedConfirmation}
               </AlertDescription>
             </Alert>
           )}
           {error && (
             <Alert variant="destructive">
-              <AlertDescription className={joinStyles(payloadForm.confirmationMessage ? payloadForm.confirmationMessage.contentStyles : '' )}>{`${error.status || '500'}: ${error.message || ''}`}</AlertDescription>
+              <AlertDescription className={joinStyles(payloadForm.confirmationMessage ? payloadForm.confirmationMessage.contentStyles : '')}>{`${error.status || '500'}: ${error.message || ''}`}</AlertDescription>
             </Alert>
           )}
         </CardFooter>
