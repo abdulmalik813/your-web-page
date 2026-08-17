@@ -32,9 +32,9 @@ export function ThemeToggle() {
 
   return (
     <Button variant="outline" size="icon-lg" onClick={cycleTheme} className="w-12 h-12">
-      {theme === 'system' && <Monitor className="h-[1.4rem] w-[1.4rem] transition-all" />}
-      {theme === 'dark' && <Moon className="h-[1.4rem] w-[1.4rem] transition-all" />}
-      {theme === 'light' && <Sun className="h-[1.4rem] w-[1.4rem] transition-all" />}
+      {theme === 'system' && <Monitor className="h-[1.4rem] w-[1.4rem]" />}
+      {theme === 'dark' && <Moon className="h-[1.4rem] w-[1.4rem]" />}
+      {theme === 'light' && <Sun className="h-[1.4rem] w-[1.4rem]" />}
       <span className="sr-only">Toggle theme</span>
     </Button>
   )
