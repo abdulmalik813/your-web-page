@@ -77,9 +77,9 @@ export const buildSchema = (fields: FieldType[]) => {
 
       case "email":
         if (field.required) {
-          schemaFields[field.name] = z.email("Invalid email address").min(1, `${field.label || field.name} is required`)
+          schemaFields[field.name] = z.email("Email Address is Required").min(1, `${field.label || field.name} is required`)
         } else {
-          schemaFields[field.name] = z.email("Invalid email address").optional().or(z.literal(""))
+          schemaFields[field.name] = z.email("Invalid Email Address").optional().or(z.literal(""))
         }
         break
 
