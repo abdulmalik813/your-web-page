@@ -14,7 +14,6 @@ export function MapBlockUI({
     <div className="relative overflow-hidden h-full">
       <iframe
         src={mapUrl}
-        title={text || 'Map'}
         loading="lazy"
         allowFullScreen
         referrerPolicy="no-referrer-when-downgrade"
