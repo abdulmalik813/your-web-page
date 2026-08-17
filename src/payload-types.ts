@@ -1636,7 +1636,6 @@ export interface RecentPostsBlock {
 export interface MapBlock {
   mapUrl: string;
   text?: string | null;
-  styles?: (string | Style)[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'mapBlock';
@@ -2534,7 +2533,6 @@ export interface FaqBlockSelect<T extends boolean = true> {
 export interface MapBlockSelect<T extends boolean = true> {
   mapUrl?: T;
   text?: T;
-  styles?: T;
   id?: T;
   blockName?: T;
 }

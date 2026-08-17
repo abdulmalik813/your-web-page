@@ -15,14 +15,7 @@ export const MapBlock = (dbPrefix: string = ''): Block => ({
       name: 'text',
       type: 'text',
       label: 'Overlay Text',
-    },
-    {
-      name: 'styles',
-      type: 'relationship',
-      relationTo: 'styles',
-      hasMany: true,
-      label: 'Styles',
-    },
+    }
   ],
   graphQL: {
     singularName: 'MapBlock',

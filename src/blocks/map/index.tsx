@@ -1,33 +1,25 @@
 import type { MapBlock as MapBlockType } from '@/payload-types'
-import { joinStyles } from '@/lib/make-styles'
 import { PageContext } from '@/types/page-context'
 
 export function MapBlockUI({
   pageContext,
   mapUrl,
   text,
-  styles,
 }: MapBlockType & {
   pageContext: PageContext
 }) {
   if (!mapUrl) return null
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden h-full">
       <iframe
         src={mapUrl}
         title={text || 'Map'}
         loading="lazy"
         allowFullScreen
         referrerPolicy="no-referrer-when-downgrade"
-        className={joinStyles('block w-full h-full', styles)}
+        className="block w-full h-full"
       />
-
-      {text && (
-        <div className="absolute bottom-4 left-4 bg-background px-5 py-3 font-bold uppercase shadow-lg">
-          {text}
-        </div>
-      )}
     </div>
   )
 }
