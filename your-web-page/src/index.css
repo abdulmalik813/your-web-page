@@ -1,0 +1,304 @@
+@import "tailwindcss";
+
+@theme {
+  --font-oswald: 'Oswald', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+
+  --color-background: #faf9f9;
+  --color-primary: #000000;
+  --color-on-primary: #ffffff;
+  --color-secondary: #ff4500;
+  --color-brand-orange: #ff4500;
+  --color-surface-container-low: #f4f3f3;
+  --color-surface-container-high: #e8e8e8;
+  --color-surface-variant: #e2e2e2;
+  --color-on-surface-variant: #444748;
+  --color-outline-variant: #c4c7c7;
+  --color-tertiary-container: #1b1c19;
+}
+
+@layer utilities {
+  .font-display-hero {
+    font-family: var(--font-oswald);
+    font-size: clamp(56px, 8vw, 120px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  .font-headline-lg {
+    font-family: var(--font-oswald);
+    font-size: clamp(40px, 5vw, 72px);
+    line-height: 1.1;
+    font-weight: 600;
+  }
+
+  .font-headline-lg-mobile {
+    font-family: var(--font-oswald);
+    font-size: clamp(32px, 6vw, 48px);
+    line-height: 1.1;
+    font-weight: 600;
+  }
+
+  .font-headline-md {
+    font-family: var(--font-oswald);
+    font-size: clamp(28px, 3vw, 40px);
+    line-height: 1.2;
+    font-weight: 500;
+  }
+
+  .font-body-lg {
+    font-family: var(--font-inter);
+    font-size: 20px;
+    line-height: 32px;
+    font-weight: 400;
+  }
+
+  .font-body-md {
+    font-family: var(--font-inter);
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+  }
+
+  .font-label-caps {
+    font-family: var(--font-inter);
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .font-mono-metric {
+    font-family: var(--font-inter);
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+  }
+
+  .grid-bg {
+    background-image: linear-gradient(to right, #D1D1D1 1px, transparent 1px), linear-gradient(to bottom, #D1D1D1 1px, transparent 1px);
+    background-size: 8.333333% 80px;
+    background-position: center top;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-bg {
+    background-size: 25% 64px;
+  }
+
+  .font-display-hero {
+    font-size: clamp(42px, 13vw, 64px);
+    line-height: 1;
+  }
+
+  .font-body-lg {
+    font-size: 17px;
+    line-height: 27px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    min-height: 48px;
+  }
+}
+
+/* Touch devices should not inherit mouse-only hover animation. */
+@media (hover: none), (pointer: coarse) {
+  .group:hover *,
+  [class*="hover:"]:hover {
+    transform: none !important;
+  }
+
+  .group:hover img {
+    filter: grayscale(1) !important;
+  }
+}
+
+.page-transition {
+  animation: page-enter 260ms ease-out both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition {
+    animation: none;
+  }
+}
+
+/* Sharp elements rule as specified in brand design guidelines */
+* {
+  border-radius: 0px !important;
+}
+
+.btn-primary {
+  background-color: #000000;
+  color: #ffffff;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  padding: 1rem 1.5rem;
+  text-transform: uppercase;
+  border: 1px solid #000000;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary:hover {
+  background-color: #ff4500;
+  border-color: #ff4500;
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: #000000;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  padding: 1rem 1.5rem;
+  text-transform: uppercase;
+  border: 1px solid #000000;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-secondary:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.theme-toggle {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #000000;
+  background: transparent;
+  color: #000000;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: #ff4500;
+  border-color: #ff4500;
+  color: #ffffff;
+}
+
+.header-project-button {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .header-project-button {
+    display: inline-flex;
+  }
+}
+
+.dark body,
+.dark [class~="bg-[#faf9f9]"] {
+  background-color: #111111 !important;
+}
+
+.dark [class~="bg-[#f4f3f3]"],
+.dark [class~="bg-[#e8e8e8]"] {
+  background-color: #1d1d1d !important;
+}
+
+.dark [class~="bg-white"] {
+  background-color: #181818 !important;
+}
+
+.dark [class~="text-[#000000]"],
+.dark [class~="text-[#1a1c1c]"],
+.dark [class~="text-[#444748]"] {
+  color: #f5f5f5 !important;
+}
+
+.dark [class~="border-[#000000]"],
+.dark [class~="border-[#c4c7c7]"] {
+  border-color: #686868 !important;
+}
+
+.dark .grid-bg {
+  background-image: linear-gradient(to right, #292929 1px, transparent 1px), linear-gradient(to bottom, #292929 1px, transparent 1px);
+}
+
+.dark .theme-toggle {
+  color: #ffffff;
+  border-color: #686868;
+}
+
+.dark .btn-primary {
+  background-color: #f5f5f5;
+  border-color: #f5f5f5;
+  color: #000000;
+}
+
+.dark .btn-primary:hover {
+  background-color: #ff4500;
+  border-color: #ff4500;
+  color: #ffffff;
+}
+
+.dark .btn-secondary {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.dark .btn-secondary:hover {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* Keep markers, form fields, and hover surfaces clear in dark mode. */
+.dark span[class~="bg-[#000000]"][class*="w-2"] {
+  background-color: #ffffff !important;
+}
+
+.dark [class*="hover:bg-[#f4f3f3]"]:hover,
+.dark [class*="hover:bg-[#e8e8e8]"]:hover {
+  background-color: #252525 !important;
+}
+
+.dark [class*="hover:text-[#000000]"]:hover {
+  color: #000000 !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  color: #f5f5f5;
+  background-color: #181818 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #9a9a9a;
+}
+
