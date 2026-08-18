@@ -48,7 +48,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
           </div>
 
           <div className="flex flex-col justify-end lg:items-end gap-12 lg:gap-8 w-full">
-            <div className="flex flex-wrap gap-x-6 gap-y-4 lg:justify-end">
+            <div className="flex flex-wrap gap-x-6 gap-y-4 justify-end">
               {footerData.links?.map((item, itemIndex) => (
                 <NavigationBlockUI
                   key={itemIndex}

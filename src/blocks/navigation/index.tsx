@@ -183,7 +183,7 @@ export function NavigationBlockUI({
           className={joinStyles(
             className,
             navigationBlock.nav.styles,
-            active ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : '',
+            active ? 'ring-2 ring-accent ring-offset-2 ring-offset-background' : '',
           )}
           size={
             navigationBlock.nav.buttonSize ??
@@ -271,7 +271,7 @@ export function NavigationBlockUI({
         className={joinStyles(
           className,
           navigationBlock.nav?.styles,
-          dropdownActive ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : '',
+          dropdownActive ? 'ring-2 ring-accent ring-offset-2 ring-offset-background' : '',
         )}
         size={
           navigationBlock.nav?.buttonSize ??
