@@ -41,9 +41,7 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
         <div className="flex flex-col lg:flex-row justify-between items-stretch gap-12 lg:gap-8 lg:mt-4">
           <div className="flex flex-col gap-6 max-w-2xl w-full">
             {footerData.tagLine && (
-              <div className="text-sm md:text-base text-muted-foreground [&_p]:mb-2 [&_p]:last:mb-0 space-y-2 font-medium tracking-wide">
-                <LexicalRenderer content={footerData.tagLine} pageContext={pageContext} />
-              </div>
+                <LexicalRenderer content={footerData.tagLine} className={joinStyles(footerData.tagLineStyles)} pageContext={pageContext} />
             )}
           </div>
 
