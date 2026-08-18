@@ -20,22 +20,20 @@ export async function Footer({ pageContext }: { pageContext: PageContext }) {
     <footer className="w-full mt-auto bg-background text-foreground py-8 lg:py-12 border-t border-primary">
       <div className="container mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
         {hasLogo && (
-          <div className="mb-12 lg:mb-16">
-            <Link
-              href="/"
-              prefetch={true}
-              className="group inline-flex items-center"
-              aria-label="Home"
-            >
-              <MediaBlockUI media={lightLogo} pageContext={pageContext} className="dark:hidden" />
+          <Link
+            href="/"
+            prefetch={true}
+            className="group inline-flex items-center"
+            aria-label="Home"
+          >
+            <MediaBlockUI media={lightLogo} pageContext={pageContext} className="dark:hidden" />
 
-              <MediaBlockUI
-                media={darkLogo}
-                pageContext={pageContext}
-                className="hidden dark:block"
-              />
-            </Link>
-          </div>
+            <MediaBlockUI
+              media={darkLogo}
+              pageContext={pageContext}
+              className="hidden dark:block"
+            />
+          </Link>
         )}
 
         <div className="flex flex-col lg:flex-row justify-between items-stretch gap-12 lg:gap-8 lg:mt-4">
