@@ -400,12 +400,12 @@ export const Settings: GlobalConfig = {
               fields: [
                 {
                   name: 'theme',
-                  type: 'textarea',
+                  type: 'code',
                   label: 'Theme',
                   required: true,
                   admin: {
-                    rows: 20,
-                  },
+                    language: 'css'
+                  }
                 },
               ],
             },

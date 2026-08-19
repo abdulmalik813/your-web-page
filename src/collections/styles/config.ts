@@ -128,10 +128,11 @@ export const Styles: CollectionConfig<'styles'> = {
     },
     {
       name: 'stylesheet',
-      type: 'textarea',
+      type: 'code',
       label: 'Stylesheet',
       admin: {
         description: 'CSS stylesheet (if tailwind, the content will be overridden)',
+        language: 'css',
       },
       access: {
         update: canUpdateNonFontField,
