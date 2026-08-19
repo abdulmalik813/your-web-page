@@ -131,8 +131,7 @@ export const Styles: CollectionConfig<'styles'> = {
       type: 'code',
       label: 'Stylesheet',
       admin: {
-        description: 'CSS stylesheet (if tailwind, the content will be overridden)',
-        language: 'css',
+        description: 'CSS stylesheet (if tailwind, the content will be overridden)'
       },
       access: {
         update: canUpdateNonFontField,
