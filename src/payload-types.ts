@@ -3543,11 +3543,6 @@ export interface Setting {
   favIconSvg?: (string | null) | Media;
   favIconPng?: (string | null) | Media;
   locale: string;
-  googleVerification?: string | null;
-  googleAnalyticsId?: string | null;
-  bingVerification?: string | null;
-  microsoftClarityId?: string | null;
-  yandexVerification?: string | null;
   emails?:
     | {
         email: string;
@@ -3800,11 +3795,6 @@ export interface SettingsSelect<T extends boolean = true> {
   favIconSvg?: T;
   favIconPng?: T;
   locale?: T;
-  googleVerification?: T;
-  googleAnalyticsId?: T;
-  bingVerification?: T;
-  microsoftClarityId?: T;
-  yandexVerification?: T;
   emails?:
     | T
     | {

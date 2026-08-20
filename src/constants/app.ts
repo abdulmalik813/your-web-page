@@ -19,11 +19,6 @@ export async function getAppSettings() {
     favIcon,
     favIconPng,
     favIconSvg,
-    googleVerification: setting.googleVerification,
-    bingVerification: setting.bingVerification,
-    yandexVerification: setting.yandexVerification,
-    googleAnalyticsId: setting.googleAnalyticsId,
-    microsoftClarityId: setting.microsoftClarityId,
     locale: setting.locale || 'en_CA',
   }
 }
