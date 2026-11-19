@@ -57,7 +57,7 @@ export function SiteHeader({ settings, navigation, services }: SiteHeaderProps) 
         Skip to content
       </a>
       <header
-        className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/95 backdrop-blur-md text-foreground transition-colors"
+        className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md text-foreground transition-colors"
         id="top"
       >
         <div className="mx-auto flex min-h-16 w-full max-w-[1360px] items-center justify-between gap-2 px-4 sm:min-h-[82px] sm:px-6 lg:gap-4 lg:px-8">
