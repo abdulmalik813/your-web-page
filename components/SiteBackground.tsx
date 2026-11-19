@@ -29,7 +29,6 @@ export function SiteBackground() {
 
     const isDarkMode = () => document.documentElement.classList.contains('dark');
 
-    // Modest particle count for high-performance 60fps
     const particleCount = Math.min(Math.floor((width * height) / 30000), 50);
     const particles: Particle[] = [];
 
@@ -53,7 +52,6 @@ export function SiteBackground() {
     };
     window.addEventListener('resize', handleResize);
 
-    // Mouse proximity tracking on desktop
     let mouseX = -1000;
     let mouseY = -1000;
     const handleMouseMove = (e: MouseEvent) => {
@@ -62,7 +60,6 @@ export function SiteBackground() {
     };
     window.addEventListener('mousemove', handleMouseMove);
 
-    // Scroll tracking for subtle parallax drift
     let lastScrollY = window.scrollY;
     let scrollVelocity = 0;
     const handleScroll = () => {
@@ -76,13 +73,12 @@ export function SiteBackground() {
       ctx.clearRect(0, 0, width, height);
 
       const dark = isDarkMode();
-      // In light mode: high-saturation, punchy colors that pop!
-      // In dark mode: the superb luminous neon/obsidian tones
+      // Dark: warm terracotta/signal palette — Light: deep ink colours, subtle so the CSS glows shine
       const colors = {
-        primary: dark ? 'rgba(237, 128, 100, ' : 'rgba(234, 78, 40, ',
-        signal: dark ? 'rgba(200, 217, 147, ' : 'rgba(125, 195, 20, ',
-        ink: dark ? 'rgba(240, 239, 231, ' : 'rgba(27, 38, 32, ',
-        line: dark ? 'rgba(237, 128, 100, ' : 'rgba(234, 78, 40, ',
+        primary: dark ? 'rgba(237, 128, 100, ' : 'rgba(180, 83, 9, ',
+        signal:  dark ? 'rgba(200, 217, 147, ' : 'rgba(180, 83, 9, ',
+        ink:     dark ? 'rgba(240, 239, 231, ' : 'rgba(120, 53, 15, ',
+        line:    dark ? 'rgba(237, 128, 100, ' : 'rgba(180, 83, 9, ',
       };
 
       scrollVelocity *= 0.92;
@@ -95,7 +91,6 @@ export function SiteBackground() {
           p.x += p.vx;
           p.y += p.vy - scrollVelocity * 0.45;
 
-          // Mouse proximity gentle repulsion
           const dx = p.x - mouseX;
           const dy = p.y - mouseY;
           const dist = Math.sqrt(dx * dx + dy * dy);
@@ -105,27 +100,24 @@ export function SiteBackground() {
             p.y += (dy / dist) * force * 1.5;
           }
 
-          // Screen wrap-around
           if (p.x < -20) p.x = width + 20;
           if (p.x > width + 20) p.x = -20;
           if (p.y < -20) p.y = height + 20;
           if (p.y > height + 20) p.y = -20;
         }
 
-        // Draw particle dot
-        const colorPrefix = colors[p.colorType];
-        ctx.fillStyle = `${colorPrefix}${p.baseAlpha * (dark ? 1.0 : 0.95)})`;
+        const alphaScale = dark ? 1.0 : 0.3;
+        ctx.fillStyle = `${colors[p.colorType]}${p.baseAlpha * alphaScale})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.fill();
 
-        // Connect nearby particles with subtle architectural line
         for (let j = i + 1; j < len; j++) {
           const p2 = particles[j];
           const distSq = (p.x - p2.x) ** 2 + (p.y - p2.y) ** 2;
           const maxDist = 130;
           if (distSq < maxDist * maxDist) {
-            const lineAlpha = (1 - Math.sqrt(distSq) / maxDist) * (dark ? 0.22 : 0.24);
+            const lineAlpha = (1 - Math.sqrt(distSq) / maxDist) * (dark ? 0.22 : 0.08);
             ctx.strokeStyle = `${colors.line}${lineAlpha})`;
             ctx.lineWidth = 0.95;
             ctx.beginPath();
@@ -154,85 +146,69 @@ export function SiteBackground() {
       className="pointer-events-none fixed inset-0 -z-10 h-full w-full overflow-hidden select-none"
       aria-hidden="true"
     >
-      {/* 0. Base Theme Background Layer */}
+      {/* 0. Base layer */}
       <div className="absolute inset-0 bg-background" />
 
-      {/* 1. Large Ambient Living Mesh Glows */}
-      {/* Top Right Radiant Terracotta / Vibrant Amber Field */}
+      {/* ── LIGHT MODE: Warm golden mesh gradient ── */}
+      {/* Top-right: deep amber/gold sunburst */}
       <div
-        className="absolute -right-16 -top-20 h-[580px] w-[580px] rounded-full opacity-90 blur-[80px] transition-opacity duration-1000 dark:opacity-60 dark:blur-[95px] sm:h-[760px] sm:w-[760px]"
+        className="absolute -right-24 -top-32 h-[700px] w-[700px] rounded-full opacity-70 blur-[100px] dark:opacity-0 sm:h-[900px] sm:w-[900px]"
         style={{
-          background: `
-            radial-gradient(circle,
-              #ea4e28 0%,
-              #f59e0b 36%,
-              #fbbf24 55%,
-              transparent 72%
-            )
-          `,
-          animation: reduceMotion ? 'none' : 'ambient-drift-1 22s ease-in-out infinite alternate',
+          background: 'radial-gradient(circle, #f59e0b 0%, #d97706 28%, #b45309 52%, transparent 72%)',
+          animation: reduceMotion ? 'none' : 'ambient-drift-1 20s ease-in-out infinite alternate',
         }}
       />
-      {/* Dark mode overlay override for top right */}
+      {/* Mid-left: warm rose-gold / champagne */}
       <div
-        className="absolute -right-16 -top-20 hidden h-[580px] w-[580px] rounded-full opacity-0 blur-[95px] transition-opacity duration-1000 dark:block dark:opacity-60 sm:h-[760px] sm:w-[760px]"
+        className="absolute -left-20 top-[25%] h-[600px] w-[600px] rounded-full opacity-55 blur-[90px] dark:opacity-0 sm:h-[780px] sm:w-[780px]"
+        style={{
+          background: 'radial-gradient(circle, #fbbf24 0%, #f97316 35%, #ea580c 58%, transparent 74%)',
+          animation: reduceMotion ? 'none' : 'ambient-drift-2 25s ease-in-out infinite alternate',
+        }}
+      />
+      {/* Bottom-centre: peach / coral */}
+      <div
+        className="absolute -bottom-20 left-1/3 h-[580px] w-[580px] rounded-full opacity-50 blur-[95px] dark:opacity-0 sm:h-[760px] sm:w-[760px]"
+        style={{
+          background: 'radial-gradient(circle, #fed7aa 0%, #fb923c 32%, #f97316 54%, transparent 72%)',
+          animation: reduceMotion ? 'none' : 'ambient-drift-3 28s ease-in-out infinite alternate',
+        }}
+      />
+      {/* Top-left accent: lemon-gold highlight */}
+      <div
+        className="absolute -left-10 -top-10 h-[380px] w-[380px] rounded-full opacity-40 blur-[70px] dark:opacity-0 sm:h-[500px] sm:w-[500px]"
+        style={{
+          background: 'radial-gradient(circle, #fde68a 0%, #fbbf24 45%, transparent 70%)',
+          animation: reduceMotion ? 'none' : 'ambient-drift-4 18s ease-in-out infinite alternate',
+        }}
+      />
+
+      {/* ── DARK MODE: Original superb neon orbs ── */}
+      <div
+        className="absolute -right-16 -top-20 hidden h-[580px] w-[580px] rounded-full blur-[95px] dark:block dark:opacity-60 sm:h-[760px] sm:w-[760px]"
         style={{
           background: 'radial-gradient(circle, var(--primary) 0%, transparent 68%)',
           animation: reduceMotion ? 'none' : 'ambient-drift-1 22s ease-in-out infinite alternate',
         }}
       />
-
-      {/* Mid Left Vivid Chartreuse Lime & Emerald Mint Field */}
       <div
-        className="absolute -left-16 top-[30%] h-[540px] w-[540px] rounded-full opacity-85 blur-[85px] transition-opacity duration-1000 dark:opacity-50 dark:blur-[105px] sm:h-[700px] sm:w-[700px]"
-        style={{
-          background: `
-            radial-gradient(circle,
-              #88ce10 0%,
-              #10b981 38%,
-              #2dd4bf 56%,
-              transparent 72%
-            )
-          `,
-          animation: reduceMotion ? 'none' : 'ambient-drift-2 26s ease-in-out infinite alternate',
-        }}
-      />
-      {/* Dark mode overlay override for mid left */}
-      <div
-        className="absolute -left-16 top-[30%] hidden h-[540px] w-[540px] rounded-full opacity-0 blur-[105px] transition-opacity duration-1000 dark:block dark:opacity-50 sm:h-[700px] sm:w-[700px]"
+        className="absolute -left-16 top-[30%] hidden h-[540px] w-[540px] rounded-full blur-[105px] dark:block dark:opacity-50 sm:h-[700px] sm:w-[700px]"
         style={{
           background: 'radial-gradient(circle, var(--signal) 0%, var(--accent) 40%, transparent 72%)',
           animation: reduceMotion ? 'none' : 'ambient-drift-2 26s ease-in-out infinite alternate',
         }}
       />
-
-      {/* Bottom Center-Right Warm Coral & Golden Sunset Field */}
       <div
-        className="absolute -bottom-12 right-1/4 h-[540px] w-[540px] rounded-full opacity-80 blur-[90px] transition-opacity duration-1000 dark:opacity-45 dark:blur-[115px] sm:h-[720px] sm:w-[720px]"
-        style={{
-          background: `
-            radial-gradient(circle,
-              #f97316 0%,
-              #e11d48 35%,
-              #fb923c 55%,
-              transparent 70%
-            )
-          `,
-          animation: reduceMotion ? 'none' : 'ambient-drift-3 30s ease-in-out infinite alternate',
-        }}
-      />
-      {/* Dark mode overlay override for bottom right */}
-      <div
-        className="absolute -bottom-12 right-1/4 hidden h-[540px] w-[540px] rounded-full opacity-0 blur-[115px] transition-opacity duration-1000 dark:block dark:opacity-45 sm:h-[720px] sm:w-[720px]"
+        className="absolute -bottom-12 right-1/4 hidden h-[540px] w-[540px] rounded-full blur-[115px] dark:block dark:opacity-45 sm:h-[720px] sm:w-[720px]"
         style={{
           background: 'radial-gradient(circle, var(--accent) 0%, var(--primary) 45%, transparent 70%)',
           animation: reduceMotion ? 'none' : 'ambient-drift-3 30s ease-in-out infinite alternate',
         }}
       />
 
-      {/* 2. Architectural Micro-Grid */}
+      {/* Architectural Micro-Grid */}
       <div
-        className="absolute inset-0 opacity-[0.11] dark:opacity-[0.14]"
+        className="absolute inset-0 opacity-[0.09] dark:opacity-[0.14]"
         style={{
           backgroundImage: `
             linear-gradient(to right, currentColor 1px, transparent 1px),
@@ -242,24 +218,22 @@ export function SiteBackground() {
         }}
       />
 
-      {/* Coordinate Registration Crosses / Dots at 32px intervals */}
+      {/* Dot grid */}
       <div
-        className="absolute inset-0 opacity-[0.20] dark:opacity-[0.24]"
+        className="absolute inset-0 opacity-[0.16] dark:opacity-[0.24]"
         style={{
-          backgroundImage: `
-            radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)
-          `,
+          backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
           backgroundSize: '32px 32px',
         }}
       />
 
-      {/* 3. Interactive Floating Constellation Canvas */}
+      {/* Interactive Constellation Canvas */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 size-full opacity-90 dark:opacity-95"
       />
 
-      {/* 4. Fine Paper Texture */}
+      {/* Fine Paper Texture */}
       <div
         className="absolute inset-0 opacity-[0.03] mix-blend-overlay dark:opacity-[0.045]"
         style={{
@@ -269,37 +243,24 @@ export function SiteBackground() {
 
       <style jsx>{`
         @keyframes ambient-drift-1 {
-          0% {
-            transform: translate(0, 0) scale(1);
-          }
-          50% {
-            transform: translate(45px, 40px) scale(1.09);
-          }
-          100% {
-            transform: translate(-35px, 25px) scale(0.95);
-          }
+          0%   { transform: translate(0, 0) scale(1); }
+          50%  { transform: translate(50px, 45px) scale(1.1); }
+          100% { transform: translate(-40px, 20px) scale(0.94); }
         }
         @keyframes ambient-drift-2 {
-          0% {
-            transform: translate(0, 0) scale(1);
-          }
-          50% {
-            transform: translate(-40px, -35px) scale(1.12);
-          }
-          100% {
-            transform: translate(30px, -20px) scale(0.93);
-          }
+          0%   { transform: translate(0, 0) scale(1); }
+          50%  { transform: translate(-45px, -38px) scale(1.13); }
+          100% { transform: translate(35px, -18px) scale(0.92); }
         }
         @keyframes ambient-drift-3 {
-          0% {
-            transform: translate(0, 0) scale(1);
-          }
-          50% {
-            transform: translate(35px, -30px) scale(1.08);
-          }
-          100% {
-            transform: translate(-25px, 35px) scale(0.96);
-          }
+          0%   { transform: translate(0, 0) scale(1); }
+          50%  { transform: translate(38px, -32px) scale(1.08); }
+          100% { transform: translate(-28px, 38px) scale(0.95); }
+        }
+        @keyframes ambient-drift-4 {
+          0%   { transform: translate(0, 0) scale(1); }
+          50%  { transform: translate(22px, 28px) scale(1.06); }
+          100% { transform: translate(-18px, -14px) scale(0.97); }
         }
       `}</style>
     </div>

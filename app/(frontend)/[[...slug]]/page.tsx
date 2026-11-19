@@ -33,12 +33,12 @@ import {
 } from '@/lib/cms';
 import { buildPageMetadata } from '@/lib/seo';
 
-const pageSection = 'relative overflow-x-clip border-b border-border/50 bg-muted/20 py-12 md:py-24';
+const pageSection = 'relative overflow-x-clip border-b border-border/50 bg-muted/20 py-10 md:py-14 lg:py-20';
 const pageContainer = 'mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11';
 const pageLabel = 'font-mono text-xs font-medium uppercase leading-5 tracking-[0.14em]';
 const pageCell = `${siteCardClass} flex flex-col gap-4 p-6 md:p-8`;
 const pageWrap = 'mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11';
-const pageTightSection = 'relative overflow-x-clip border-b border-border/50 bg-transparent py-12 md:py-24';
+const pageTightSection = 'relative overflow-x-clip border-b border-border/50 bg-transparent py-10 md:py-14 lg:py-20';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }): Promise<Metadata> {
   const { slug = [] } = await params;
@@ -182,7 +182,7 @@ export default async function CatchAllPage({ params }: { params: Promise<{ slug?
               <section className="relative isolate overflow-x-clip border-b border-border/60 bg-[radial-gradient(ellipse_at_76%_40%,var(--accent)_0%,transparent_42%),linear-gradient(135deg,transparent,var(--muted)/25_55%,transparent)]" key={block.id || index}>
                 <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:radial-gradient(var(--border)_0.7px,transparent_0.7px)] [background-size:24px_24px]" aria-hidden="true" />
                 <div className="relative mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11">
-                  <div className={`grid grid-cols-1 items-center gap-8 py-12 md:py-20 ${isHome ? 'lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10' : ''}`}>
+                  <div className={`grid grid-cols-1 items-center gap-8 py-10 md:py-14 lg:py-20 ${isHome ? 'lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10' : ''}`}>
                     <Reveal className="relative z-10 flex flex-col items-start gap-7" direction="left">
                       {block.eyebrow ? <p className="font-mono text-xs font-semibold uppercase leading-5 tracking-[0.12em] text-primary">{block.eyebrow}</p> : null}
                       <h1 className="max-w-[13ch] break-words font-heading text-[clamp(3rem,7.5vw,7.3rem)] font-medium leading-[0.88] tracking-[-0.06em] [overflow-wrap:anywhere]">{block.title}{block.highlight ? <> <mark className="bg-transparent italic text-primary">{block.highlight}</mark></> : null}</h1>

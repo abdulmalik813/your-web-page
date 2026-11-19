@@ -18,7 +18,7 @@ export async function CtaBand({
 
   return (
     <section className="relative overflow-hidden bg-muted/20 text-foreground">
-      <div className="mx-auto w-full max-w-[1360px] px-4 py-12 sm:px-6 md:py-20 lg:px-11">
+      <div className="mx-auto w-full max-w-[1360px] px-4 py-10 sm:px-6 md:py-14 lg:py-20 lg:px-11">
         <Reveal direction="scale" interactive>
           <div className={`relative isolate grid gap-8 overflow-hidden ${siteCardClass} p-6 sm:p-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:p-12`}>
             <Reveal className="relative min-w-0" direction="left">

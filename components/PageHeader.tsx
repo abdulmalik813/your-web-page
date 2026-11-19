@@ -22,7 +22,7 @@ export function PageHeader({
   className = '',
 }: PageHeaderProps) {
   return (
-    <section className={`relative isolate overflow-hidden border-b border-border/70 bg-gradient-to-br from-transparent via-muted/20 to-transparent py-12 text-foreground md:py-20 ${className}`.trim()}>
+    <section className={`relative isolate overflow-hidden border-b border-border/70 bg-gradient-to-br from-transparent via-muted/20 to-transparent py-10 text-foreground md:py-14 lg:py-20 ${className}`.trim()}>
       <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] [background-size:28px_28px]" aria-hidden="true" />
       <Reveal className="relative mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11" direction="left">
         {breadcrumbs?.length ? <Breadcrumbs items={breadcrumbs} /> : null}

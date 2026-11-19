@@ -48,7 +48,7 @@ export function Reveal({
   delay = 0,
   interactive = false,
   direction = 'up',
-  once = true,
+  once = false,
 }: RevealProps) {
   const reduceMotion = useReducedMotion();
   const isDesktop = useSyncExternalStore(subscribeMedia, getClientSnapshot, getServerSnapshot);
@@ -61,7 +61,7 @@ export function Reveal({
       initial={reduceMotion ? false : { opacity: 0, ...offset }}
       whileInView={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0, scale: 1 }}
       whileHover={interactive && !reduceMotion ? { y: -4 } : undefined}
-      viewport={{ once, amount: 0.12 }}
+      viewport={{ once, amount: 0.05, margin: '0px 0px -40px 0px' }}
       transition={{ duration: 0.42, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}

@@ -12,7 +12,7 @@ export async function TestimonialsSection({ draft = false }: { draft?: boolean }
   return (
     <section className="relative isolate overflow-hidden border-b border-border/50 bg-gradient-to-br from-muted/30 via-transparent to-accent/15 text-foreground" aria-labelledby="testimonials-heading">
       <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 border-l border-primary/10 [background-image:linear-gradient(90deg,transparent_49%,var(--border)_50%,transparent_51%)] [background-size:24px_24px]" aria-hidden="true" />
-      <div className="relative mx-auto w-full max-w-[1360px] px-4 py-12 sm:px-6 md:py-24 lg:px-11">
+      <div className="relative mx-auto w-full max-w-[1360px] px-4 py-10 sm:px-6 md:py-14 lg:py-20 lg:px-11">
         <Reveal className="mb-10 flex flex-wrap items-end justify-between gap-6" direction="left">
           <div>
             <span className="mb-3 block font-mono text-xs font-semibold uppercase leading-5 tracking-[0.1em] text-primary">What clients say</span>
