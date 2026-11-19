@@ -1773,6 +1773,7 @@ export interface Setting {
     relationTo: 'users';
     value: string | User;
   } | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1806,6 +1807,7 @@ export interface Navigation {
     relationTo: 'users';
     value: string | User;
   } | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1841,6 +1843,7 @@ export interface Footer {
     relationTo: 'users';
     value: string | User;
   } | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1895,6 +1898,7 @@ export interface SettingsSelect<T extends boolean = true> {
       };
   createdBy?: T;
   updatedBy?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1924,6 +1928,7 @@ export interface NavigationSelect<T extends boolean = true> {
       };
   createdBy?: T;
   updatedBy?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1955,6 +1960,7 @@ export interface FooterSelect<T extends boolean = true> {
       };
   createdBy?: T;
   updatedBy?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

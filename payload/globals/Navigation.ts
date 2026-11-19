@@ -17,6 +17,7 @@ export const Navigation: GlobalConfig = {
   access: { read: () => true, update: ({ req }) => Boolean(req.user) },
   hooks: cmsGlobalCacheHooks('navigation'),
   admin: { livePreview: { url: () => livePreviewUrl({ data: {}, globalSlug: 'navigation' }), breakpoints: livePreviewBreakpoints } },
+  versions: { drafts: { autosave: true } },
   fields: [
     { name: 'homeLabel', type: 'text', defaultValue: 'Home' },
     { name: 'contactLabel', type: 'text', defaultValue: 'Contact' },

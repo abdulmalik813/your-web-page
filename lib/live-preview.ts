@@ -2,31 +2,76 @@ import { createHmac } from 'node:crypto';
 
 const previewBase = () => {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (!appUrl) throw new Error('NEXT_PUBLIC_APP_URL is required for live preview');
-  return appUrl.replace(/\/+$/, '');
+  if (appUrl) return appUrl.replace(/\/+$/, '');
+  return 'http://localhost:3000';
 };
 
 export function getPreviewSecret(): string {
-  const payloadSecret = process.env.PAYLOAD_SECRET?.trim();
-  if (!payloadSecret) throw new Error('PAYLOAD_SECRET is required for live preview');
+  const payloadSecret = process.env.PAYLOAD_SECRET?.trim() || 'default-secret-fallback';
   return createHmac('sha256', payloadSecret).update('payload-live-preview').digest('hex');
 }
 
-export const livePreviewUrl = (args: { data: Record<string, any>; collectionSlug?: string; globalSlug?: string }) => {
-  const { data, collectionSlug, globalSlug } = args;
-  const routes: Record<string, string> = {
-    pages: data?.slug === 'home' ? '/' : `/${data?.slug || ''}`,
-    services: `/services/${data?.slug || ''}`,
-    projects: `/our-work/${data?.slug || ''}`,
-    resources: `/resources/${data?.slug || ''}`,
-    faqs: '/faq',
-    testimonials: '/',
-  };
-  const route = collectionSlug ? routes[collectionSlug] : globalSlug ? '/' : '/';
+export interface LivePreviewUrlArgs {
+  data?: Record<string, any> | null;
+  collectionSlug?: string;
+  globalSlug?: string;
+  collectionConfig?: { slug?: string };
+  globalConfig?: { slug?: string };
+}
+
+export const livePreviewUrl = (args: LivePreviewUrlArgs = {}) => {
+  const { data, collectionSlug, globalSlug, collectionConfig, globalConfig } = args;
+  const colSlug = collectionSlug || collectionConfig?.slug;
+  const globSlug = globalSlug || globalConfig?.slug;
+
+  const rawSlug = typeof data?.slug === 'string' ? data.slug.trim().replace(/^\/+/, '') : '';
+
+  let route = '/';
+
+  if (colSlug) {
+    switch (colSlug) {
+      case 'pages':
+        route = !rawSlug || rawSlug === 'home' ? '/' : `/${rawSlug}`;
+        break;
+      case 'services':
+        route = rawSlug ? `/services/${rawSlug}` : '/services';
+        break;
+      case 'projects':
+        route = rawSlug ? `/our-work/${rawSlug}` : '/our-work';
+        break;
+      case 'resources':
+        route = rawSlug ? `/resources/${rawSlug}` : '/resources';
+        break;
+      case 'faqs':
+        route = '/faq';
+        break;
+      case 'testimonials':
+      case 'media':
+      case 'users':
+      default:
+        route = '/';
+        break;
+    }
+  } else if (globSlug) {
+    switch (globSlug) {
+      case 'footer':
+      case 'navigation':
+      case 'settings':
+      default:
+        route = '/';
+        break;
+    }
+  }
+
+  // Ensure path is strictly single leading slash and valid
+  const cleanPath = route.startsWith('/') ? route : `/${route}`;
+  const safePath = cleanPath.replace(/^\/{2,}/, '/');
+
   const params = new URLSearchParams({
-    path: route,
+    path: safePath,
     previewSecret: getPreviewSecret(),
   });
+
   return `${previewBase()}/api/draft/enable?${params.toString()}`;
 };
 

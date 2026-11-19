@@ -117,5 +117,5 @@ export const Services: CollectionConfig = {
       ],
     },
   ],
-  versions: { drafts: true },
+  versions: { drafts: { autosave: true } },
 };

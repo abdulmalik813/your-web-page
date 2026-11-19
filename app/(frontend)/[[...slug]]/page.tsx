@@ -180,13 +180,13 @@ export default async function CatchAllPage({ params }: { params: Promise<{ slug?
             const isHome = slug.length === 0;
             return (
               <section className="relative isolate overflow-x-clip border-b border-border bg-[radial-gradient(ellipse_at_76%_40%,var(--accent)_0%,transparent_42%),linear-gradient(135deg,transparent,var(--muted)/25_55%,transparent)]" key={block.id || index}>
-                <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:radial-gradient(var(--border)_0.7px,transparent_0.7px)] [background-size:24px_24px]" aria-hidden="true" />
+                <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(var(--border)_0.7px,transparent_0.7px)] [background-size:24px_24px]" aria-hidden="true" />
                 <div className="relative mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11">
                   <div className={`grid grid-cols-1 items-center gap-8 py-8 md:py-10 lg:py-14 ${isHome ? 'lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10' : ''}`}>
                     <Reveal className="relative z-10 flex flex-col items-start gap-7" direction="left">
                       {block.eyebrow ? <p className="font-mono text-xs font-semibold uppercase leading-5 tracking-[0.12em] text-primary">{block.eyebrow}</p> : null}
                       <h1 className="max-w-[13ch] break-words font-heading text-[clamp(3rem,7.5vw,7.3rem)] font-medium leading-[0.88] tracking-[-0.06em] [overflow-wrap:anywhere]">{block.title}{block.highlight ? <> <mark className="bg-transparent italic text-primary">{block.highlight}</mark></> : null}</h1>
-                      {block.lead ? <p className="max-w-[58ch] text-[clamp(1.05rem,1.5vw,1.25rem)] leading-[1.7] text-muted-foreground">{block.lead}</p> : null}
+                      {block.lead ? <p className="max-w-[58ch] text-[clamp(1.05rem,1.5vw,1.25rem)] leading-[1.7] text-foreground font-medium">{block.lead}</p> : null}
                       <div className="flex flex-wrap gap-3">
                         {block.primaryHref ? <Button asChild className="group h-12 gap-3 rounded-sm bg-primary px-6 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"><Link href={block.primaryHref}>{block.primaryLabel || 'Learn more'}<ArrowRight className="transition-transform group-hover:translate-x-1" size={15} aria-hidden="true" /></Link></Button> : null}
                         {block.secondaryHref ? <Button asChild variant="outline" className="h-12 rounded-sm border-border bg-background px-6 font-semibold transition-colors hover:bg-muted"><Link href={block.secondaryHref}>{block.secondaryLabel || 'View more'}</Link></Button> : null}
@@ -194,7 +194,7 @@ export default async function CatchAllPage({ params }: { params: Promise<{ slug?
                     </Reveal>
                     {isHome ? <HeroScene /> : null}
                   </div>
-                  {Array.isArray(block.facts) && block.facts.length > 0 ? <div className="grid border-t border-border/60 py-3 font-mono text-xs font-medium uppercase leading-5 tracking-[0.06em] md:grid-cols-3">{block.facts.map((fact: { id?: string; text: string }, factIndex: number) => <Reveal className={`m-0 break-words px-4 py-3 text-muted-foreground sm:px-6 lg:px-8 ${factIndex ? 'border-t border-border/60 md:border-l md:border-t-0' : ''}`} key={fact.id || fact.text} delay={factIndex * 0.04} direction={revealDirectionForIndex(factIndex)}>{fact.text}</Reveal>)}</div> : null}
+                  {Array.isArray(block.facts) && block.facts.length > 0 ? <div className="grid border-t border-border py-3 font-mono text-xs font-semibold uppercase leading-5 tracking-[0.06em] md:grid-cols-3">{block.facts.map((fact: { id?: string; text: string }, factIndex: number) => <Reveal className={`m-0 break-words px-4 py-3 text-foreground sm:px-6 lg:px-8 ${factIndex ? 'border-t border-border md:border-l md:border-t-0' : ''}`} key={fact.id || fact.text} delay={factIndex * 0.04} direction={revealDirectionForIndex(factIndex)}>{fact.text}</Reveal>)}</div> : null}
                 </div>
               </section>
             );

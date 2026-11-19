@@ -8,6 +8,7 @@ export const Settings: GlobalConfig = {
   access: { read: () => true, update: ({ req }) => Boolean(req.user) },
   hooks: cmsGlobalCacheHooks('settings'),
   admin: { livePreview: { url: () => livePreviewUrl({ data: {}, globalSlug: 'settings' }), breakpoints: livePreviewBreakpoints } },
+  versions: { drafts: { autosave: true } },
   fields: [
     { name: 'brand', type: 'text', required: true },
     { name: 'shortMark', type: 'text', required: true },

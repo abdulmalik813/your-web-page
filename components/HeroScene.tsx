@@ -36,14 +36,14 @@ export function HeroScene() {
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           style={{ transformStyle: 'preserve-3d' }}
         >
-          <div className="overflow-hidden rounded-sm border border-border/60 bg-background/90 backdrop-blur-md">
+          <div className="overflow-hidden rounded-sm border border-border bg-background/95 backdrop-blur-md">
             <div className="flex items-center justify-between bg-foreground px-4 py-3 text-background">
               <div className="flex items-center gap-1.5" aria-hidden="true">
                 <i className="size-2 bg-primary" />
                 <i className="size-2 bg-background/50" />
                 <i className="size-2 bg-background/30" />
               </div>
-              <span className="font-mono text-xs uppercase tracking-[0.12em] text-background/70">A considered digital presence</span>
+              <span className="font-mono text-xs uppercase tracking-[0.12em] text-background/80">A considered digital presence</span>
               <span className="size-2" aria-hidden="true" />
             </div>
             <div className="grid gap-6 p-5 sm:grid-cols-[1fr_0.9fr] sm:gap-8 sm:p-8">
@@ -52,7 +52,7 @@ export function HeroScene() {
                 <h2 className="mb-4 font-heading text-[clamp(1.7rem,3.8vw,3rem)] leading-[0.98] tracking-[-0.04em] text-foreground">
                   Made for the next chapter.
                 </h2>
-                <p className="max-w-[30ch] text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                <p className="max-w-[30ch] text-xs leading-relaxed text-foreground sm:text-sm font-medium">
                   A clear idea, carefully shaped, and built to last.
                 </p>
                 <div className="mt-6 flex items-center gap-3">
@@ -60,7 +60,7 @@ export function HeroScene() {
                   <span className="size-8 border border-border" aria-hidden="true" />
                 </div>
               </div>
-              <div className="relative min-h-[190px] overflow-hidden rounded-sm border border-border/60 bg-gradient-to-br from-accent via-secondary to-primary/20 [transform-style:preserve-3d] sm:min-h-[240px]">
+              <div className="relative min-h-[190px] overflow-hidden rounded-sm border border-border bg-gradient-to-br from-accent via-secondary to-primary/20 [transform-style:preserve-3d] sm:min-h-[240px]">
                 <div className="absolute right-0 top-0 h-full w-[55%] border-l border-primary/20 bg-primary/5 [background-image:linear-gradient(90deg,transparent_49%,var(--border)_50%,transparent_51%),linear-gradient(transparent_49%,var(--border)_50%,transparent_51%)] [background-size:22px_22px] [transform:translateZ(45px)]" aria-hidden="true" />
                 <div className="absolute right-[18%] top-[18%] size-16 border-8 border-signal bg-background/80 [transform:translateZ(85px)] sm:size-20" aria-hidden="true" />
                 <div className="absolute bottom-[13%] left-[12%] h-[44%] w-[68%] border border-white/40 bg-card/65 [transform:translateZ(65px)_rotateY(-12deg)]" aria-hidden="true" />
@@ -69,14 +69,14 @@ export function HeroScene() {
                   <span className="h-1.5 w-16 bg-foreground/35" />
                   <span className="mt-1 h-5 w-16 bg-primary" />
                 </div>
-                <div className="absolute bottom-4 right-4 border border-foreground/10 bg-background/90 px-3 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.1em] text-foreground/80">
+                <div className="absolute bottom-4 right-4 border border-foreground/10 bg-background/90 px-3 py-1.5 font-mono text-xs font-semibold uppercase tracking-[0.1em] text-foreground">
                   Built with intent
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-3 border-t border-border/60 bg-card/60">
+            <div className="grid grid-cols-3 border-t border-border bg-card/80">
               {['Clear thinking', 'Quiet confidence', 'Built to perform'].map((value) => (
-                <span className="border-r border-border/60 px-2 py-3 text-center font-mono text-xs font-medium uppercase tracking-[0.02em] text-muted-foreground last:border-r-0" key={value}>
+                <span className="border-r border-border px-2 py-3 text-center font-mono text-xs font-semibold uppercase tracking-[0.02em] text-foreground last:border-r-0" key={value}>
                   {value}
                 </span>
               ))}

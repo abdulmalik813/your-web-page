@@ -412,32 +412,44 @@ export function getCmsPage(slug: string, draft = false): Promise<any | null> {
   })();
 }
 
-async function querySettings(): Promise<any> {
+async function querySettings(draft = false): Promise<any> {
   const payload = await getPayloadClient();
-  return payload.findGlobal({ slug: 'settings', overrideAccess: false });
+  return payload.findGlobal({ slug: 'settings', draft, overrideAccess: draft });
 }
 
-export const getCmsSettings = unstable_cache(querySettings, ['cms-global-settings'], {
+const getCachedSettings = unstable_cache(() => querySettings(false), ['cms-global-settings'], {
   tags: ['global-settings'],
 });
 
-async function queryNavigation(): Promise<any> {
-  const payload = await getPayloadClient();
-  return payload.findGlobal({ slug: 'navigation', overrideAccess: false });
+export function getCmsSettings(draft = false): Promise<any> {
+  return draft ? querySettings(true) : getCachedSettings();
 }
 
-export const getCmsNavigation = unstable_cache(queryNavigation, ['cms-global-navigation'], {
+async function queryNavigation(draft = false): Promise<any> {
+  const payload = await getPayloadClient();
+  return payload.findGlobal({ slug: 'navigation', draft, overrideAccess: draft });
+}
+
+const getCachedNavigation = unstable_cache(() => queryNavigation(false), ['cms-global-navigation'], {
   tags: ['global-navigation'],
 });
 
-async function queryFooter(): Promise<any> {
-  const payload = await getPayloadClient();
-  return payload.findGlobal({ slug: 'footer', overrideAccess: false });
+export function getCmsNavigation(draft = false): Promise<any> {
+  return draft ? queryNavigation(true) : getCachedNavigation();
 }
 
-export const getCmsFooter = unstable_cache(queryFooter, ['cms-global-footer'], {
+async function queryFooter(draft = false): Promise<any> {
+  const payload = await getPayloadClient();
+  return payload.findGlobal({ slug: 'footer', draft, overrideAccess: draft });
+}
+
+const getCachedFooter = unstable_cache(() => queryFooter(false), ['cms-global-footer'], {
   tags: ['global-footer'],
 });
+
+export function getCmsFooter(draft = false): Promise<any> {
+  return draft ? queryFooter(true) : getCachedFooter();
+}
 
 async function queryPages(): Promise<any[]> {
   const payload = await getPayloadClient();

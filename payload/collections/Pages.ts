@@ -119,5 +119,5 @@ export const Pages: CollectionConfig = {
       ],
     },
   ],
-  versions: { drafts: true },
+  versions: { drafts: { autosave: true } },
 };

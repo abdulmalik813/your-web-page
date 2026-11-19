@@ -121,5 +121,5 @@ export const Resources: CollectionConfig = {
       ],
     },
   ],
-  versions: { drafts: true },
+  versions: { drafts: { autosave: true } },
 };

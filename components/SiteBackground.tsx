@@ -29,7 +29,7 @@ export function SiteBackground() {
 
     const isDarkMode = () => document.documentElement.classList.contains('dark');
 
-    const particleCount = Math.min(Math.floor((width * height) / 30000), 50);
+    const particleCount = Math.min(Math.floor((width * height) / 35000), 40);
     const particles: Particle[] = [];
 
     for (let i = 0; i < particleCount; i++) {
@@ -37,11 +37,11 @@ export function SiteBackground() {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.42,
-        vy: (Math.random() - 0.5) * 0.42,
-        radius: Math.random() * 2.0 + 1.2,
-        colorType: typeRand < 0.45 ? 'primary' : typeRand < 0.75 ? 'signal' : 'ink',
-        baseAlpha: Math.random() * 0.35 + 0.45,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        radius: Math.random() * 1.8 + 1.0,
+        colorType: typeRand < 0.35 ? 'primary' : typeRand < 0.7 ? 'signal' : 'ink',
+        baseAlpha: Math.random() * 0.25 + 0.25,
       });
     }
 
@@ -64,7 +64,7 @@ export function SiteBackground() {
     let scrollVelocity = 0;
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      scrollVelocity = (currentScrollY - lastScrollY) * 0.15;
+      scrollVelocity = (currentScrollY - lastScrollY) * 0.12;
       lastScrollY = currentScrollY;
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -73,12 +73,12 @@ export function SiteBackground() {
       ctx.clearRect(0, 0, width, height);
 
       const dark = isDarkMode();
-      // Dark: warm terracotta/signal palette — Light: deep ink colours, subtle so the CSS glows shine
+      // High-contrast clean palette: orange accent, white/black signals
       const colors = {
-        primary: dark ? 'rgba(237, 128, 100, ' : 'rgba(180, 83, 9, ',
-        signal:  dark ? 'rgba(200, 217, 147, ' : 'rgba(180, 83, 9, ',
-        ink:     dark ? 'rgba(240, 239, 231, ' : 'rgba(120, 53, 15, ',
-        line:    dark ? 'rgba(237, 128, 100, ' : 'rgba(180, 83, 9, ',
+        primary: 'rgba(249, 115, 22, ',
+        signal:  dark ? 'rgba(255, 255, 255, ' : 'rgba(0, 0, 0, ',
+        ink:     dark ? 'rgba(180, 180, 180, ' : 'rgba(40, 40, 40, ',
+        line:    dark ? 'rgba(249, 115, 22, ' : 'rgba(249, 115, 22, ',
       };
 
       scrollVelocity *= 0.92;
@@ -89,15 +89,15 @@ export function SiteBackground() {
 
         if (!reduceMotion) {
           p.x += p.vx;
-          p.y += p.vy - scrollVelocity * 0.45;
+          p.y += p.vy - scrollVelocity * 0.35;
 
           const dx = p.x - mouseX;
           const dy = p.y - mouseY;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 160 && dist > 0) {
-            const force = (160 - dist) / 160;
-            p.x += (dx / dist) * force * 1.5;
-            p.y += (dy / dist) * force * 1.5;
+          if (dist < 150 && dist > 0) {
+            const force = (150 - dist) / 150;
+            p.x += (dx / dist) * force * 1.2;
+            p.y += (dy / dist) * force * 1.2;
           }
 
           if (p.x < -20) p.x = width + 20;
@@ -106,7 +106,7 @@ export function SiteBackground() {
           if (p.y > height + 20) p.y = -20;
         }
 
-        const alphaScale = dark ? 1.0 : 0.3;
+        const alphaScale = dark ? 0.75 : 0.45;
         ctx.fillStyle = `${colors[p.colorType]}${p.baseAlpha * alphaScale})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
@@ -115,11 +115,11 @@ export function SiteBackground() {
         for (let j = i + 1; j < len; j++) {
           const p2 = particles[j];
           const distSq = (p.x - p2.x) ** 2 + (p.y - p2.y) ** 2;
-          const maxDist = 130;
+          const maxDist = 120;
           if (distSq < maxDist * maxDist) {
-            const lineAlpha = (1 - Math.sqrt(distSq) / maxDist) * (dark ? 0.22 : 0.08);
+            const lineAlpha = (1 - Math.sqrt(distSq) / maxDist) * (dark ? 0.14 : 0.08);
             ctx.strokeStyle = `${colors.line}${lineAlpha})`;
-            ctx.lineWidth = 0.95;
+            ctx.lineWidth = 0.85;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
@@ -146,69 +146,44 @@ export function SiteBackground() {
       className="pointer-events-none fixed inset-0 -z-10 h-full w-full overflow-hidden select-none"
       aria-hidden="true"
     >
-      {/* 0. Base layer */}
+      {/* 0. Clean Base layer */}
       <div className="absolute inset-0 bg-background" />
 
-      {/* ── LIGHT MODE: Warm golden mesh gradient ── */}
-      {/* Top-right: deep amber/gold sunburst */}
+      {/* ── LIGHT MODE: Soft, restrained orange ambient warmth (not vibrant or washed out) ── */}
       <div
-        className="absolute -right-24 -top-32 h-[700px] w-[700px] rounded-full opacity-70 blur-[100px] dark:opacity-0 sm:h-[900px] sm:w-[900px]"
+        className="absolute -right-24 -top-32 h-[550px] w-[550px] rounded-full opacity-30 blur-[110px] dark:opacity-0 sm:h-[700px] sm:w-[700px]"
         style={{
-          background: 'radial-gradient(circle, #f59e0b 0%, #d97706 28%, #b45309 52%, transparent 72%)',
-          animation: reduceMotion ? 'none' : 'ambient-drift-1 20s ease-in-out infinite alternate',
+          background: 'radial-gradient(circle, #f97316 0%, transparent 68%)',
+          animation: reduceMotion ? 'none' : 'ambient-drift-1 24s ease-in-out infinite alternate',
         }}
       />
-      {/* Mid-left: warm rose-gold / champagne */}
       <div
-        className="absolute -left-20 top-[25%] h-[600px] w-[600px] rounded-full opacity-55 blur-[90px] dark:opacity-0 sm:h-[780px] sm:w-[780px]"
+        className="absolute -left-20 top-[40%] h-[450px] w-[450px] rounded-full opacity-20 blur-[100px] dark:opacity-0 sm:h-[600px] sm:w-[600px]"
         style={{
-          background: 'radial-gradient(circle, #fbbf24 0%, #f97316 35%, #ea580c 58%, transparent 74%)',
-          animation: reduceMotion ? 'none' : 'ambient-drift-2 25s ease-in-out infinite alternate',
-        }}
-      />
-      {/* Bottom-centre: peach / coral */}
-      <div
-        className="absolute -bottom-20 left-1/3 h-[580px] w-[580px] rounded-full opacity-50 blur-[95px] dark:opacity-0 sm:h-[760px] sm:w-[760px]"
-        style={{
-          background: 'radial-gradient(circle, #fed7aa 0%, #fb923c 32%, #f97316 54%, transparent 72%)',
-          animation: reduceMotion ? 'none' : 'ambient-drift-3 28s ease-in-out infinite alternate',
-        }}
-      />
-      {/* Top-left accent: lemon-gold highlight */}
-      <div
-        className="absolute -left-10 -top-10 h-[380px] w-[380px] rounded-full opacity-40 blur-[70px] dark:opacity-0 sm:h-[500px] sm:w-[500px]"
-        style={{
-          background: 'radial-gradient(circle, #fde68a 0%, #fbbf24 45%, transparent 70%)',
-          animation: reduceMotion ? 'none' : 'ambient-drift-4 18s ease-in-out infinite alternate',
+          background: 'radial-gradient(circle, #fb923c 0%, transparent 65%)',
+          animation: reduceMotion ? 'none' : 'ambient-drift-2 28s ease-in-out infinite alternate',
         }}
       />
 
-      {/* ── DARK MODE: Original superb neon orbs ── */}
+      {/* ── DARK MODE: Subtle restrained orange ambient warmth ── */}
       <div
-        className="absolute -right-16 -top-20 hidden h-[580px] w-[580px] rounded-full blur-[95px] dark:block dark:opacity-60 sm:h-[760px] sm:w-[760px]"
+        className="absolute -right-20 -top-24 hidden h-[550px] w-[550px] rounded-full blur-[110px] dark:block dark:opacity-25 sm:h-[700px] sm:w-[700px]"
         style={{
-          background: 'radial-gradient(circle, var(--primary) 0%, transparent 68%)',
-          animation: reduceMotion ? 'none' : 'ambient-drift-1 22s ease-in-out infinite alternate',
+          background: 'radial-gradient(circle, #f97316 0%, transparent 68%)',
+          animation: reduceMotion ? 'none' : 'ambient-drift-1 24s ease-in-out infinite alternate',
         }}
       />
       <div
-        className="absolute -left-16 top-[30%] hidden h-[540px] w-[540px] rounded-full blur-[105px] dark:block dark:opacity-50 sm:h-[700px] sm:w-[700px]"
+        className="absolute -left-20 top-[40%] hidden h-[450px] w-[450px] rounded-full blur-[100px] dark:block dark:opacity-15 sm:h-[600px] sm:w-[600px]"
         style={{
-          background: 'radial-gradient(circle, var(--signal) 0%, var(--accent) 40%, transparent 72%)',
-          animation: reduceMotion ? 'none' : 'ambient-drift-2 26s ease-in-out infinite alternate',
-        }}
-      />
-      <div
-        className="absolute -bottom-12 right-1/4 hidden h-[540px] w-[540px] rounded-full blur-[115px] dark:block dark:opacity-45 sm:h-[720px] sm:w-[720px]"
-        style={{
-          background: 'radial-gradient(circle, var(--accent) 0%, var(--primary) 45%, transparent 70%)',
-          animation: reduceMotion ? 'none' : 'ambient-drift-3 30s ease-in-out infinite alternate',
+          background: 'radial-gradient(circle, #f97316 0%, transparent 65%)',
+          animation: reduceMotion ? 'none' : 'ambient-drift-2 28s ease-in-out infinite alternate',
         }}
       />
 
-      {/* Architectural Micro-Grid */}
+      {/* Architectural Micro-Grid (restrained opacity) */}
       <div
-        className="absolute inset-0 opacity-[0.09] dark:opacity-[0.14]"
+        className="absolute inset-0 opacity-[0.04] dark:opacity-[0.07]"
         style={{
           backgroundImage: `
             linear-gradient(to right, currentColor 1px, transparent 1px),
@@ -220,7 +195,7 @@ export function SiteBackground() {
 
       {/* Dot grid */}
       <div
-        className="absolute inset-0 opacity-[0.16] dark:opacity-[0.24]"
+        className="absolute inset-0 opacity-[0.08] dark:opacity-[0.12]"
         style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
           backgroundSize: '32px 32px',
@@ -230,12 +205,12 @@ export function SiteBackground() {
       {/* Interactive Constellation Canvas */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 size-full opacity-90 dark:opacity-95"
+        className="absolute inset-0 size-full opacity-80 dark:opacity-90"
       />
 
       {/* Fine Paper Texture */}
       <div
-        className="absolute inset-0 opacity-[0.03] mix-blend-overlay dark:opacity-[0.045]"
+        className="absolute inset-0 opacity-[0.02] mix-blend-overlay dark:opacity-[0.03]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
         }}
@@ -244,23 +219,13 @@ export function SiteBackground() {
       <style jsx>{`
         @keyframes ambient-drift-1 {
           0%   { transform: translate(0, 0) scale(1); }
-          50%  { transform: translate(50px, 45px) scale(1.1); }
-          100% { transform: translate(-40px, 20px) scale(0.94); }
+          50%  { transform: translate(40px, 35px) scale(1.06); }
+          100% { transform: translate(-30px, 15px) scale(0.96); }
         }
         @keyframes ambient-drift-2 {
           0%   { transform: translate(0, 0) scale(1); }
-          50%  { transform: translate(-45px, -38px) scale(1.13); }
-          100% { transform: translate(35px, -18px) scale(0.92); }
-        }
-        @keyframes ambient-drift-3 {
-          0%   { transform: translate(0, 0) scale(1); }
-          50%  { transform: translate(38px, -32px) scale(1.08); }
-          100% { transform: translate(-28px, 38px) scale(0.95); }
-        }
-        @keyframes ambient-drift-4 {
-          0%   { transform: translate(0, 0) scale(1); }
-          50%  { transform: translate(22px, 28px) scale(1.06); }
-          100% { transform: translate(-18px, -14px) scale(0.97); }
+          50%  { transform: translate(-35px, -30px) scale(1.08); }
+          100% { transform: translate(25px, -15px) scale(0.95); }
         }
       `}</style>
     </div>

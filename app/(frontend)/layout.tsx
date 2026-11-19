@@ -64,9 +64,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const previewServerURL =
     process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/+$/, '') || getBaseUrl();
   const [settings, navigation, footer, services] = await Promise.all([
-    getCmsSettings(),
-    getCmsNavigation(),
-    getCmsFooter(),
+    getCmsSettings(draft),
+    getCmsNavigation(draft),
+    getCmsFooter(draft),
     getCmsServices(draft),
   ]);
 

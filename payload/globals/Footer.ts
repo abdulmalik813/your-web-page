@@ -8,6 +8,7 @@ export const Footer: GlobalConfig = {
   access: { read: () => true, update: ({ req }) => Boolean(req.user) },
   hooks: cmsGlobalCacheHooks('footer'),
   admin: { livePreview: { url: () => livePreviewUrl({ data: {}, globalSlug: 'footer' }), breakpoints: livePreviewBreakpoints } },
+  versions: { drafts: { autosave: true } },
   fields: [
     { name: 'tagline', type: 'textarea', required: true },
     {

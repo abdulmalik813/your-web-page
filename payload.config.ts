@@ -12,7 +12,7 @@ import path from 'path';
 import { buildConfig, type Config, type Plugin } from 'payload';
 import { fileURLToPath } from 'url';
 import { getPayloadSeedStatus, seedAllPayloadData } from './lib/seed';
-import { livePreviewBreakpoints } from './lib/live-preview';
+import { livePreviewBreakpoints, livePreviewUrl } from './lib/live-preview';
 import { Faqs } from './payload/collections/Faqs';
 import { Pages } from './payload/collections/Pages';
 import { Projects } from './payload/collections/Projects';
@@ -83,6 +83,8 @@ export default buildConfig({
     meta: { titleSuffix: '— CMS' },
     components: { beforeDashboard: ['./components/payload/SeedBanner#SeedBanner'] },
     livePreview: {
+      url: ({ data, collectionConfig, globalConfig }) =>
+        livePreviewUrl({ data, collectionConfig, globalConfig }),
       breakpoints: livePreviewBreakpoints,
       openByDefault: true,
     },

@@ -59,5 +59,5 @@ export const Testimonials: CollectionConfig = {
       },
     },
   ],
-  versions: { drafts: true },
+  versions: { drafts: { autosave: true } },
 };
