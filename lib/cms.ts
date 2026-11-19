@@ -2,13 +2,18 @@ import { unstable_cache } from 'next/cache';
 import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 
-export type PatternVariant = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6';
 export type ProjectType = 'Website' | 'Software' | 'SaaS';
 export type ResourceCategory = 'Guide' | 'Checklist' | 'Tutorial' | 'Case Study' | 'Notes';
+
+export interface MediaAsset {
+  url: string;
+  alt: string;
+}
 
 export interface Service {
   slug: string;
   title: string;
+  image: MediaAsset | null;
   short: string;
   metaDescription: string;
   intro: string;
@@ -25,8 +30,7 @@ export interface Project {
   title: string;
   type: ProjectType;
   tags: string[];
-  initials: string;
-  pattern: PatternVariant;
+  image: MediaAsset | null;
   role: string;
   summary: string;
   challenge: string;
@@ -45,6 +49,7 @@ export interface ResourceSection {
 export interface ResourceEntry {
   slug: string;
   title: string;
+  image: MediaAsset | null;
   excerpt: string;
   category: ResourceCategory;
   tags: string[];
@@ -112,11 +117,22 @@ function metaFields(value: unknown): { title?: string | null; description?: stri
   };
 }
 
+function mediaAsset(value: unknown): MediaAsset | null {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
+  const media = value as Record<string, unknown>;
+  if (typeof media.url !== 'string' || !media.url) return null;
+  return {
+    url: media.url,
+    alt: typeof media.alt === 'string' ? media.alt : '',
+  };
+}
+
 function toService(value: unknown): Service {
   const doc = value as Record<string, unknown>;
   return {
     slug: String(doc.slug),
     title: String(doc.title),
+    image: mediaAsset(doc.image),
     short: String(doc.short),
     metaDescription: String(doc.metaDescription),
     intro: String(doc.intro),
@@ -144,8 +160,7 @@ function toProject(value: unknown): Project {
     title: String(doc.title),
     type: String(doc.type) as ProjectType,
     tags: tagRows(doc.tags),
-    initials: String(doc.initials),
-    pattern: String(doc.pattern) as PatternVariant,
+    image: mediaAsset(doc.image),
     role: String(doc.role),
     summary: String(doc.summary),
     challenge: String(doc.challenge),
@@ -162,6 +177,7 @@ function toResource(value: unknown): ResourceEntry {
   return {
     slug: String(doc.slug),
     title: String(doc.title),
+    image: mediaAsset(doc.image),
     excerpt: String(doc.excerpt),
     category: String(doc.category) as ResourceCategory,
     tags: tagRows(doc.tags),
@@ -186,6 +202,7 @@ async function queryServices(draft = false): Promise<Service[]> {
   const result = await payload.find({
     collection: 'services',
     draft,
+    depth: 1,
     sort: 'sortOrder',
     limit: 100,
     overrideAccess: draft,
@@ -206,6 +223,7 @@ async function queryServiceBySlug(slug: string, draft = false): Promise<Service 
   const result = await payload.find({
     collection: 'services',
     draft,
+    depth: 1,
     where: { slug: { equals: slug } },
     limit: 1,
     overrideAccess: draft,
@@ -225,6 +243,7 @@ async function queryProjects(draft = false): Promise<Project[]> {
   const result = await payload.find({
     collection: 'projects',
     draft,
+    depth: 1,
     sort: 'sortOrder',
     limit: 100,
     overrideAccess: draft,
@@ -245,6 +264,7 @@ async function queryProjectBySlug(slug: string, draft = false): Promise<Project 
   const result = await payload.find({
     collection: 'projects',
     draft,
+    depth: 1,
     where: { slug: { equals: slug } },
     limit: 1,
     overrideAccess: draft,
@@ -264,6 +284,7 @@ async function queryResources(draft = false): Promise<ResourceEntry[]> {
   const result = await payload.find({
     collection: 'resources',
     draft,
+    depth: 1,
     sort: 'sortOrder',
     limit: 100,
     overrideAccess: draft,
@@ -284,6 +305,7 @@ async function queryResourceBySlug(slug: string, draft = false): Promise<Resourc
   const result = await payload.find({
     collection: 'resources',
     draft,
+    depth: 1,
     where: { slug: { equals: slug } },
     limit: 1,
     overrideAccess: draft,

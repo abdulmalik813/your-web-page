@@ -1,4 +1,5 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb';
+import { s3Storage } from '@payloadcms/storage-s3';
 import { resendAdapter } from '@payloadcms/email-resend';
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
@@ -8,7 +9,7 @@ import { searchPlugin } from '@payloadcms/plugin-search';
 import { seoPlugin } from '@payloadcms/plugin-seo';
 import { revalidatePath } from 'next/cache';
 import path from 'path';
-import { buildConfig } from 'payload';
+import { buildConfig, type Config, type Plugin } from 'payload';
 import { fileURLToPath } from 'url';
 import { getPayloadSeedStatus, seedAllPayloadData } from './lib/seed';
 import { livePreviewBreakpoints } from './lib/live-preview';
@@ -19,12 +20,33 @@ import { Resources } from './payload/collections/Resources';
 import { Services } from './payload/collections/Services';
 import { Testimonials } from './payload/collections/Testimonials';
 import { Users } from './payload/collections/Users';
+import { Media } from './payload/collections/Media';
 import { Settings } from './payload/globals/Settings';
 import { Footer } from './payload/globals/Footer';
 import { Navigation } from './payload/globals/Navigation';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
+
+function getMediaStoragePlugin(): Plugin {
+  const storageAdapter = s3Storage({
+    bucket: requireEnv('S3_BUCKET'),
+    collections: {
+      media: { prefix: 'media' },
+    },
+    config: {
+      credentials: {
+        accessKeyId: requireEnv('S3_ACCESS_KEY_ID'),
+        secretAccessKey: requireEnv('S3_SECRET_ACCESS_KEY'),
+      },
+      endpoint: requireEnv('S3_ENDPOINT'),
+      forcePathStyle: true,
+      region: requireEnv('S3_REGION'),
+    },
+  }) as unknown as { init: (config: Config) => Config };
+
+  return (config) => storageAdapter.init(config);
+}
 
 function requireEnv(name: string): string {
   const value = process.env[name]?.trim();
@@ -65,16 +87,17 @@ export default buildConfig({
       openByDefault: true,
     },
   },
-  serverURL: requireEnv('APP_URL'),
-  cors: [requireEnv('APP_URL')],
+  serverURL: requireEnv('NEXT_PUBLIC_APP_URL'),
+  cors: [requireEnv('NEXT_PUBLIC_APP_URL')],
   email,
-  collections: [Pages, Services, Projects, Resources, Faqs, Testimonials, Users],
+  collections: [Pages, Services, Projects, Resources, Faqs, Testimonials, Media, Users],
   globals: [Settings, Navigation, Footer],
   editor: lexicalEditor(),
   secret: requireEnv('PAYLOAD_SECRET'),
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
   db: mongooseAdapter({ url: requireEnv('DATABASE_URI') }),
   plugins: [
+    getMediaStoragePlugin(),
     redirectsPlugin({ collections: ['pages', 'services', 'projects', 'resources'] }),
     searchPlugin({
       collections: ['pages', 'services', 'projects', 'resources', 'faqs'],
@@ -88,12 +111,12 @@ export default buildConfig({
       generateDescription: ({ doc }) =>
         String(doc?.metaDescription || doc?.excerpt || doc?.summary || doc?.description || ''),
       generateURL: ({ doc, collectionSlug }) => {
-        if (!doc?.slug) return requireEnv('APP_URL');
+        if (!doc?.slug) return requireEnv('NEXT_PUBLIC_APP_URL');
         const prefixes: Record<string, string> = {
           pages: '', services: '/services/', projects: '/our-work/', resources: '/resources/',
         };
         const prefix = collectionSlug ? prefixes[collectionSlug] : undefined;
-        return `${requireEnv('APP_URL').replace(/\/+$/, '')}${prefix || '/'}${doc.slug}`;
+        return `${requireEnv('NEXT_PUBLIC_APP_URL').replace(/\/+$/, '')}${prefix || '/'}${doc.slug}`;
       },
     }),
     formBuilderPlugin({

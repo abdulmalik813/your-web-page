@@ -19,7 +19,7 @@ configuration files are used only by the seed routine; they are not runtime cont
 fallbacks. Published Payload reads use tagged Next.js caching, and Payload writes
 invalidate the related cache tags and routes.
 
-Live preview requires `APP_URL` to point to this site and an authenticated Payload
+Live preview requires `NEXT_PUBLIC_APP_URL` to point to this site and an authenticated Payload
 session on the same origin. Preview links enable Next.js Draft Mode through
 `/api/draft/enable`; use `/api/draft/disable` to leave preview. Pages, services,
 projects, resources, FAQs, and testimonials support draft versions, so apply the
@@ -31,9 +31,9 @@ to enable or exit preview mode.
 
 **Prerequisites:** Node.js 20.9 or newer, pnpm, and Docker Compose.
 
-1. Copy `.env.example` to `.env.local` and configure the required values.
-2. Start the local MongoDB replica set:
-   `docker compose -f docker-compose.dev.yml up -d mongodb`
+1. If `.env` does not exist, copy `.env.example` to `.env`; otherwise merge its required values into your existing file.
+2. Start MongoDB and Silo:
+   `docker compose -f docker-compose.dev.yml up -d mongodb silo-s3-init`
 3. Install dependencies:
    `pnpm install`
 4. Start the development server:
@@ -44,7 +44,15 @@ to enable or exit preview mode.
 
 MongoDB is the only supported Payload database. Local development uses the
 single-node replica set in `docker-compose.dev.yml`; production uses the
-MongoDB connection string configured in `DATABASE_URI`.
+MongoDB connection string configured in `DATABASE_URI`. Payload media files
+are stored in the S3-compatible bucket configured by `S3_BUCKET`. Local
+development uses Silo at `http://localhost:9000`; its console is available at
+`http://localhost:9001`.
+
+The Payload admin includes a shared Media collection. Upload an image there,
+then select it in the Image field on a service, project, or resource. Those
+images are used on listing cards and detail pages; no generated card patterns
+are used as substitutes.
 
 ## Docker and CI
 
@@ -56,14 +64,18 @@ BuildKit as a secret rather than Docker build arguments or image environment
 variables.
 
 Configure a `prod` GitHub environment with an `ENV` secret containing a JSON
-object of the production environment variables. It must include `APP_URL`,
+object of the production environment variables. It must include `NEXT_PUBLIC_APP_URL`,
 `PAYLOAD_SECRET`, `EMAIL_FROM`, `EMAIL_FROM_NAME`, `DATABASE_URI`,
+`S3_ACCESS_KEY_ID`, `S3_BUCKET`, `S3_ENDPOINT`, `S3_REGION`,
+`S3_SECRET_ACCESS_KEY`,
 `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, `CF_ACCESS_CLIENT_ID`,
 `CF_ACCESS_CLIENT_SECRET`, `TUNNEL_TARGET_PORT_NETWORK`, and
 `DOKPLOY_DEPLOY_URL`. Set `DATABASE_URI` to the MongoDB URI with `[DB_HOST]`
 and `[DB_PORT]` placeholders, and set `TUNNEL_TARGET_PORT_NETWORK` to
 `container,port,docker-network`. In Dokploy, configure the actual internal
-MongoDB URI (without placeholders).
+MongoDB URI (without placeholders) and the S3 settings. `S3_ENDPOINT` must be
+reachable by both the app server and visitors’ browsers, and the bucket must
+allow public reads for the site’s public images.
 
 ## Build
 

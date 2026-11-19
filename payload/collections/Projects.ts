@@ -41,6 +41,14 @@ export const Projects: CollectionConfig = {
       required: true,
     },
     {
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description: 'Optional image shown on project cards and its detail page.',
+      },
+    },
+    {
       name: 'type',
       type: 'select',
       required: true,
@@ -57,18 +65,6 @@ export const Projects: CollectionConfig = {
           required: true,
         },
       ],
-    },
-    {
-      name: 'initials',
-      type: 'text',
-      required: true,
-    },
-    {
-      name: 'pattern',
-      type: 'select',
-      required: true,
-      defaultValue: 'p1',
-      options: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'],
     },
     {
       name: 'role',

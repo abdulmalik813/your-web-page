@@ -7,6 +7,83 @@
  */
 
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "UploadTransforms".
+ */
+export type UploadTransforms = {
+  /**
+   * Time range on the original, in milliseconds. Start inclusive, end exclusive.
+   */
+  clip?: {
+    endMs: number;
+    startMs: number;
+  };
+  /**
+   * Rectangle in original-file pixels, applied before resize and encoding.
+   */
+  crop?: {
+    height: number;
+    width: number;
+    x: number;
+    y: number;
+  };
+  /**
+   * Encoding settings for the output format. Does not select the format.
+   */
+  encoding?: {
+    [k: string]: unknown;
+  };
+  /**
+   * Mirror the image on one or both axes.
+   */
+  flip?: {
+    horizontal?: boolean;
+    vertical?: boolean;
+  };
+  /**
+   * Preferred point as percentages of the original, from 0 to 100.
+   */
+  focalPoint?: {
+    x: number;
+    y: number;
+  };
+  /**
+   * Keep or remove metadata embedded in the output file.
+   */
+  metadataPolicy?: {
+    mode: 'preserve' | 'strip';
+  };
+  /**
+   * One-based, inclusive page range on the original document.
+   */
+  pageRange?: {
+    endPage: number;
+    startPage: number;
+  };
+  /**
+   * Video frame to use as the poster, in milliseconds on the original.
+   */
+  posterFrame?: {
+    timestampMs: number;
+  };
+  /**
+   * Target size for visual media.
+   */
+  resize?: {
+    fit?: 'contain' | 'cover' | 'fill' | 'inside' | 'outside';
+    height?: number;
+    width?: number;
+    withoutEnlargement?: boolean;
+  };
+  /**
+   * Clockwise rotation in degrees.
+   */
+  rotate?: {
+    angle: number;
+  };
+  [k: string]: unknown;
+} | null;
+/**
  * Supported timezones in IANA format.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -62,24 +139,16 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_90F860DA".
+ * via the `definition` "LexicalNodes_83E8DF84".
  */
-export type LexicalNodes_90F860DA =
+export type LexicalNodes_83E8DF84 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_90F860DA>
+  | SerializedParagraphNode<LexicalNodes_83E8DF84>
   | SerializedHorizontalRuleNode
-  | {
-      type: 'upload';
-      /**
-       * @deprecated
-       * Lexical's internal serialization version for this node type.
-       */
-      version?: number;
-      [k: string]: unknown;
-    }
-  | SerializedQuoteNode<LexicalNodes_90F860DA>
+  | SerializedUploadNode<'media'>
+  | SerializedQuoteNode<LexicalNodes_83E8DF84>
   | SerializedRelationshipNode<
       | 'pages'
       | 'services'
@@ -94,11 +163,11 @@ export type LexicalNodes_90F860DA =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_90F860DA, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_90F860DA, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_90F860DA>
-  | SerializedListItemNode<LexicalNodes_90F860DA>
-  | SerializedHeadingNode<LexicalNodes_90F860DA>;
+  | SerializedAutoLinkNode<LexicalNodes_83E8DF84, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_83E8DF84, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_83E8DF84>
+  | SerializedListItemNode<LexicalNodes_83E8DF84>
+  | SerializedHeadingNode<LexicalNodes_83E8DF84>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -124,6 +193,7 @@ export interface Config {
     resources: Resource;
     faqs: Faq;
     testimonials: Testimonial;
+    media: Media;
     users: User;
     redirects: Redirect;
     search: Search;
@@ -143,6 +213,7 @@ export interface Config {
     resources: ResourcesSelect<false> | ResourcesSelect<true>;
     faqs: FaqsSelect<false> | FaqsSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
@@ -174,6 +245,7 @@ export interface Config {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: ActivityWidget;
+    'upload-dropzone': UploadDropzoneWidget;
   };
   user: User;
   jobs: {
@@ -254,7 +326,7 @@ export interface HeroBlock {
 export interface ContentBlock {
   eyebrow?: string | null;
   heading?: string | null;
-  content?: LexicalRichText<LexicalNodes_90F860DA> | null;
+  content?: LexicalRichText<LexicalNodes_83E8DF84> | null;
   columns?: ('one' | 'two') | null;
   id?: string | null;
   blockName?: string | null;
@@ -308,7 +380,7 @@ export interface FormBlock {
   form: string | Form;
   eyebrow?: string | null;
   heading?: string | null;
-  description?: LexicalRichText<LexicalNodes_90F860DA> | null;
+  description?: LexicalRichText<LexicalNodes_83E8DF84> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'form';
@@ -323,7 +395,7 @@ export interface Form {
   fields?: (Checkbox | Country | Email | Message | Number | Select | Text | Textarea | Date)[] | null;
   submitButtonLabel?: string | null;
   confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: LexicalRichText<LexicalNodes_90F860DA>;
+  confirmationMessage?: LexicalRichText<LexicalNodes_83E8DF84>;
   redirect?: {
     type?: ('reference' | 'custom') | null;
     reference?: {
@@ -340,7 +412,7 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
-        message?: LexicalRichText<LexicalNodes_90F860DA> | null;
+        message?: LexicalRichText<LexicalNodes_83E8DF84> | null;
         id?: string | null;
       }[]
     | null;
@@ -400,7 +472,7 @@ export interface Email {
  * via the `definition` "Message".
  */
 export interface Message {
-  message?: LexicalRichText<LexicalNodes_90F860DA> | null;
+  message?: LexicalRichText<LexicalNodes_83E8DF84> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'message';
@@ -565,6 +637,10 @@ export interface Service {
   slug: string;
   sortOrder?: number | null;
   title: string;
+  /**
+   * Optional image shown on service cards and its detail page.
+   */
+  image?: (string | null) | Media;
   short: string;
   metaDescription: string;
   intro: string;
@@ -603,6 +679,49 @@ export interface Service {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt: string;
+  caption?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  _stored?: boolean | null;
+  _transforms?: UploadTransforms;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
+    _stored?: boolean | null;
+  };
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects".
  */
 export interface Project {
@@ -610,13 +729,15 @@ export interface Project {
   slug: string;
   sortOrder?: number | null;
   title: string;
+  /**
+   * Optional image shown on project cards and its detail page.
+   */
+  image?: (string | null) | Media;
   type: 'Website' | 'Software' | 'SaaS';
   tags: {
     tag: string;
     id?: string | null;
   }[];
-  initials: string;
-  pattern: 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6';
   role: string;
   summary: string;
   challenge: string;
@@ -650,6 +771,10 @@ export interface Resource {
   slug: string;
   sortOrder?: number | null;
   title: string;
+  /**
+   * Optional image shown on resource cards and its detail page.
+   */
+  image?: (string | null) | Media;
   excerpt: string;
   category: 'Guide' | 'Checklist' | 'Tutorial' | 'Case Study' | 'Notes';
   tags: {
@@ -891,6 +1016,10 @@ export interface PayloadLockedDocument {
         value: string | Testimonial;
       } | null)
     | ({
+        relationTo: 'media';
+        value: string | Media;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null)
@@ -1121,6 +1250,7 @@ export interface ServicesSelect<T extends boolean = true> {
   slug?: T;
   sortOrder?: T;
   title?: T;
+  image?: T;
   short?: T;
   metaDescription?: T;
   intro?: T;
@@ -1169,6 +1299,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   slug?: T;
   sortOrder?: T;
   title?: T;
+  image?: T;
   type?: T;
   tags?:
     | T
@@ -1176,8 +1307,6 @@ export interface ProjectsSelect<T extends boolean = true> {
         tag?: T;
         id?: T;
       };
-  initials?: T;
-  pattern?: T;
   role?: T;
   summary?: T;
   challenge?: T;
@@ -1208,6 +1337,7 @@ export interface ResourcesSelect<T extends boolean = true> {
   slug?: T;
   sortOrder?: T;
   title?: T;
+  image?: T;
   excerpt?: T;
   category?: T;
   tags?:
@@ -1282,6 +1412,44 @@ export interface TestimonialsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  caption?: T;
+  prefix?: T;
+  _objectKey?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  _stored?: T;
+  _transforms?: T;
+  original?:
+    | T
+    | {
+        filename?: T;
+        url?: T;
+        mimeType?: T;
+        filesize?: T;
+        width?: T;
+        height?: T;
+        prefix?: T;
+        _objectKey?: T;
+        _stored?: T;
+      };
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1825,6 +1993,7 @@ export interface CollectionQueryWidget {
       | 'resources'
       | 'faqs'
       | 'testimonials'
+      | 'media'
       | 'users'
       | 'redirects'
       | 'search'
@@ -1859,6 +2028,7 @@ export interface ActivityWidget {
           | 'resources'
           | 'faqs'
           | 'testimonials'
+          | 'media'
           | 'users'
           | 'redirects'
           | 'search'
@@ -1868,6 +2038,16 @@ export interface ActivityWidget {
       | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload-dropzone_widget".
+ */
+export interface UploadDropzoneWidget {
+  data?: {
+    excludedCollections?: 'media'[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

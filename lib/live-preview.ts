@@ -1,8 +1,8 @@
 import { createHmac } from 'node:crypto';
 
 const previewBase = () => {
-  const appUrl = process.env.APP_URL?.trim();
-  if (!appUrl) throw new Error('APP_URL is required for live preview');
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (!appUrl) throw new Error('NEXT_PUBLIC_APP_URL is required for live preview');
   return appUrl.replace(/\/+$/, '');
 };
 

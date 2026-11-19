@@ -41,6 +41,14 @@ export const Services: CollectionConfig = {
       required: true,
     },
     {
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description: 'Optional image shown on service cards and its detail page.',
+      },
+    },
+    {
       name: 'short',
       type: 'textarea',
       required: true,

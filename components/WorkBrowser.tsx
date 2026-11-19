@@ -27,7 +27,7 @@ export function WorkBrowser({ projects }: { projects: Project[] }) {
         </span>
       </div>
       {filtered.length ? (
-        <Grid columns={3} fill>{filtered.map((project, index) => <ProjectCard key={project.slug} project={project} index={index} />)}</Grid>
+        <Grid columns={3}>{filtered.map((project, index) => <ProjectCard key={project.slug} project={project} index={index} />)}</Grid>
       ) : (
         <Empty className="min-h-56 rounded-sm border border-dashed border-border bg-card p-8">
           <EmptyHeader>

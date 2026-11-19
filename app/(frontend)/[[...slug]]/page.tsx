@@ -8,6 +8,7 @@ import { Grid } from '@/components/Grid';
 import { PageHeader } from '@/components/PageHeader';
 import { ProjectCard } from '@/components/ProjectCard';
 import { ResourceCard } from '@/components/ResourceCard';
+import { MediaFigure } from '@/components/MediaFigure';
 import { ServiceCard } from '@/components/ServiceCard';
 import { WorkBrowser } from '@/components/WorkBrowser';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
@@ -112,6 +113,7 @@ export default async function CatchAllPage({ params }: { params: Promise<{ slug?
               <PageHeader label="Service" title={item.title} lead={item.intro} breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Services', href: '/services' }, { label: item.title }]}>
                 <div className="mt-7 flex flex-wrap gap-3"><Button asChild className="h-12 rounded-sm bg-primary px-6 font-semibold text-primary-foreground"><Link href="/start-a-project">Start a project</Link></Button><Button asChild variant="outline" className="h-12 rounded-sm border-border bg-background px-6 font-semibold"><Link href="/contact">Ask a question</Link></Button></div>
               </PageHeader>
+              {item.image ? <section className={pageSection}><div className={pageContainer}><MediaFigure image={item.image} alt={item.title} aspect="wide" sizes="(min-width: 1360px) 1280px, calc(100vw - 2rem)" /></div></section> : null}
               <section className={pageSection}><div className={pageContainer}><div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.8fr_1.2fr]">
                 <Reveal className="h-full" direction="left"><Card className={pageCell}><span className={pageLabel}>Overview</span><h2 className="break-words text-[clamp(1.9rem,4.4vw,3.6rem)] font-semibold leading-[1.02] tracking-tight [overflow-wrap:anywhere]">How we approach {item.title.toLowerCase()}</h2></Card></Reveal>
                 <Reveal className="h-full" direction="right"><Card className={`${pageCell} h-full max-w-[68ch] text-lg leading-[1.7]`}>{item.overview.map((text) => <p key={text}>{text}</p>)}</Card></Reveal>
@@ -135,7 +137,7 @@ export default async function CatchAllPage({ params }: { params: Promise<{ slug?
           return (
             <>
               <PageHeader label="Project" title={item.title} lead={item.summary} breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Our Work', href: '/our-work' }, { label: item.title}]} />
-              <section className={pageSection}><div className={pageContainer}><Reveal direction="scale" interactive><Card className={`${siteCardClass} relative mb-7 grid aspect-[21/9] w-full overflow-hidden bg-gradient-to-br from-accent via-muted to-primary/10 p-4 [transform:perspective(1400px)_rotateX(2deg)]`}><div className="absolute inset-y-0 right-0 w-1/3 border-l border-primary/20 bg-primary/5 [background-image:linear-gradient(90deg,transparent_49%,var(--border)_50%,transparent_51%),linear-gradient(transparent_49%,var(--border)_50%,transparent_51%)] [background-size:24px_24px]" aria-hidden="true" /><div className="absolute bottom-8 left-8 h-[38%] w-[45%] border border-border/60 bg-card/80 [transform:translateZ(45px)_rotateY(-8deg)]" aria-hidden="true" /></Card></Reveal></div></section>
+              {item.image ? <section className={pageSection}><div className={pageContainer}><MediaFigure image={item.image} alt={item.title} aspect="wide" sizes="(min-width: 1360px) 1280px, calc(100vw - 2rem)" /></div></section> : null}
               <section className={pageSection}><div className={pageContainer}><div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.8fr_1.2fr]">
                 <Reveal className="h-full" direction="left"><Card className={pageCell}><dl className="m-0 grid gap-0">{[['Type', item.type], ['Our role', item.role], ['Built with', item.tags.join(', ')]].map(([label, value], index) => <div className={`border-t border-border py-4 ${index === 0 ? 'border-t-0 pt-0' : ''}`} key={label}><dt className={`${pageLabel} mb-1 text-muted-foreground`}>{label}</dt><dd className="m-0 break-words font-semibold [overflow-wrap:anywhere]">{value}</dd></div>)}</dl></Card></Reveal>
                 <Reveal className="h-full" direction="right"><Card className={`${pageCell} max-w-[68ch] text-base leading-[1.7] [&_h2]:mb-[0.7em] [&_h2]:mt-[2.2em] [&_h2]:text-[clamp(1.4rem,2.6vw,2rem)] [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2:first-child]:mt-0`}><h2>The challenge</h2><p>{item.challenge}</p><h2>The approach</h2><p>{item.approach}</p><h2>What it delivered</h2><ul className="mb-5 grid list-none gap-2.5">{item.outcomes.map((outcome) => <li className="relative pl-6 before:absolute before:left-0 before:top-[0.68em] before:size-[7px] before:bg-primary before:content-['']" key={outcome}>{outcome}</li>)}</ul></Card></Reveal>
@@ -156,6 +158,7 @@ export default async function CatchAllPage({ params }: { params: Promise<{ slug?
               <PageHeader label="Resource" title={item.title} lead={item.excerpt} breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Resources', href: '/resources' }, { label: item.title }]}>
                 <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs font-medium uppercase leading-5 tracking-[0.08em] text-muted-foreground"><span>{item.publishDate}</span><span>{item.readTime} min read</span>{item.tags.length ? <span>{item.tags.join(' · ')}</span> : null}</div>
               </PageHeader>
+              {item.image ? <section className={pageSection}><div className={pageContainer}><MediaFigure image={item.image} alt={item.title} aspect="wide" sizes="(min-width: 1360px) 1280px, calc(100vw - 2rem)" /></div></section> : null}
               <section className={pageSection}><div className={pageContainer}><Reveal className="max-w-[68ch] text-base leading-[1.75] [&_h2]:mb-[0.7em] [&_h2]:mt-[2.2em] [&_h2]:text-[clamp(1.4rem,2.6vw,2rem)] [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2:first-child]:mt-0 [&_li]:relative [&_li]:pl-6 [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:top-[0.68em] [&_li]:before:size-[7px] [&_li]:before:bg-primary [&_li]:before:content-[''] [&_ul]:mb-5 [&_ul]:grid [&_ul]:list-none [&_ul]:gap-2.5" direction="right"><article>{item.sections.map((section, index) => <div key={index}>{section.heading ? <h2>{section.heading}</h2> : null}{section.paragraphs?.map((paragraph, paragraphIndex) => <p key={paragraphIndex}>{paragraph}</p>)}{section.bullets?.length ? <ul>{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul> : null}</div>)}</article></Reveal></div></section>
               <section className={pageSection}><div className={pageContainer}><Reveal className="mb-8 flex flex-wrap items-end justify-between gap-6" direction="right"><div><span className={pageLabel}>Keep reading</span><h2 className="mt-2 font-heading text-[clamp(2rem,4.6vw,4rem)] font-medium tracking-tight">More resources</h2></div><Button asChild variant="outline" className="rounded-sm border-border bg-card"><Link href="/resources">All resources</Link></Button></Reveal><Grid columns={3}>{more.map((resource, index) => <ResourceCard key={resource.slug} resource={resource} index={index} />)}</Grid></div></section>
               <CtaBand />
@@ -239,16 +242,16 @@ async function CardGrid({ block, draft }: { block: any; draft: boolean }) {
   ) : null;
   if (block.source === 'services') {
     const items = (await getCmsServices(draft)).slice(0, limit);
-    return <section className={pageTightSection}><div className={pageWrap}>{heading}<Grid columns={3} fill>{items.map((item, index) => <ServiceCard key={item.slug} service={item} index={index} />)}</Grid></div></section>;
+    return <section className={pageTightSection}><div className={pageWrap}>{heading}<Grid columns={3}>{items.map((item, index) => <ServiceCard key={item.slug} service={item} index={index} />)}</Grid></div></section>;
   }
   if (block.source === 'projects') {
     const items = (await getCmsProjects(draft)).slice(0, limit);
     if (limit > 3) return <section className={pageTightSection}><div className={pageWrap}>{heading}<WorkBrowser projects={items} /></div></section>;
-    return <section className={pageTightSection}><div className={pageWrap}>{heading}<Grid columns={3} fill>{items.map((item, index) => <ProjectCard key={item.slug} project={item} index={index} />)}</Grid></div></section>;
+    return <section className={pageTightSection}><div className={pageWrap}>{heading}<Grid columns={3}>{items.map((item, index) => <ProjectCard key={item.slug} project={item} index={index} />)}</Grid></div></section>;
   }
   if (block.source === 'resources') {
     const items = (await getCmsResources(draft)).slice(0, limit);
-    return <section className={pageTightSection}><div className={pageWrap}>{heading}<Grid columns={3} fill>{items.map((item, index) => <ResourceCard key={item.slug} resource={item} index={index} />)}</Grid></div></section>;
+    return <section className={pageTightSection}><div className={pageWrap}>{heading}<Grid columns={3}>{items.map((item, index) => <ResourceCard key={item.slug} resource={item} index={index} />)}</Grid></div></section>;
   }
   if (block.source === 'faqs') {
     const groups = await getCmsFaqGroups(draft);
@@ -256,7 +259,7 @@ async function CardGrid({ block, draft }: { block: any; draft: boolean }) {
   }
   if (block.source === 'testimonials') return <TestimonialsSection draft={draft} />;
   return (
-    <section className={pageTightSection}><div className={pageWrap}>{heading}<Grid columns={3} fill>{(block.cards || []).map((card: any, index: number) => (
+    <section className={pageTightSection}><div className={pageWrap}>{heading}<Grid columns={3}>{(block.cards || []).map((card: any, index: number) => (
       <Reveal className="h-full" delay={index * 0.04} direction={revealDirectionForIndex(index)} interactive key={card.id || card.title}>
         {card.href ? (
           <Link className="block h-full min-w-0 rounded-sm no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" href={card.href}>

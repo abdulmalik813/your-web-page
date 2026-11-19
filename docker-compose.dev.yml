@@ -23,54 +23,55 @@ services:
       retries: 20
       start_period: 10s
 
-  # SeaweedFS Master
-  seaweed-master:
-    image: chrislusf/seaweedfs:latest
-    container_name: your-web-page-seaweed-master
+  # Silo S3-compatible object storage
+  silo:
+    image: pgsty/silo:latest
+    container_name: your-web-page-silo
     restart: unless-stopped
-    command: master
-    ports:
-      - "9333:9333"
-
-  # SeaweedFS Volume Server
-  seaweed-volume:
-    image: chrislusf/seaweedfs:latest
-    container_name: your-web-page-seaweed-volume
-    restart: unless-stopped
-    command: volume -mserver="seaweed-master:9333" -dir="/data"
-    depends_on:
-      - seaweed-master
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:?S3_ACCESS_KEY_ID is required}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:?S3_SECRET_ACCESS_KEY is required}
     volumes:
-      - seaweed_data:/data
+      - silo_data:/data
     ports:
-      - "8080:8080"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
 
-  # SeaweedFS Filer
-  seaweed-filer:
-    image: chrislusf/seaweedfs:latest
-    container_name: your-web-page-seaweed-filer
-    restart: unless-stopped
-    command: filer -master="seaweed-master:9333"
+  silo-s3-init:
+    image: amazon/aws-cli:2
+    container_name: your-web-page-silo-s3-init
     depends_on:
-      - seaweed-master
-      - seaweed-volume
-    ports:
-      - "8888:8888"
-
-  # SeaweedFS S3 Gateway
-  seaweed-s3:
-    image: chrislusf/seaweedfs:latest
-    container_name: your-web-page-seaweed-s3
-    restart: unless-stopped
-    command: s3 -filer="seaweed-filer:8888"
-    depends_on:
-      - seaweed-filer
-    ports:
-      - "8333:8333"
+      - silo
+    environment:
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?S3_ACCESS_KEY_ID is required}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?S3_SECRET_ACCESS_KEY is required}
+      AWS_DEFAULT_REGION: ${S3_REGION:?S3_REGION is required}
+      S3_BUCKET: ${S3_BUCKET:?S3_BUCKET is required}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        for attempt in $$(seq 1 30); do
+          if aws --endpoint-url http://silo:9000 s3api list-buckets >/dev/null 2>&1; then
+            break
+          fi
+          if [ "$$attempt" -eq 30 ]; then
+            echo "Silo S3 did not become ready after 60 seconds" >&2
+            exit 1
+          fi
+          sleep 2
+        done
+        if ! aws --endpoint-url http://silo:9000 s3api head-bucket --bucket "$$S3_BUCKET" >/dev/null 2>&1; then
+          aws --endpoint-url http://silo:9000 s3api create-bucket --bucket "$$S3_BUCKET"
+        fi
+        policy="{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"PublicReadImages\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::$$S3_BUCKET/*\"}]}"
+        aws --endpoint-url http://silo:9000 s3api put-bucket-policy --bucket "$$S3_BUCKET" --policy "$$policy"
 
 volumes:
   mongodb_data:
     driver: local
 
-  seaweed_data:
+  silo_data:
     driver: local

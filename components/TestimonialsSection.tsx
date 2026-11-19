@@ -19,7 +19,7 @@ export async function TestimonialsSection({ draft = false }: { draft?: boolean }
             <h2 id="testimonials-heading" className="break-words font-heading text-[clamp(2rem,4.6vw,4rem)] font-medium leading-[0.98] tracking-[-0.045em] [overflow-wrap:anywhere]">In their words</h2>
           </div>
         </Reveal>
-        <Grid columns={3} fill>
+        <Grid columns={3}>
           {approved.map((item, index) => (
             <Reveal className="h-full" delay={index * 0.08} direction={revealDirectionForIndex(index)} interactive key={item.id}>
               <Card className={`${siteCardClass} flex h-full flex-col gap-5 p-6`}>

@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { calcFillerCount, filterProjects, filterResources } from './filters';
+import { filterProjects, filterResources } from './filters';
 
 const projects = [
-  { id: 1, slug: 'one', title: 'One', type: 'Website', tags: [], initials: 'ONE', pattern: 'p1', role: '', summary: '', challenge: '', approach: '', outcomes: [] },
-  { id: 2, slug: 'two', title: 'Two', type: 'Software', tags: [], initials: 'TWO', pattern: 'p2', role: '', summary: '', challenge: '', approach: '', outcomes: [] },
-  { id: 3, slug: 'three', title: 'Three', type: 'SaaS', tags: [], initials: 'THR', pattern: 'p3', role: '', summary: '', challenge: '', approach: '', outcomes: [] },
+  { id: 1, slug: 'one', title: 'One', type: 'Website', tags: [], role: '', summary: '', challenge: '', approach: '', outcomes: [] },
+  { id: 2, slug: 'two', title: 'Two', type: 'Software', tags: [], role: '', summary: '', challenge: '', approach: '', outcomes: [] },
+  { id: 3, slug: 'three', title: 'Three', type: 'SaaS', tags: [], role: '', summary: '', challenge: '', approach: '', outcomes: [] },
 ] as any;
 
 const resources = [
@@ -22,12 +22,4 @@ test('filters CMS documents by type and category', () => {
   assert.equal(filterResources(resources, 'All', 'Search engine optimization').length, 1);
   assert.equal(filterResources(resources, 'All', 'SEO-only resource title').length, 1);
   assert.equal(filterResources(resources, 'All', 'SEO-only resource description').length, 1);
-});
-
-test('calcFillerCount fills incomplete grid rows accurately', () => {
-  assert.equal(calcFillerCount(6, 3), 0);
-  assert.equal(calcFillerCount(2, 3), 1);
-  assert.equal(calcFillerCount(1, 3), 2);
-  assert.equal(calcFillerCount(5, 2), 1);
-  assert.equal(calcFillerCount(0, 3), 0);
 });

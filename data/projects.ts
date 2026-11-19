@@ -1,13 +1,10 @@
 export type ProjectType = 'Website' | 'Software' | 'SaaS';
-export type PatternVariant = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6';
 
 export interface Project {
   slug: string;
   title: string;
   type: ProjectType;
   tags: string[];
-  initials: string;
-  pattern: PatternVariant;
   role: string;
   summary: string;
   challenge: string;
@@ -21,8 +18,6 @@ export const PROJECTS: Project[] = [
     title: 'Harbourside Tours',
     type: 'Website',
     tags: ['Next.js', 'Tailwind CSS', 'Headless CMS'],
-    initials: 'HT',
-    pattern: 'p2',
     role: 'Design, development, hosting setup',
     summary:
       'A tourism website built around one job: getting a visitor from the home page to a booking enquiry in as few steps as possible.',
@@ -41,8 +36,6 @@ export const PROJECTS: Project[] = [
     title: 'Island Trades Collective',
     type: 'Website',
     tags: ['Next.js', 'Tailwind CSS', 'Service Areas'],
-    initials: 'IT',
-    pattern: 'p3',
     role: 'Design, development',
     summary:
       'A directory-style site for a group of local trades businesses, with individual service pages, coverage areas and a shared enquiry flow.',
@@ -61,8 +54,6 @@ export const PROJECTS: Project[] = [
     title: 'Maritime Market',
     type: 'Website',
     tags: ['E-commerce', 'Payments', 'Inventory'],
-    initials: 'MM',
-    pattern: 'p4',
     role: 'Design, development, store configuration',
     summary:
       'An online store for an independent maker, with an organized product catalogue, Canadian tax and shipping rules, and automated order emails.',
@@ -81,8 +72,6 @@ export const PROJECTS: Project[] = [
     title: 'ShiftBoard',
     type: 'SaaS',
     tags: ['Next.js', 'PostgreSQL', 'Authentication'],
-    initials: 'SB',
-    pattern: 'p5',
     role: 'Product scoping, design, full-stack development',
     summary:
       'A scheduling web application for small shops and hospitality teams to build weekly rosters, publish shifts and handle swap requests.',
@@ -101,8 +90,6 @@ export const PROJECTS: Project[] = [
     title: 'Inventory Sync',
     type: 'Software',
     tags: ['TypeScript', 'REST APIs', 'Background Jobs'],
-    initials: 'IS',
-    pattern: 'p6',
     role: 'Software architecture and development',
     summary:
       'An internal synchronization service that keeps stock counts aligned between an in-store point-of-sale system and an online storefront.',
@@ -121,8 +108,6 @@ export const PROJECTS: Project[] = [
     title: 'Clientdesk',
     type: 'SaaS',
     tags: ['Next.js', 'PostgreSQL', 'Transactional Email'],
-    initials: 'CD',
-    pattern: 'p1',
     role: 'Product scoping, UI design, development',
     summary:
       'A lightweight client portal where small service firms share project documents, track open requests and send clear status updates.',

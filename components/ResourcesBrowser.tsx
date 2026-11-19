@@ -38,7 +38,7 @@ export function ResourcesBrowser({ resources }: { resources: ResourceEntry[] }) 
         </div>
       </div>
       {filtered.length > 0 ? (
-        <Grid columns={3} fill>{filtered.map((entry, index) => <ResourceCard key={entry.slug} resource={entry} index={index} />)}</Grid>
+        <Grid columns={3}>{filtered.map((entry, index) => <ResourceCard key={entry.slug} resource={entry} index={index} />)}</Grid>
       ) : (
         <Empty className="min-h-56 rounded-sm border border-dashed border-border bg-card p-8">
           <EmptyHeader>

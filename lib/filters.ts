@@ -29,8 +29,3 @@ export function filterResources(resources: ResourceEntry[], category: ResourceFi
     return searchable.includes(normalizedQuery);
   });
 }
-
-export function calcFillerCount(visibleItemCount: number, columnCount: number): number {
-  if (columnCount < 2 || visibleItemCount <= 0) return 0;
-  return (columnCount - (visibleItemCount % columnCount)) % columnCount;
-}

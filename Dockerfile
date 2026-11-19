@@ -58,12 +58,17 @@ for (const [key, value] of Object.entries(parsed)) {
 
 if (
   !/^mongodb(?:\+srv)?:\/\//i.test(buildEnv.DATABASE_URI || '') ||
-  !buildEnv.APP_URL ||
+  !buildEnv.NEXT_PUBLIC_APP_URL ||
   !buildEnv.PAYLOAD_SECRET ||
   !buildEnv.EMAIL_FROM ||
-  !buildEnv.EMAIL_FROM_NAME
+  !buildEnv.EMAIL_FROM_NAME ||
+  !buildEnv.S3_ACCESS_KEY_ID ||
+  !buildEnv.S3_BUCKET ||
+  !buildEnv.S3_ENDPOINT ||
+  !buildEnv.S3_REGION ||
+  !buildEnv.S3_SECRET_ACCESS_KEY
 ) {
-  console.error('ERROR: Required MongoDB build configuration is missing or invalid.');
+  console.error('ERROR: Required application, MongoDB, or S3 build configuration is missing or invalid.');
   process.exit(1);
 }
 

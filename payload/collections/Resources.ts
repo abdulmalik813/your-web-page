@@ -41,6 +41,14 @@ export const Resources: CollectionConfig = {
       required: true,
     },
     {
+      name: 'image',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description: 'Optional image shown on resource cards and its detail page.',
+      },
+    },
+    {
       name: 'excerpt',
       type: 'textarea',
       required: true,

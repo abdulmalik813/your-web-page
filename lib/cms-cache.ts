@@ -32,6 +32,27 @@ export function cmsCollectionCacheHooks(
   };
 }
 
+export function cmsMediaCacheHooks(): NonNullable<CollectionConfig['hooks']> {
+  return {
+    afterChange: [
+      ({ doc }) => {
+        for (const slug of ['media', 'services', 'projects', 'resources']) {
+          revalidateCmsCollection(slug);
+        }
+        return doc;
+      },
+    ],
+    afterDelete: [
+      ({ doc }) => {
+        for (const slug of ['media', 'services', 'projects', 'resources']) {
+          revalidateCmsCollection(slug);
+        }
+        return doc;
+      },
+    ],
+  };
+}
+
 export function cmsGlobalCacheHooks(
   slug: string,
 ): NonNullable<GlobalConfig['hooks']> {

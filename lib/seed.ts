@@ -340,8 +340,6 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
       title: project.title,
       type: project.type,
       tags: project.tags.map((tag) => ({ tag })),
-      initials: project.initials,
-      pattern: project.pattern,
       role: project.role,
       summary: project.summary,
       challenge: project.challenge,

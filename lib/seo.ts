@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export function getBaseUrl(): string {
-  const raw = process.env.APP_URL?.trim();
-  if (!raw) throw new Error('APP_URL is required');
+  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (!raw) throw new Error('NEXT_PUBLIC_APP_URL is required');
   return raw.replace(/\/+$/, '');
 }
 
