@@ -27,16 +27,16 @@ export function HeroScene() {
           transformStyle: 'preserve-3d',
         }}
       >
-        <div className="pointer-events-none absolute -z-10 inset-x-3 inset-y-4 rounded-sm border border-primary/15 bg-accent/40 [transform:translateZ(-42px)_rotateY(7deg)_rotateX(-3deg)]" aria-hidden="true" />
+        <div className="pointer-events-none absolute -z-10 inset-x-3 inset-y-4 rounded-sm border border-primary/15 bg-accent/40 sm:[transform:translateZ(-42px)_rotateY(7deg)_rotateX(-3deg)]" aria-hidden="true" />
         <motion.div
           className={`relative z-10 ${siteCardClass} p-2 sm:p-3`}
-          initial={reduceMotion ? false : { opacity: 0, x: 24, y: 16 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           whileInView={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0 }}
           viewport={{ once: false, amount: 0.2 }}
           transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           style={{ transformStyle: 'preserve-3d' }}
         >
-          <div className="overflow-hidden rounded-sm border border-border/60 bg-background">
+          <div className="overflow-hidden rounded-sm border border-border/60 bg-background/90 backdrop-blur-md">
             <div className="flex items-center justify-between bg-foreground px-4 py-3 text-background">
               <div className="flex items-center gap-1.5" aria-hidden="true">
                 <i className="size-2 bg-primary" />

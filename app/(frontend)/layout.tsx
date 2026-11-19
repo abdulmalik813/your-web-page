@@ -6,6 +6,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { PayloadLivePreview } from '@/components/PayloadLivePreview';
 import { PayloadAdminBar } from '@/components/PayloadAdminBar';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { SiteBackground } from '@/components/SiteBackground';
 import { getCmsFooter, getCmsNavigation, getCmsServices, getCmsSettings } from '@/lib/cms';
 import { buildCanonicalUrl, getBaseUrl } from '@/lib/seo';
 import { draftMode } from 'next/headers';
@@ -89,12 +90,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en-CA" className={`${archivo.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen bg-background font-sans text-foreground" suppressHydrationWarning>
+      <body className="min-h-screen font-sans text-foreground" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          <SiteBackground />
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }} />
           <PayloadAdminBar draftEnabled={draft} />
           <SiteHeader settings={settings} navigation={navigation} services={services} />
-          <main id="main" tabIndex={-1} className="w-full max-w-full overflow-x-clip outline-none">
+          <main id="main" tabIndex={-1} className="relative z-10 w-full max-w-full overflow-x-clip outline-none">
             <MotionShell>{children}</MotionShell>
           </main>
           <SiteFooter settings={settings} footer={footer} />

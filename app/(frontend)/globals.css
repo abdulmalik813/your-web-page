@@ -137,7 +137,6 @@ html,
 body {
   max-width: 100%;
   overflow-x: clip;
-  position: relative;
 }
 
 @supports not (overflow-x: clip) {

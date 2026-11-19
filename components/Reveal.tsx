@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useSyncExternalStore, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import type { RevealDirection } from './revealDirections';
 import { cn } from '@/lib/utils';
@@ -30,6 +30,18 @@ const mobileOffsets: Record<RevealDirection, { x: number; y: number; scale?: num
   scale: { x: 0, y: 0, scale: 0.97 },
 };
 
+const subscribeMedia = (callback: () => void) => {
+  if (typeof window === 'undefined') return () => {};
+  const mq = window.matchMedia('(min-width: 768px)');
+  mq.addEventListener('change', callback);
+  return () => mq.removeEventListener('change', callback);
+};
+
+const getClientSnapshot = () =>
+  typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
+
+const getServerSnapshot = () => false;
+
 export function Reveal({
   children,
   className,
@@ -39,15 +51,7 @@ export function Reveal({
   once = true,
 }: RevealProps) {
   const reduceMotion = useReducedMotion();
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)');
-    setIsDesktop(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
+  const isDesktop = useSyncExternalStore(subscribeMedia, getClientSnapshot, getServerSnapshot);
 
   const offset = isDesktop ? desktopOffsets[direction] : mobileOffsets[direction];
 
