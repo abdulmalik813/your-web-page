@@ -1,0 +1,11 @@
+.git
+.next
+node_modules
+.pnpm-store
+.buildkit-cache-mounts
+coverage
+.env
+.env.*
+!.env.example
+*.db
+*.log

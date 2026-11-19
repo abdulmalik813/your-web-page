@@ -1,0 +1,76 @@
+services:
+  # Single-node MongoDB replica set for local Payload transactions
+  mongodb:
+    image: mongo:8.0
+    container_name: your-web-page-mongodb
+    restart: unless-stopped
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "--eval",
+          "try { const status = rs.status(); quit(status.ok === 1 && status.myState === 1 ? 0 : 1) } catch (error) { rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'mongodb:27017'}]}); quit(1) }",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 10s
+
+  # SeaweedFS Master
+  seaweed-master:
+    image: chrislusf/seaweedfs:latest
+    container_name: your-web-page-seaweed-master
+    restart: unless-stopped
+    command: master
+    ports:
+      - "9333:9333"
+
+  # SeaweedFS Volume Server
+  seaweed-volume:
+    image: chrislusf/seaweedfs:latest
+    container_name: your-web-page-seaweed-volume
+    restart: unless-stopped
+    command: volume -mserver="seaweed-master:9333" -dir="/data"
+    depends_on:
+      - seaweed-master
+    volumes:
+      - seaweed_data:/data
+    ports:
+      - "8080:8080"
+
+  # SeaweedFS Filer
+  seaweed-filer:
+    image: chrislusf/seaweedfs:latest
+    container_name: your-web-page-seaweed-filer
+    restart: unless-stopped
+    command: filer -master="seaweed-master:9333"
+    depends_on:
+      - seaweed-master
+      - seaweed-volume
+    ports:
+      - "8888:8888"
+
+  # SeaweedFS S3 Gateway
+  seaweed-s3:
+    image: chrislusf/seaweedfs:latest
+    container_name: your-web-page-seaweed-s3
+    restart: unless-stopped
+    command: s3 -filer="seaweed-filer:8888"
+    depends_on:
+      - seaweed-filer
+    ports:
+      - "8333:8333"
+
+volumes:
+  mongodb_data:
+    driver: local
+
+  seaweed_data:
+    driver: local
