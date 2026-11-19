@@ -20,7 +20,6 @@ export function HeroScene() {
       role="img"
       aria-label="A layered three-dimensional website interface"
     >
-      <div className="absolute inset-x-[14%] top-[12%] aspect-square border border-accent/70 bg-accent/20" aria-hidden="true" />
       <motion.div
         className="relative isolate"
         style={{
@@ -83,16 +82,6 @@ export function HeroScene() {
               ))}
             </div>
           </div>
-        </motion.div>
-        <motion.div
-          className="absolute -bottom-5 right-4 hidden border border-border bg-card px-4 py-3 text-foreground sm:block"
-          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-          whileInView={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.4 }}
-          transition={{ duration: 0.4, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <span className="block font-mono text-xs font-semibold uppercase tracking-[0.1em] text-primary">Charlottetown, PEI</span>
-          <span className="mt-1 block font-heading text-lg">Working everywhere.</span>
         </motion.div>
       </motion.div>
     </div>

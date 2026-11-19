@@ -179,7 +179,7 @@ export default async function CatchAllPage({ params }: { params: Promise<{ slug?
           case 'hero': {
             const isHome = slug.length === 0;
             return (
-              <section className="relative isolate overflow-hidden border-b border-border/60 bg-[radial-gradient(ellipse_at_76%_40%,var(--accent)_0%,transparent_38%),linear-gradient(135deg,var(--background),var(--muted)_55%,var(--background))]" key={block.id || index}>
+              <section className="relative isolate overflow-x-clip border-b border-border/60 bg-[radial-gradient(ellipse_at_76%_40%,var(--accent)_0%,transparent_38%),linear-gradient(135deg,var(--background),var(--muted)_55%,var(--background))]" key={block.id || index}>
                 <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:radial-gradient(var(--border)_0.7px,transparent_0.7px)] [background-size:24px_24px]" aria-hidden="true" />
                 <div className="relative mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11">
                   <div className={`grid grid-cols-1 items-center gap-8 py-12 md:py-20 ${isHome ? 'lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10' : ''}`}>
