@@ -1,8 +1,9 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import type { RevealDirection } from './revealDirections';
+import { cn } from '@/lib/utils';
 
 interface RevealProps {
   children: ReactNode;
@@ -10,14 +11,23 @@ interface RevealProps {
   delay?: number;
   interactive?: boolean;
   direction?: RevealDirection;
+  once?: boolean;
 }
 
-const hiddenOffsets: Record<RevealDirection, { x: number; y: number }> = {
-  left: { x: -28, y: 0 },
-  right: { x: 28, y: 0 },
-  up: { x: 0, y: 22 },
-  down: { x: 0, y: -22 },
-  scale: { x: 0, y: 0 },
+const desktopOffsets: Record<RevealDirection, { x: number; y: number; scale?: number }> = {
+  left: { x: -22, y: 0 },
+  right: { x: 22, y: 0 },
+  up: { x: 0, y: 20 },
+  down: { x: 0, y: -20 },
+  scale: { x: 0, y: 0, scale: 0.96 },
+};
+
+const mobileOffsets: Record<RevealDirection, { x: number; y: number; scale?: number }> = {
+  left: { x: 0, y: 16 },
+  right: { x: 0, y: 16 },
+  up: { x: 0, y: 16 },
+  down: { x: 0, y: -16 },
+  scale: { x: 0, y: 0, scale: 0.97 },
 };
 
 export function Reveal({
@@ -26,16 +36,28 @@ export function Reveal({
   delay = 0,
   interactive = false,
   direction = 'up',
+  once = true,
 }: RevealProps) {
   const reduceMotion = useReducedMotion();
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    setIsDesktop(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const offset = isDesktop ? desktopOffsets[direction] : mobileOffsets[direction];
 
   return (
     <motion.div
-      className={className}
-      initial={reduceMotion ? false : { opacity: 0, ...hiddenOffsets[direction] }}
-      whileInView={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0 }}
+      className={cn('max-w-full', className)}
+      initial={reduceMotion ? false : { opacity: 0, ...offset }}
+      whileInView={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0, scale: 1 }}
       whileHover={interactive && !reduceMotion ? { y: -4 } : undefined}
-      viewport={{ once: false, amount: 0.16 }}
+      viewport={{ once, amount: 0.12 }}
       transition={{ duration: 0.42, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}

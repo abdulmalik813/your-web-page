@@ -94,7 +94,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }} />
           <PayloadAdminBar draftEnabled={draft} />
           <SiteHeader settings={settings} navigation={navigation} services={services} />
-          <main id="main" tabIndex={-1}>
+          <main id="main" tabIndex={-1} className="w-full max-w-full overflow-x-clip outline-none">
             <MotionShell>{children}</MotionShell>
           </main>
           <SiteFooter settings={settings} footer={footer} />

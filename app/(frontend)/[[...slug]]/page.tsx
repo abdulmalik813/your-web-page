@@ -33,12 +33,12 @@ import {
 } from '@/lib/cms';
 import { buildPageMetadata } from '@/lib/seo';
 
-const pageSection = 'relative border-b border-border/50 bg-muted/10 py-12 md:py-24';
+const pageSection = 'relative overflow-x-clip border-b border-border/50 bg-muted/10 py-12 md:py-24';
 const pageContainer = 'mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11';
 const pageLabel = 'font-mono text-xs font-medium uppercase leading-5 tracking-[0.14em]';
 const pageCell = `${siteCardClass} flex flex-col gap-4 p-6 md:p-8`;
 const pageWrap = 'mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11';
-const pageTightSection = 'relative border-b border-border/50 bg-background py-12 md:py-24';
+const pageTightSection = 'relative overflow-x-clip border-b border-border/50 bg-background py-12 md:py-24';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }): Promise<Metadata> {
   const { slug = [] } = await params;
@@ -178,11 +178,13 @@ export default async function CatchAllPage({ params }: { params: Promise<{ slug?
         switch (block.blockType) {
           case 'hero': {
             const isHome = slug.length === 0;
+            const isWhereWeWork = slug.length === 1 && slug[0] === 'where-we-work';
+            const showGlobe = isHome || isWhereWeWork;
             return (
               <section className="relative isolate overflow-x-clip border-b border-border/60 bg-[radial-gradient(ellipse_at_76%_40%,var(--accent)_0%,transparent_38%),linear-gradient(135deg,var(--background),var(--muted)_55%,var(--background))]" key={block.id || index}>
                 <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:radial-gradient(var(--border)_0.7px,transparent_0.7px)] [background-size:24px_24px]" aria-hidden="true" />
                 <div className="relative mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11">
-                  <div className={`grid grid-cols-1 items-center gap-8 py-12 md:py-20 ${isHome ? 'lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10' : ''}`}>
+                  <div className={`grid grid-cols-1 items-center gap-8 py-12 md:py-20 ${showGlobe ? 'lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10' : ''}`}>
                     <Reveal className="relative z-10 flex flex-col items-start gap-7" direction="left">
                       {block.eyebrow ? <p className="font-mono text-xs font-semibold uppercase leading-5 tracking-[0.12em] text-primary">{block.eyebrow}</p> : null}
                       <h1 className="max-w-[13ch] break-words font-heading text-[clamp(3rem,7.5vw,7.3rem)] font-medium leading-[0.88] tracking-[-0.06em] [overflow-wrap:anywhere]">{block.title}{block.highlight ? <> <mark className="bg-transparent italic text-primary">{block.highlight}</mark></> : null}</h1>
@@ -192,7 +194,7 @@ export default async function CatchAllPage({ params }: { params: Promise<{ slug?
                         {block.secondaryHref ? <Button asChild variant="outline" className="h-12 rounded-sm border-border bg-background px-6 font-semibold transition-colors hover:bg-muted"><Link href={block.secondaryHref}>{block.secondaryLabel || 'View more'}</Link></Button> : null}
                       </div>
                     </Reveal>
-                    {isHome ? <HeroScene /> : null}
+                    {showGlobe ? <HeroScene /> : null}
                   </div>
                   {Array.isArray(block.facts) && block.facts.length > 0 ? <div className="grid border-t border-border/60 py-3 font-mono text-xs font-medium uppercase leading-5 tracking-[0.06em] md:grid-cols-3">{block.facts.map((fact: { id?: string; text: string }, factIndex: number) => <Reveal className={`m-0 break-words px-4 py-3 text-muted-foreground sm:px-6 lg:px-8 ${factIndex ? 'border-t border-border/60 md:border-l md:border-t-0' : ''}`} key={fact.id || fact.text} delay={factIndex * 0.04} direction={revealDirectionForIndex(factIndex)}>{fact.text}</Reveal>)}</div> : null}
                 </div>

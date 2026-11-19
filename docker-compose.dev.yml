@@ -39,7 +39,7 @@ services:
       - "127.0.0.1:9001:9001"
 
   silo-s3-init:
-    image: amazon/aws-cli:2
+    image: amazon/aws-cli:latest
     container_name: your-web-page-silo-s3-init
     depends_on:
       - silo
