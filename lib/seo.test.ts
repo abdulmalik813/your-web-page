@@ -9,23 +9,6 @@ test('canonical URLs use the configured application URL', () => {
   assert.equal(buildCanonicalUrl('/'), 'https://example.com');
 });
 
-test('local preview URLs replace the wildcard bind address with localhost', () => {
-  const previousAppUrl = process.env.NEXT_PUBLIC_APP_URL;
-  process.env.NEXT_PUBLIC_APP_URL = 'http://0.0.0.0:3000';
-
-  try {
-    assert.equal(getBaseUrl(), 'http://localhost:3000');
-    const previewPath = livePreviewUrl({ collectionSlug: 'pages', data: { slug: 'contact' } });
-    assert.ok(previewPath.startsWith('/api/draft/enable?'));
-    const previewUrl = new URL(previewPath, getBaseUrl());
-    assert.equal(previewUrl.origin, 'http://localhost:3000');
-    assert.equal(previewUrl.searchParams.get('path'), '/contact');
-  } finally {
-    if (previousAppUrl === undefined) delete process.env.NEXT_PUBLIC_APP_URL;
-    else process.env.NEXT_PUBLIC_APP_URL = previousAppUrl;
-  }
-});
-
 test('sitemap entries contain no blog or pricing routes', () => {
   process.env.NEXT_PUBLIC_APP_URL = 'https://example.com';
   const entries = getAllSitemapEntries();

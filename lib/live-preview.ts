@@ -62,7 +62,6 @@ export const livePreviewUrl = (args: LivePreviewUrlArgs = {}) => {
     }
   }
 
-  // Ensure path is strictly single leading slash and valid
   const cleanPath = route.startsWith('/') ? route : `/${route}`;
   const safePath = cleanPath.replace(/^\/{2,}/, '/');
 
@@ -71,9 +70,6 @@ export const livePreviewUrl = (args: LivePreviewUrlArgs = {}) => {
     previewSecret: getPreviewSecret(),
   });
 
-  // Return a relative URL so Payload LivePreview automatically resolves against
-  // the browser's active origin (window.location.origin). This prevents 0.0.0.0
-  // or build-time domain mismatches in production and container environments.
   return `/api/draft/enable?${params.toString()}`;
 };
 

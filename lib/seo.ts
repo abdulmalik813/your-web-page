@@ -4,12 +4,6 @@ export function getBaseUrl(): string {
   const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
   if (!raw) throw new Error('NEXT_PUBLIC_APP_URL is required');
   const url = new URL(raw);
-  if (url.hostname === '0.0.0.0') {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('NEXT_PUBLIC_APP_URL must use a browser-reachable hostname, not 0.0.0.0');
-    }
-    url.hostname = 'localhost';
-  }
   return url.toString().replace(/\/+$/, '');
 }
 
