@@ -3,6 +3,8 @@ import { draftMode } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { PreviewLivePreview } from '@/components/PreviewLivePreview';
 import { getCmsPage } from '@/lib/cms';
+import { getPreviewUser } from '@/lib/preview-auth';
+import { toPreviewPath, toPublicPath } from '@/lib/preview-paths';
 import { CmsPageLayout } from '../../[[...slug]]/CmsPageLayout';
 import { DetailPage } from '../../[[...slug]]/DetailPage';
 
@@ -14,6 +16,14 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }): Promise<Metadata> {
   const { slug = [] } = await params;
+
+  if (!(await getPreviewUser())) {
+    return {
+      title: 'Preview',
+      robots: { index: false, follow: false },
+    };
+  }
+
   const page = await getCmsPage(slug.join('/'), true);
   return {
     title: page?.title || 'Preview',
@@ -23,7 +33,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
 
 export default async function PreviewPage({ params }: { params: Promise<{ slug?: string[] }> }) {
   const { slug = [] } = await params;
-  const publicPath = slug.length ? `/${slug.join('/')}` : '/';
+  const publicPath = toPublicPath(slug.length ? `/${slug.join('/')}` : '/');
+  const previewPath = toPreviewPath(publicPath);
+
+  if (!(await getPreviewUser())) {
+    redirect(`/admin/login?redirect=${encodeURIComponent(previewPath)}`);
+  }
+
   const { isEnabled: draft } = await draftMode();
 
   if (!draft) redirect(publicPath);

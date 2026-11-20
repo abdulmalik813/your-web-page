@@ -16,7 +16,7 @@ import { Reveal } from '@/components/Reveal';
 import { revealDirectionForIndex } from '@/components/revealDirections';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { siteCardClass } from '@/components/siteStyles';
+import { siteCardClass, siteCardHoverClass, siteCardLiftClass } from '@/components/siteStyles';
 import { getCmsFaqGroups, getCmsProjects, getCmsNewsletters, getCmsServices } from '@/lib/cms';
 import { legacyCmsLink, legacyLink, resolveLink } from '@/lib/links';
 import { JsonLd } from '@/components/JsonLd';
@@ -158,17 +158,17 @@ async function CardGrid({ block, draft }: { block: any; draft: boolean }) {
     <section className={pageTightSection}><div className={pageWrap}>{heading}<Grid columns={3}>{(block.cards || []).map((card: any, index: number) => {
       const link = resolveLink(card.link) ?? legacyLink(card.href, card.title);
       return (
-      <Reveal className="h-full" delay={index * 0.04} direction={revealDirectionForIndex(index)} interactive key={card.id || card.title}>
+      <Reveal className="h-full" delay={index * 0.04} direction={revealDirectionForIndex(index)} key={card.id || card.title}>
         {link ? (
-          <Link className="block h-full min-w-0 rounded-sm no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" href={link.href} target={link.newTab ? '_blank' : undefined} rel={link.newTab ? 'noopener noreferrer' : undefined}>
-            <Card className={`${siteCardClass} flex h-full flex-col gap-4 p-6`}>
+          <Link className="group block h-full min-w-0 rounded-sm no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" href={link.href} target={link.newTab ? '_blank' : undefined} rel={link.newTab ? 'noopener noreferrer' : undefined}>
+            <Card className={`${siteCardClass} ${siteCardLiftClass} flex h-full flex-col gap-4 p-6`}>
               <span className="font-mono text-xs font-semibold tracking-[0.04em] text-primary-strong">{card.number}</span>
-              <h3 className="break-words font-heading text-[clamp(1.4rem,2vw,1.9rem)] font-medium leading-tight tracking-tight [overflow-wrap:anywhere]">{card.title}</h3>
+              <h3 className="break-words font-heading text-[clamp(1.4rem,2vw,1.9rem)] font-medium leading-tight tracking-tight transition-colors duration-200 group-hover:text-primary-strong [overflow-wrap:anywhere]">{card.title}</h3>
               <p className="break-words text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">{card.description}</p>
             </Card>
           </Link>
         ) : (
-          <Card className={`${siteCardClass} flex h-full flex-col gap-4 p-6`}>
+          <Card className={`${siteCardClass} ${siteCardHoverClass} flex h-full flex-col gap-4 p-6`}>
             <span className="font-mono text-xs font-semibold tracking-[0.04em] text-primary-strong">{card.number}</span>
             <h3 className="break-words font-heading text-[clamp(1.4rem,2vw,1.9rem)] font-medium leading-tight tracking-tight [overflow-wrap:anywhere]">{card.title}</h3>
             <p className="break-words text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">{card.description}</p>

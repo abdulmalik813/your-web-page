@@ -13,7 +13,7 @@ import { ServiceCard } from '@/components/ServiceCard';
 import { Reveal } from '@/components/Reveal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { siteCardClass } from '@/components/siteStyles';
+import { siteCardClass, siteCardHoverClass } from '@/components/siteStyles';
 import { getCmsServiceBySlug, getCmsServices, getCmsProjectBySlug, getCmsProjects, getCmsNewsletterBySlug, getCmsNewsletters, getCmsSettings } from '@/lib/cms';
 import { legacyLink, resolveLink } from '@/lib/links';
 import { JsonLd } from '@/components/JsonLd';
@@ -22,7 +22,7 @@ import { articleNode, breadcrumbNode, projectNode, serviceNode, webPageNode } fr
 const pageSection = 'relative overflow-x-clip border-b border-border bg-muted/20 py-8 md:py-10 lg:py-14';
 const pageContainer = 'mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11';
 const pageLabel = 'font-mono text-xs font-medium uppercase leading-5 tracking-[0.14em]';
-const pageCell = `${siteCardClass} flex flex-col gap-4 p-6 md:p-8`;
+const pageCell = `${siteCardClass} ${siteCardHoverClass} flex flex-col gap-4 p-6 md:p-8`;
 
 const newsletterConverters = {
   ...defaultJSXConverters,

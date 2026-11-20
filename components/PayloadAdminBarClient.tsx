@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { toPublicPath } from '@/lib/preview-paths';
 import { Eye, EyeOff, LayoutDashboard, Loader2, Pencil, Plus } from 'lucide-react';
 
 interface PayloadAdminBarClientProps {
@@ -43,14 +44,8 @@ export function PayloadAdminBarClient({
   previewHref,
 }: PayloadAdminBarClientProps) {
   const pathname = usePathname() || '/';
-  // Preview lives at /preview/<public path>; the bar should still resolve and
-  // exit to the public document it mirrors.
-  const publicPath =
-    pathname === '/preview'
-      ? '/'
-      : pathname.startsWith('/preview/')
-        ? pathname.slice('/preview'.length)
-        : pathname;
+  // /preview/<path> is a draft view of /<path>; resolve the public document.
+  const publicPath = toPublicPath(pathname);
   const [resolvedState, setResolvedState] = useState<{
     path: string;
     doc: ResolvedDoc | null;
@@ -61,8 +56,11 @@ export function PayloadAdminBarClient({
 
   useEffect(() => {
     let isCancelled = false;
+    const controller = new AbortController();
 
-    fetch(`/api/admin/resolve-document?path=${encodeURIComponent(publicPath)}`)
+    fetch(`/api/admin/resolve-document?path=${encodeURIComponent(publicPath)}`, {
+      signal: controller.signal,
+    })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!isCancelled) {
@@ -83,6 +81,7 @@ export function PayloadAdminBarClient({
 
     return () => {
       isCancelled = true;
+      controller.abort();
     };
   }, [publicPath]);
 
@@ -94,7 +93,7 @@ export function PayloadAdminBarClient({
   return (
     <aside
       aria-label="Payload CMS toolbar"
-      className="relative z-40 border-b border-border bg-card/95 text-foreground backdrop-blur-md transition-colors"
+      className="admin-toolbar-enter relative z-40 border-b border-border bg-card/95 text-foreground backdrop-blur-md transition-colors"
     >
       <div className="mx-auto flex min-h-11 w-full max-w-[1360px] flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-1.5 sm:px-6 lg:px-11">
         {/* Left Side: Brand badge, Status indicator, Current target */}
@@ -113,7 +112,7 @@ export function PayloadAdminBarClient({
           >
             {draftEnabled ? (
               <span className="inline-flex items-center gap-1.5 rounded-sm border border-primary/40 bg-primary/10 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-primary-strong">
-                <span className="size-1.5 rounded-full bg-primary animate-pulse" aria-hidden="true" />
+                <span className="size-1.5 rounded-full bg-primary animate-pulse motion-reduce:animate-none" aria-hidden="true" />
                 Draft Preview
               </span>
             ) : (
@@ -140,7 +139,7 @@ export function PayloadAdminBarClient({
         <div className="flex flex-wrap items-center gap-2">
           {isLoading ? (
             <span className="inline-flex min-h-7 items-center gap-1.5 rounded-sm border border-border bg-muted/40 px-3 font-mono text-xs text-muted-foreground opacity-60">
-              <Loader2 className="size-3 animate-spin" aria-hidden="true" />
+              <Loader2 className="size-3 animate-spin motion-reduce:animate-none" aria-hidden="true" />
               <span>Locating...</span>
             </span>
           ) : docInfo?.editUrl ? (

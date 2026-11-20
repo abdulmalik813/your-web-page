@@ -23,7 +23,9 @@ export function validatePageSlug(slug: string): true | string {
     return 'Enter a page slug with a non-empty name between each slash, such as test/more.';
   }
   const segments = slug.split('/');
-  if (['unsubscribe', 'admin', 'api', 'robotstxt', 'sitemapxml', '_next'].includes(segments[0])) {
+  // /preview owns its whole subtree (draft previews mirror public paths there),
+  // so no page may start with that segment.
+  if (['preview', 'unsubscribe', 'admin', 'api', 'robotstxt', 'sitemapxml', '_next'].includes(segments[0])) {
     return `/${slug} is reserved for an existing site route. Choose another page slug.`;
   }
   if (segments.length === 2 && ['services', 'our-work', 'newsletters'].includes(segments[0])) {

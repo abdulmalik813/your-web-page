@@ -2,6 +2,7 @@ import config from '@payload-config';
 import { getPayload } from 'payload';
 import { type NextRequest, NextResponse } from 'next/server';
 import { getPreviewSecret } from '@/lib/live-preview';
+import { toPreviewPath } from '@/lib/preview-paths';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +30,9 @@ export async function GET(request: NextRequest): Promise<Response> {
     rawPath.startsWith('/') && !rawPath.startsWith('//')
       ? rawPath.split('?')[0].split('#')[0]
       : '/';
-  const previewPath = path === '/' ? '/preview' : `/preview${path}`;
+  // The toolbar also runs on /preview; keep its links on the public page
+  // instead of nesting /preview twice.
+  const previewPath = toPreviewPath(path);
 
   const previewHref = `/api/draft/enable?${new URLSearchParams({
     path: previewPath,

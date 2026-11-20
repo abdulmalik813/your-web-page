@@ -23,6 +23,8 @@ interface MediaFigureProps {
    */
   aspect?: 'card' | 'wide' | 'thumb';
   className?: string;
+  /** Applied to the <img> itself, e.g. a group-hover zoom. */
+  imageClassName?: string;
   /**
    * Next/Image sizes hint.
    * Defaults are set per aspect for sensible defaults.
@@ -48,10 +50,13 @@ export function MediaFigure({
   alt,
   aspect = 'card',
   className = '',
+  imageClassName = '',
   sizes,
   priority = false,
 }: MediaFigureProps) {
   if (!image) return null;
+
+  const imageClass = `object-cover ${imageClassName}`.trim();
 
   // Flat legacy asset (from cms.ts mappers that return { url, alt })
   if (isFlatAsset(image)) {
@@ -66,7 +71,7 @@ export function MediaFigure({
           alt={image.alt || alt}
           fill
           sizes={sizes ?? DEFAULT_SIZES[aspect]}
-          className="object-cover"
+          className={imageClass}
           priority={priority}
         />
       </figure>
@@ -86,7 +91,7 @@ export function MediaFigure({
         alt={mediaAlt || alt}
         fill
         sizes={sizes ?? DEFAULT_SIZES[aspect]}
-        className="object-cover"
+        className={imageClass}
         priority={priority}
         {...(!width && !height ? {} : { width: undefined, height: undefined })}
       />

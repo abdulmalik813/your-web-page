@@ -3,7 +3,7 @@ import { getCmsApprovedTestimonials } from '@/lib/cms';
 import { Grid } from './Grid';
 import { Reveal } from './Reveal';
 import { revealDirectionForIndex } from './revealDirections';
-import { siteCardClass } from './siteStyles';
+import { siteCardClass, siteCardHoverClass } from './siteStyles';
 
 export async function TestimonialsSection({ draft = false }: { draft?: boolean }) {
   const approved = await getCmsApprovedTestimonials(draft);
@@ -21,8 +21,8 @@ export async function TestimonialsSection({ draft = false }: { draft?: boolean }
         </Reveal>
         <Grid columns={3}>
           {approved.map((item, index) => (
-            <Reveal className="h-full" delay={index * 0.08} direction={revealDirectionForIndex(index)} interactive key={item.id}>
-              <Card className={`${siteCardClass} flex h-full flex-col gap-5 p-6`}>
+            <Reveal className="h-full" delay={index * 0.08} direction={revealDirectionForIndex(index)} key={item.id}>
+              <Card className={`${siteCardClass} ${siteCardHoverClass} flex h-full flex-col gap-5 p-6`}>
                 <span className="grid size-11 place-items-center bg-primary/10 font-heading text-4xl leading-none text-primary-strong" aria-hidden="true">“</span>
                 <blockquote className="break-words font-heading text-xl leading-snug [overflow-wrap:anywhere]">{item.quote}</blockquote>
                 <div className="mt-auto border-t border-border/60 pt-4 text-sm leading-relaxed text-muted-foreground">

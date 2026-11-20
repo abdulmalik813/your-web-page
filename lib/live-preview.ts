@@ -1,4 +1,5 @@
 import { createHmac } from 'node:crypto';
+import { toPreviewPath } from './preview-paths';
 
 export function getPreviewSecret(): string {
   const payloadSecret = process.env.PAYLOAD_SECRET?.trim() || 'default-secret-fallback';
@@ -63,7 +64,7 @@ export const livePreviewUrl = (args: LivePreviewUrlArgs = {}) => {
   const safePath = cleanPath.replace(/^\/{2,}/, '/');
   // Public routes are static, so drafts are rendered by the dedicated
   // dynamic preview route that mirrors the public path.
-  const previewPath = safePath === '/' ? '/preview' : `/preview${safePath}`;
+  const previewPath = toPreviewPath(safePath);
 
   const params = new URLSearchParams({
     path: previewPath,
