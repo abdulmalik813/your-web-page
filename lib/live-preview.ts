@@ -1,5 +1,5 @@
 import { createHmac } from 'node:crypto';
-import { getClientSideURL, getServerSideURL } from './get-url';
+import { getServerSideURL } from './get-url';
 
 export function getPreviewSecret(): string {
   const payloadSecret = process.env.PAYLOAD_SECRET?.trim() || 'default-secret-fallback';

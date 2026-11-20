@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { livePreviewUrl } from './live-preview';
 import { buildCanonicalUrl, getAllSitemapEntries, getBaseUrl } from './seo';
-import { getServerSideURL, getClientSideURL } from './get-url';
+import { getServerSideURL } from './get-url';
 
 test('canonical URLs use the configured application URL', () => {
   process.env.NEXT_PUBLIC_SERVER_URL = 'https://example.com';
@@ -17,7 +17,6 @@ test('getServerSideURL resolves NEXT_PUBLIC_SERVER_URL', () => {
   process.env.NEXT_PUBLIC_SERVER_URL = 'https://yourwebpage.ca/';
 
   assert.equal(getServerSideURL(), 'https://yourwebpage.ca');
-  assert.equal(getClientSideURL(), 'https://yourwebpage.ca');
 
   // Restore
   if (prevApp === undefined) {
@@ -28,8 +27,6 @@ test('getServerSideURL resolves NEXT_PUBLIC_SERVER_URL', () => {
 });
 
 test('livePreviewUrl returns a full URL using the browser origin', () => {
-  // In a Node test environment there is no DOM, so getClientSideURL() falls
-  // back to getServerSideURL(). We set NEXT_PUBLIC_SERVER_URL to control the value.
   const prev = process.env.NEXT_PUBLIC_SERVER_URL;
   process.env.NEXT_PUBLIC_SERVER_URL = 'https://yourwebpage.ca';
 

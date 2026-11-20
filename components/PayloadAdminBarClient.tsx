@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Eye, EyeOff, LayoutDashboard, Loader2, Pencil, Plus } from 'lucide-react';
-import { getClientSideURL } from '@/lib/get-url';
 
 interface PayloadAdminBarClientProps {
   adminUrl: string;
@@ -43,7 +42,6 @@ export function PayloadAdminBarClient({
   draftEnabled,
   previewSecret,
 }: PayloadAdminBarClientProps) {
-  const adminBase = adminUrl || getClientSideURL();
   const pathname = usePathname() || '/';
   const [resolvedState, setResolvedState] = useState<{
     path: string;
@@ -183,7 +181,7 @@ export function PayloadAdminBarClient({
 
           <Link
             className="inline-flex min-h-7 items-center gap-1.5 rounded-sm border border-border bg-background px-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-foreground no-underline transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            href={`${adminBase}/admin/collections/pages/create`}
+            href={`${adminUrl}/admin/collections/pages/create`}
             title="Create a new page"
           >
             <Plus aria-hidden="true" className="size-3.5" />
