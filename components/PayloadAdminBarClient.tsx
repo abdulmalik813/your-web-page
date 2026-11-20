@@ -8,7 +8,7 @@ import { Eye, EyeOff, LayoutDashboard, Loader2, Pencil, Plus } from 'lucide-reac
 interface PayloadAdminBarClientProps {
   adminUrl: string;
   draftEnabled: boolean;
-  previewSecret: string;
+  previewHref: string;
 }
 
 interface ResolvedDoc {
@@ -40,9 +40,17 @@ function formatCollectionLabel(collection: string | null): string {
 export function PayloadAdminBarClient({
   adminUrl,
   draftEnabled,
-  previewSecret,
+  previewHref,
 }: PayloadAdminBarClientProps) {
   const pathname = usePathname() || '/';
+  // Preview lives at /preview/<public path>; the bar should still resolve and
+  // exit to the public document it mirrors.
+  const publicPath =
+    pathname === '/preview'
+      ? '/'
+      : pathname.startsWith('/preview/')
+        ? pathname.slice('/preview'.length)
+        : pathname;
   const [resolvedState, setResolvedState] = useState<{
     path: string;
     doc: ResolvedDoc | null;
@@ -54,12 +62,12 @@ export function PayloadAdminBarClient({
   useEffect(() => {
     let isCancelled = false;
 
-    fetch(`/api/admin/resolve-document?path=${encodeURIComponent(pathname)}`)
+    fetch(`/api/admin/resolve-document?path=${encodeURIComponent(publicPath)}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (!isCancelled) {
           setResolvedState({
-            path: pathname,
+            path: publicPath,
             doc: data && data.editUrl ? data : null,
           });
         }
@@ -67,7 +75,7 @@ export function PayloadAdminBarClient({
       .catch(() => {
         if (!isCancelled) {
           setResolvedState({
-            path: pathname,
+            path: publicPath,
             doc: null,
           });
         }
@@ -76,17 +84,12 @@ export function PayloadAdminBarClient({
     return () => {
       isCancelled = true;
     };
-  }, [pathname]);
+  }, [publicPath]);
 
-  const isLoading = resolvedState.path !== pathname;
-  const docInfo = resolvedState.path === pathname ? resolvedState.doc : null;
+  const isLoading = resolvedState.path !== publicPath;
+  const docInfo = resolvedState.path === publicPath ? resolvedState.doc : null;
 
-  const params = new URLSearchParams({
-    path: pathname,
-    previewSecret,
-  });
-  const previewHref = `/api/draft/enable?${params.toString()}`;
-  const exitPreviewHref = `/api/draft/disable?path=${encodeURIComponent(pathname)}`;
+  const exitPreviewHref = `/api/draft/disable?path=${encodeURIComponent(publicPath)}`;
 
   return (
     <aside

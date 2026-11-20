@@ -3,21 +3,18 @@ import { Archivo, JetBrains_Mono } from 'next/font/google';
 import { MotionShell } from '@/components/MotionShell';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
-import { PreviewLivePreview } from '@/components/PreviewLivePreview';
-import { PayloadAdminBar } from '@/components/PayloadAdminBar';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { SiteBackground } from '@/components/SiteBackground';
 import { getCmsFooter, getCmsNavigation, getCmsSettings } from '@/lib/cms';
 import { buildCanonicalUrl, DEFAULT_OG_IMAGE_PATH, getBaseUrl, resolveOgImageUrl } from '@/lib/seo';
 import { organizationNode, websiteNode } from '@/lib/schema';
 import { JsonLd } from '@/components/JsonLd';
-import { draftMode } from 'next/headers';
+import { AdminBarGate } from '@/components/AdminBarGate';
 import './globals.css';
 
 const archivo = Archivo({
   subsets: ['latin'],
   weight: 'variable',
-  axes: ['wdth'],
   variable: '--font-archivo',
   display: 'swap',
 });
@@ -90,11 +87,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { isEnabled: draft } = await draftMode();
   const [settings, navigation, footer] = await Promise.all([
-    getCmsSettings(draft),
-    getCmsNavigation(draft),
-    getCmsFooter(draft),
+    getCmsSettings(),
+    getCmsNavigation(),
+    getCmsFooter(),
   ]);
 
   const structuredData = [organizationNode(settings), websiteNode(settings)];
@@ -105,13 +101,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <SiteBackground />
           <JsonLd nodes={structuredData} />
-          <PayloadAdminBar draftEnabled={draft} />
+          <AdminBarGate />
           <SiteHeader settings={settings} navigation={navigation} />
           <main id="main" tabIndex={-1} className="relative z-10 w-full max-w-full overflow-x-clip outline-none">
             <MotionShell>{children}</MotionShell>
           </main>
           <SiteFooter settings={settings} footer={footer} />
-          {draft && <PreviewLivePreview />}
         </ThemeProvider>
       </body>
     </html>

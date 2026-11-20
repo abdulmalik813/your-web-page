@@ -4,7 +4,7 @@ export const Users: CollectionConfig = {
   slug: 'users',
   auth: true,
   admin: {
-    useAsTitle: 'email',
+    useAsTitle: 'name',
   },
   fields: [
     {

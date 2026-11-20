@@ -137,24 +137,32 @@ export function SiteBackground() {
 
     };
 
-    // Start drawing after the page has hydrated and gone idle, so the
-    // continuous animation does not compete with the initial render.
-    let idleHandle: number | undefined;
+    // The constellation is decoration. Start it on the first interaction (or
+    // after the page has been idle for a while) so its first frames never
+    // compete with hydration and the LCP paint.
+    let started = false;
     let startTimeout: ReturnType<typeof setTimeout> | undefined;
     const start = () => {
+      if (started) return;
+      started = true;
+      window.removeEventListener('pointerdown', start);
+      window.removeEventListener('keydown', start);
+      window.removeEventListener('touchstart', start);
+      if (startTimeout !== undefined) clearTimeout(startTimeout);
       animationFrameId = requestAnimationFrame(render);
     };
 
-    if (typeof window.requestIdleCallback === 'function') {
-      idleHandle = window.requestIdleCallback(start, { timeout: 2500 });
-    } else {
-      startTimeout = setTimeout(start, 1200);
-    }
+    window.addEventListener('pointerdown', start, { passive: true });
+    window.addEventListener('keydown', start);
+    window.addEventListener('touchstart', start, { passive: true });
+    startTimeout = setTimeout(start, 8000);
 
     return () => {
-      if (idleHandle !== undefined) window.cancelIdleCallback(idleHandle);
       if (startTimeout !== undefined) clearTimeout(startTimeout);
       cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('pointerdown', start);
+      window.removeEventListener('keydown', start);
+      window.removeEventListener('touchstart', start);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('scroll', handleScroll);

@@ -1,4 +1,3 @@
-import { draftMode } from 'next/headers';
 import { JsonLd } from '@/components/JsonLd';
 import { NewsletterBrowser } from '@/components/NewsletterBrowser';
 import { NewsletterForm } from '@/components/NewsletterForm';
@@ -7,9 +6,10 @@ import { getCmsNewsletters, getCmsPage, getCmsSettings } from '@/lib/cms';
 import { breadcrumbNode, itemListNode, webPageNode } from '@/lib/schema';
 import { buildPageMetadata } from '@/lib/seo';
 
+export const revalidate = 300;
+
 export async function generateMetadata() {
-  const { isEnabled: draft } = await draftMode();
-  const [page, settings] = await Promise.all([getCmsPage('newsletters', draft), getCmsSettings(draft)]);
+  const [page, settings] = await Promise.all([getCmsPage('newsletters'), getCmsSettings()]);
   const hero = page?.layout?.find((block: { blockType?: string }) => block.blockType === 'hero');
   return buildPageMetadata({
     title: page?.meta?.title || page?.title || 'Newsletters',
@@ -30,11 +30,10 @@ export async function generateMetadata() {
 }
 
 export default async function NewslettersPage() {
-  const { isEnabled: draft } = await draftMode();
   const [newsletter, page, settings] = await Promise.all([
-    getCmsNewsletters(draft),
-    getCmsPage('newsletters', draft),
-    getCmsSettings(draft),
+    getCmsNewsletters(),
+    getCmsPage('newsletters'),
+    getCmsSettings(),
   ]);
   const hero = Array.isArray(page?.layout)
     ? page.layout.find((block: { blockType?: string }) => block.blockType === 'hero')

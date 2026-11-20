@@ -57,7 +57,8 @@ test('page metadata uses the Settings image as a fallback and prefers a page ima
 test('livePreviewUrl stays on the current origin', () => {
   const previewUrl = livePreviewUrl({ collectionSlug: 'pages', data: { slug: 'contact' } });
   assert.ok(previewUrl.startsWith('/api/draft/enable?'));
-  assert.ok(previewUrl.includes('path=%2Fcontact'));
+  assert.ok(previewUrl.includes('path=%2Fpreview%2Fcontact'));
+  assert.ok(livePreviewUrl({ collectionSlug: 'pages', data: { slug: 'home' } }).includes('path=%2Fpreview'));
 });
 
 test('sitemap entries contain no blog or pricing routes', () => {

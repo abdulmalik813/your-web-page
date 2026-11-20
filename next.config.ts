@@ -22,7 +22,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  transpilePackages: ['motion'],
 };
 
 export default withPayload(nextConfig, { devBundleServerPackages: false });

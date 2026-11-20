@@ -61,9 +61,12 @@ export const livePreviewUrl = (args: LivePreviewUrlArgs = {}) => {
 
   const cleanPath = route.startsWith('/') ? route : `/${route}`;
   const safePath = cleanPath.replace(/^\/{2,}/, '/');
+  // Public routes are static, so drafts are rendered by the dedicated
+  // dynamic preview route that mirrors the public path.
+  const previewPath = safePath === '/' ? '/preview' : `/preview${safePath}`;
 
   const params = new URLSearchParams({
-    path: safePath,
+    path: previewPath,
     previewSecret: getPreviewSecret(),
   });
 

@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
-import { draftMode } from 'next/headers';
 import { getCmsPage, getCmsPages, getCmsProjectBySlug, getCmsProjects, getCmsNewsletterBySlug, getCmsNewsletters, getCmsSettings, getCmsServiceBySlug, getCmsServices } from '@/lib/cms';
 import { buildPageMetadata } from '@/lib/seo';
 import { CmsPageLayout } from './CmsPageLayout';
 import { DetailPage } from './DetailPage';
+
+/** Public pages are prerendered and refreshed in the background, never
+ * rendered per request. Draft previews live under /preview instead. */
+export const revalidate = 300;
 
 /**
  * Pre-render every CMS page, service detail, project detail, and newsletter detail
@@ -50,12 +53,11 @@ export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }): Promise<Metadata> {
   const { slug = [] } = await params;
-  const { isEnabled: draft } = await draftMode();
-  const [page, settings] = await Promise.all([getCmsPage(slug.join('/'), draft), getCmsSettings(draft)]);
+  const [page, settings] = await Promise.all([getCmsPage(slug.join('/')), getCmsSettings()]);
   const fallbackImage = settings?.meta?.image;
   if (!page && slug.length === 2) {
     if (slug[0] === 'services') {
-      const service = await getCmsServiceBySlug(slug[1], draft);
+      const service = await getCmsServiceBySlug(slug[1]);
       if (service) return buildPageMetadata({
         title: service.meta?.title || service.title,
         description: service.meta?.description || service.metaDescription,
@@ -66,7 +68,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
       });
     }
     if (slug[0] === 'our-work') {
-      const project = await getCmsProjectBySlug(slug[1], draft);
+      const project = await getCmsProjectBySlug(slug[1]);
       if (project) return buildPageMetadata({
         title: project.meta?.title || project.title,
         description: project.meta?.description || project.summary,
@@ -77,7 +79,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
       });
     }
     if (slug[0] === 'newsletters') {
-      const entry = await getCmsNewsletterBySlug(slug[1], draft);
+      const entry = await getCmsNewsletterBySlug(slug[1]);
       if (entry) return buildPageMetadata({
         title: entry.meta?.title || entry.title,
         description: entry.meta?.description || entry.excerpt,
@@ -111,8 +113,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
 
 export default async function CatchAllPage({ params }: { params: Promise<{ slug?: string[] }> }) {
   const { slug = [] } = await params;
-  const { isEnabled: draft } = await draftMode();
-  const page = await getCmsPage(slug.join('/'), draft);
-  if (!page) return <DetailPage slug={slug} draft={draft} />;
-  return <CmsPageLayout page={page} isHome={slug.length === 0} draft={draft} />;
+  const page = await getCmsPage(slug.join('/'));
+  if (!page) return <DetailPage slug={slug} draft={false} />;
+  return <CmsPageLayout page={page} isHome={slug.length === 0} draft={false} />;
 }
