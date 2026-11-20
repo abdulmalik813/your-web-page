@@ -1,7 +1,5 @@
 import { createHmac } from 'node:crypto';
-import { getBaseUrl } from './seo';
-
-const previewBase = getBaseUrl;
+import { getClientSideURL } from './get-url';
 
 export function getPreviewSecret(): string {
   const payloadSecret = process.env.PAYLOAD_SECRET?.trim() || 'default-secret-fallback';
@@ -70,7 +68,7 @@ export const livePreviewUrl = (args: LivePreviewUrlArgs = {}) => {
     previewSecret: getPreviewSecret(),
   });
 
-  return `/api/draft/enable?${params.toString()}`;
+  return `${getClientSideURL()}/api/draft/enable?${params.toString()}`;
 };
 
 export const livePreviewBreakpoints = [

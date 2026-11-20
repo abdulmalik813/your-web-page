@@ -96,11 +96,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
 
-RUN mkdir -p .next/cache && chown -R node:node /app
-COPY --from=builder --chown=node:node /app/public ./public
-COPY --from=builder --chown=node:node /app/.next/standalone ./
-COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+RUN corepack enable
 
-USER node
+COPY --from=builder /app ./
+
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["pnpm", "start"]

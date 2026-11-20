@@ -10,16 +10,35 @@ test('canonical URLs use the configured application URL', () => {
   assert.equal(buildCanonicalUrl('/'), 'https://example.com');
 });
 
-test('getServerSideURL and getClientSideURL resolve the application URL properly', () => {
+
+test('getServerSideURL resolves NEXT_PUBLIC_APP_URL', () => {
+  const prevApp = process.env.NEXT_PUBLIC_APP_URL;
+
   process.env.NEXT_PUBLIC_APP_URL = 'https://yourwebpage.ca/';
+
   assert.equal(getServerSideURL(), 'https://yourwebpage.ca');
   assert.equal(getClientSideURL(), 'https://yourwebpage.ca');
+
+  // Restore
+  if (prevApp === undefined) {
+    delete process.env.NEXT_PUBLIC_APP_URL;
+  } else {
+    process.env.NEXT_PUBLIC_APP_URL = prevApp;
+  }
 });
 
-test('livePreviewUrl returns a relative URL for safe origin resolution', () => {
-  const previewPath = livePreviewUrl({ collectionSlug: 'pages', data: { slug: 'contact' } });
-  assert.ok(previewPath.startsWith('/api/draft/enable?'));
-  assert.ok(previewPath.includes('path=%2Fcontact'));
+test('livePreviewUrl returns a full URL using the browser origin', () => {
+  // In a Node test environment there is no DOM, so getClientSideURL() falls
+  // back to getServerSideURL(). We set NEXT_PUBLIC_APP_URL to control the value.
+  const prev = process.env.NEXT_PUBLIC_APP_URL;
+  process.env.NEXT_PUBLIC_APP_URL = 'https://yourwebpage.ca';
+
+  const previewUrl = livePreviewUrl({ collectionSlug: 'pages', data: { slug: 'contact' } });
+  assert.ok(previewUrl.startsWith('https://yourwebpage.ca/api/draft/enable?'));
+  assert.ok(previewUrl.includes('path=%2Fcontact'));
+
+  if (prev === undefined) delete process.env.NEXT_PUBLIC_APP_URL;
+  else process.env.NEXT_PUBLIC_APP_URL = prev;
 });
 
 test('sitemap entries contain no blog or pricing routes', () => {

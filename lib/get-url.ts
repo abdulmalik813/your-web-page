@@ -1,12 +1,9 @@
 import canUseDOM from './can-use-dom';
 
-/**
- * Returns the base application URL on the server.
- * Uses NEXT_PUBLIC_APP_URL, trimming any trailing slashes.
- */
+
 export const getServerSideURL = (): string => {
-  const url = process.env.NEXT_PUBLIC_APP_URL?.trim() || '';
-  return url.replace(/\/+$/, '');
+  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim() || '';
+  return raw.replace(/\/+$/, '');
 };
 
 /**
