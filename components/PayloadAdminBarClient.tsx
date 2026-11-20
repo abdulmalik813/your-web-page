@@ -98,7 +98,7 @@ export function PayloadAdminBarClient({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <Link
             className="group inline-flex min-h-7 items-center gap-2 rounded-sm border border-border bg-background px-2.5 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-foreground no-underline transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            href={`${adminBase}/admin`}
+            href={`${adminUrl}/admin`}
           >
             <LayoutDashboard aria-hidden="true" className="size-3.5 text-primary transition-transform group-hover:scale-110" />
             <span>Admin</span>
