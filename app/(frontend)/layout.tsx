@@ -61,7 +61,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled: draft } = await draftMode();
-  const previewServerURL = getBaseUrl();
   const [settings, navigation, footer, services] = await Promise.all([
     getCmsSettings(draft),
     getCmsNavigation(draft),
@@ -99,7 +98,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <MotionShell>{children}</MotionShell>
           </main>
           <SiteFooter settings={settings} footer={footer} />
-          <PayloadLivePreview serverURL={previewServerURL} />
+          {draft && <PayloadLivePreview />}
         </ThemeProvider>
       </body>
     </html>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Eye, EyeOff, LayoutDashboard, Loader2, Pencil, Plus } from 'lucide-react';
+import { getClientSideURL } from '@/lib/get-url';
 
 interface PayloadAdminBarClientProps {
   adminUrl: string;
@@ -42,6 +43,7 @@ export function PayloadAdminBarClient({
   draftEnabled,
   previewSecret,
 }: PayloadAdminBarClientProps) {
+  const adminBase = adminUrl || getClientSideURL();
   const pathname = usePathname() || '/';
   const [resolvedState, setResolvedState] = useState<{
     path: string;
@@ -98,7 +100,7 @@ export function PayloadAdminBarClient({
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <Link
             className="group inline-flex min-h-7 items-center gap-2 rounded-sm border border-border bg-background px-2.5 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-foreground no-underline transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            href={`${adminUrl}/admin`}
+            href={`${adminBase}/admin`}
           >
             <LayoutDashboard aria-hidden="true" className="size-3.5 text-primary transition-transform group-hover:scale-110" />
             <span>Admin</span>
@@ -143,7 +145,7 @@ export function PayloadAdminBarClient({
           ) : docInfo?.editUrl ? (
             <a
               className="inline-flex min-h-7 items-center gap-1.5 rounded-sm bg-primary px-3 font-mono text-xs font-semibold uppercase tracking-wider text-primary-foreground no-underline shadow-xs transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-              href={`${adminUrl}${docInfo.editUrl}`}
+              href={`${adminBase}${docInfo.editUrl}`}
               target="_blank"
               rel="noreferrer"
             >
@@ -153,7 +155,7 @@ export function PayloadAdminBarClient({
           ) : (
             <a
               className="inline-flex min-h-7 items-center gap-1.5 rounded-sm border border-border bg-background px-3 font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground no-underline transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-              href={`${adminUrl}/admin/collections/pages`}
+              href={`${adminBase}/admin/collections/pages`}
               target="_blank"
               rel="noreferrer"
             >
@@ -181,7 +183,7 @@ export function PayloadAdminBarClient({
 
           <Link
             className="inline-flex min-h-7 items-center gap-1.5 rounded-sm border border-border bg-background px-2.5 font-mono text-xs font-semibold uppercase tracking-wider text-foreground no-underline transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            href={`${adminUrl}/admin/collections/pages/create`}
+            href={`${adminBase}/admin/collections/pages/create`}
             title="Create a new page"
           >
             <Plus aria-hidden="true" className="size-3.5" />

@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
+import { getServerSideURL } from './get-url';
 
 export function getBaseUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (!raw) throw new Error('NEXT_PUBLIC_APP_URL is required');
-  const url = new URL(raw);
-  return url.toString().replace(/\/+$/, '');
+  const url = getServerSideURL();
+  if (!url) throw new Error('NEXT_PUBLIC_APP_URL is required');
+  return url;
 }
 
 export function buildCanonicalUrl(path: string): string {

@@ -11,6 +11,8 @@
  *   og         1200x630 (crop center)
  */
 
+import { getServerSideURL } from './get-url';
+
 export type PayloadImageSize = 'thumbnail' | 'square' | 'small' | 'medium' | 'large' | 'xlarge' | 'og';
 
 export interface PayloadMediaObject {
@@ -28,7 +30,7 @@ export function resolveImageUrl(
   size: PayloadImageSize,
 ): string | null {
   if (!media) return null;
-  const base = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') ?? '';
+  const base = getServerSideURL();
   const sizeUrl = media.sizes?.[size]?.url;
   const raw = sizeUrl ?? media.url;
   if (!raw) return null;
