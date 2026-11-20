@@ -1,10 +1,7 @@
 import { createHmac } from 'node:crypto';
+import { getBaseUrl } from './seo';
 
-const previewBase = () => {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (appUrl) return appUrl.replace(/\/+$/, '');
-  return 'http://localhost:3000';
-};
+const previewBase = getBaseUrl;
 
 export function getPreviewSecret(): string {
   const payloadSecret = process.env.PAYLOAD_SECRET?.trim() || 'default-secret-fallback';

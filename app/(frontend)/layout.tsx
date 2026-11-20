@@ -61,8 +61,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled: draft } = await draftMode();
-  const previewServerURL =
-    process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/+$/, '') || getBaseUrl();
+  const previewServerURL = getBaseUrl();
   const [settings, navigation, footer, services] = await Promise.all([
     getCmsSettings(draft),
     getCmsNavigation(draft),

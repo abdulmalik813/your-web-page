@@ -17,6 +17,7 @@ import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html';
 import { getPayload } from 'payload';
 import { getPayloadSeedStatus, seedAllPayloadData } from './lib/seed';
 import { livePreviewBreakpoints, livePreviewUrl } from './lib/live-preview';
+import { getBaseUrl } from './lib/seo';
 import { Faqs } from './payload/collections/Faqs';
 import { Pages } from './payload/collections/Pages';
 import { Projects } from './payload/collections/Projects';
@@ -133,8 +134,8 @@ export default buildConfig({
       ],
     },
   },
-  serverURL: requireEnv('NEXT_PUBLIC_APP_URL'),
-  cors: [requireEnv('NEXT_PUBLIC_APP_URL')],
+  serverURL: getBaseUrl(),
+  cors: [getBaseUrl()],
   email,
   collections: [Pages, Services, Projects, Resources, Faqs, Testimonials, Media, Users],
   globals: [Settings, Navigation, Footer],
@@ -192,12 +193,12 @@ export default buildConfig({
       generateDescription: ({ doc }) =>
         String(doc?.metaDescription || doc?.excerpt || doc?.summary || doc?.description || doc?.quote || ''),
       generateURL: ({ doc, collectionSlug }) => {
-        if (!doc?.slug) return requireEnv('NEXT_PUBLIC_APP_URL');
+        if (!doc?.slug) return getBaseUrl();
         const prefixes: Record<string, string> = {
           pages: '', services: '/services/', projects: '/our-work/', resources: '/resources/', testimonials: '/testimonials/',
         };
         const prefix = collectionSlug ? prefixes[collectionSlug] : undefined;
-        return `${requireEnv('NEXT_PUBLIC_APP_URL').replace(/\/+$/, '')}${prefix || '/'}${doc.slug}`;
+        return `${getBaseUrl()}${prefix || '/'}${doc.slug}`;
       },
     }),
     formBuilderPlugin({
