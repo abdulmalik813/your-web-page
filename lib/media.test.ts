@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { resolveImageUrl } from './media';
 
 test('keeps Payload media paths relative to the current origin', () => {
-  const previousAppUrl = process.env.NEXT_PUBLIC_APP_URL;
-  process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
+  const previousAppUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+  process.env.NEXT_PUBLIC_SERVER_URL = 'http://localhost:3000';
 
   try {
     assert.equal(
@@ -16,8 +16,8 @@ test('keeps Payload media paths relative to the current origin', () => {
       '/api/media/file/image.jpeg?prefix=media',
     );
   } finally {
-    if (previousAppUrl === undefined) delete process.env.NEXT_PUBLIC_APP_URL;
-    else process.env.NEXT_PUBLIC_APP_URL = previousAppUrl;
+    if (previousAppUrl === undefined) delete process.env.NEXT_PUBLIC_SERVER_URL;
+    else process.env.NEXT_PUBLIC_SERVER_URL = previousAppUrl;
   }
 });
 

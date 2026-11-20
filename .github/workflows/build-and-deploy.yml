@@ -110,7 +110,7 @@ jobs:
           set -euo pipefail
 
           REQUIRED=(
-            NEXT_PUBLIC_APP_URL
+            NEXT_PUBLIC_SERVER_URL
             PAYLOAD_SECRET
             EMAIL_FROM
             EMAIL_FROM_NAME

@@ -3,7 +3,7 @@ import { getServerSideURL } from './get-url';
 
 export function getBaseUrl(): string {
   const url = getServerSideURL();
-  if (!url) throw new Error('NEXT_PUBLIC_APP_URL is required');
+  if (!url) throw new Error('NEXT_PUBLIC_SERVER_URL is required');
   return url;
 }
 

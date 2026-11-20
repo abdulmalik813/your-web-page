@@ -58,7 +58,7 @@ for (const [key, value] of Object.entries(parsed)) {
 
 if (
   !/^mongodb(?:\+srv)?:\/\//i.test(buildEnv.DATABASE_URI || '') ||
-  !buildEnv.NEXT_PUBLIC_APP_URL ||
+  !buildEnv.NEXT_PUBLIC_SERVER_URL ||
   !buildEnv.PAYLOAD_SECRET ||
   !buildEnv.EMAIL_FROM ||
   !buildEnv.EMAIL_FROM_NAME ||

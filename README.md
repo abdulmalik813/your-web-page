@@ -19,7 +19,7 @@ configuration files are used only by the seed routine; they are not runtime cont
 fallbacks. Published Payload reads use tagged Next.js caching, and Payload writes
 invalidate the related cache tags and routes.
 
-Live preview requires `NEXT_PUBLIC_APP_URL` to point to this site and an authenticated Payload
+Live preview requires `NEXT_PUBLIC_SERVER_URL` to point to this site and an authenticated Payload
 session on the same origin. Preview links enable Next.js Draft Mode through
 `/api/draft/enable`; use `/api/draft/disable` to leave preview. Pages, services,
 projects, resources, FAQs, and testimonials support draft versions, so apply the
@@ -64,7 +64,7 @@ BuildKit as a secret rather than Docker build arguments or image environment
 variables.
 
 Configure a `prod` GitHub environment with an `ENV` secret containing a JSON
-object of the production environment variables. It must include `NEXT_PUBLIC_APP_URL`,
+object of the production environment variables. It must include `NEXT_PUBLIC_SERVER_URL`,
 `PAYLOAD_SECRET`, `EMAIL_FROM`, `EMAIL_FROM_NAME`, `DATABASE_URI`,
 `S3_ACCESS_KEY_ID`, `S3_BUCKET`, `S3_ENDPOINT`, `S3_REGION`,
 `S3_SECRET_ACCESS_KEY`,
