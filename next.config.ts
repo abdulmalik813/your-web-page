@@ -7,13 +7,13 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false,
   },
   images: {
-    remotePatterns: [
+    localPatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '3000',
         pathname: '/api/media/file/**',
+        search: '?prefix=media',
       },
+    ],
+    remotePatterns: [
       {
         protocol: 'https',
         hostname: 'yourwebpage.ca',

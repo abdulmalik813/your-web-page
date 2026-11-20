@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { resolveMediaForDisplay, type PayloadMediaObject } from '@/lib/media';
+import { resolveImageUrl, resolveMediaForDisplay, type PayloadMediaObject } from '@/lib/media';
 
 /** Legacy flat media shape (from cms.ts mappers) */
 interface FlatMediaAsset {
@@ -55,13 +55,14 @@ export function MediaFigure({
 
   // Flat legacy asset (from cms.ts mappers that return { url, alt })
   if (isFlatAsset(image)) {
-    if (!image.url) return null;
+    const src = resolveImageUrl(image, 'medium');
+    if (!src) return null;
     return (
       <figure
         className={`relative m-0 w-full overflow-hidden rounded-sm bg-muted ${ASPECT_CLASS[aspect]} ${className}`.trim()}
       >
         <Image
-          src={image.url}
+          src={src}
           alt={image.alt || alt}
           fill
           sizes={sizes ?? DEFAULT_SIZES[aspect]}

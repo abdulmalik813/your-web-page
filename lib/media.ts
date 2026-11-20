@@ -32,8 +32,11 @@ export function resolveImageUrl(
   const sizeUrl = media.sizes?.[size]?.url;
   const raw = sizeUrl ?? media.url;
   if (!raw) return null;
-  // Absolute URLs (S3, CDN) pass through; relative ones get the app base URL prepended
-  if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+  // Keep app-hosted media same-origin; external storage URLs pass through.
+  if (raw.startsWith('http://') || raw.startsWith('https://')) {
+    return base && raw.startsWith(`${base}/`) ? raw.slice(base.length) : raw;
+  }
+  if (raw.startsWith('/')) return raw;
   return base ? `${base}${raw}` : raw;
 }
 
