@@ -143,7 +143,7 @@ export function PayloadAdminBarClient({
           ) : docInfo?.editUrl ? (
             <a
               className="inline-flex min-h-7 items-center gap-1.5 rounded-sm bg-primary px-3 font-mono text-xs font-semibold uppercase tracking-wider text-primary-foreground no-underline shadow-xs transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-              href={`${adminBase}${docInfo.editUrl}`}
+              href={`${adminUrl}${docInfo.editUrl}`}
               target="_blank"
               rel="noreferrer"
             >
@@ -153,7 +153,7 @@ export function PayloadAdminBarClient({
           ) : (
             <a
               className="inline-flex min-h-7 items-center gap-1.5 rounded-sm border border-border bg-background px-3 font-mono text-xs font-semibold uppercase tracking-wider text-muted-foreground no-underline transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-              href={`${adminBase}/admin/collections/pages`}
+              href={`${adminUrl}/admin/collections/pages`}
               target="_blank"
               rel="noreferrer"
             >
