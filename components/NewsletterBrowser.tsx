@@ -47,10 +47,6 @@ export function NewsletterBrowser({ newsletter }: { newsletter: NewsletterEntry[
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    setPage(1);
-  }, [query, activeCategory]);
-
-  useEffect(() => {
     const trimmed = query.trim();
     if (!trimmed && activeCategory === 'All') {
       return;
@@ -126,6 +122,7 @@ export function NewsletterBrowser({ newsletter }: { newsletter: NewsletterEntry[
           label="Filter newsletters by category"
           onChange={(cat) => {
             setActiveCategory(cat);
+            setPage(1);
             if (cat === 'All' && !query.trim()) setSearchResults(null);
           }}
         />
@@ -147,6 +144,7 @@ export function NewsletterBrowser({ newsletter }: { newsletter: NewsletterEntry[
             onChange={(event) => {
               const val = event.target.value;
               setQuery(val);
+              setPage(1);
               if (!val.trim() && activeCategory === 'All') setSearchResults(null);
             }}
             className="h-11 rounded-sm border-border bg-card px-4 text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"

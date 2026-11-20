@@ -2,15 +2,16 @@
 
 import { RefreshRouteOnSave } from '@payloadcms/live-preview-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
+
+const subscribeToOrigin = () => () => {};
+const getBrowserOrigin = () => window.location.origin;
+const getServerOrigin = () => '';
 
 export function PayloadLivePreview({ serverURL }: { serverURL?: string }) {
   const router = useRouter();
-  const [url, setUrl] = useState(serverURL || '');
-
-  useEffect(() => {
-    if (!serverURL) setUrl(window.location.origin);
-  }, [serverURL]);
+  const browserOrigin = useSyncExternalStore(subscribeToOrigin, getBrowserOrigin, getServerOrigin);
+  const url = serverURL || browserOrigin;
 
   if (!url) return null;
 
