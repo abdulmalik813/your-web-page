@@ -1,7 +1,8 @@
-import type { CollectionConfig } from 'payload';
+﻿import type { CollectionConfig } from 'payload';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { cmsCollectionCacheHooks } from '../../lib/cms-cache';
 import { livePreviewBreakpoints, livePreviewUrl } from '../../lib/live-preview';
+import { slugField, makeSlugHook } from '../fields/slug';
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -21,10 +22,13 @@ export const Pages: CollectionConfig = {
     update: ({ req }) => Boolean(req.user),
     delete: ({ req }) => Boolean(req.user),
   },
-  hooks: cmsCollectionCacheHooks('pages'),
+  hooks: {
+    ...cmsCollectionCacheHooks('pages'),
+    beforeValidate: [makeSlugHook('title')],
+  },
   fields: [
     { name: 'title', type: 'text', required: true },
-    { name: 'slug', type: 'text', required: true, unique: true, index: true },
+    slugField('title'),
     {
       name: 'layout',
       type: 'blocks',
@@ -96,6 +100,15 @@ export const Pages: CollectionConfig = {
           ],
         },
         {
+          slug: 'testimonials',
+          interfaceName: 'TestimonialsBlock',
+          fields: [
+            { name: 'eyebrow', type: 'text', defaultValue: 'What clients say' },
+            { name: 'heading', type: 'text', defaultValue: 'In their words' },
+            { name: 'limit', type: 'number', defaultValue: 12 },
+          ],
+        },
+        {
           slug: 'form',
           interfaceName: 'FormBlock',
           fields: [
@@ -121,3 +134,4 @@ export const Pages: CollectionConfig = {
   ],
   versions: { drafts: { autosave: true } },
 };
+

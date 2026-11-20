@@ -1,6 +1,7 @@
-import type { CollectionConfig } from 'payload';
+﻿import type { CollectionConfig } from 'payload';
 import { cmsCollectionCacheHooks } from '../../lib/cms-cache';
 import { livePreviewBreakpoints, livePreviewUrl } from '../../lib/live-preview';
+import { slugField, makeSlugHook } from '../fields/slug';
 
 export const Projects: CollectionConfig = {
   slug: 'projects',
@@ -18,15 +19,12 @@ export const Projects: CollectionConfig = {
     update: ({ req }) => Boolean(req.user),
     delete: ({ req }) => Boolean(req.user),
   },
-  hooks: cmsCollectionCacheHooks('projects'),
+  hooks: {
+    ...cmsCollectionCacheHooks('projects'),
+    beforeValidate: [makeSlugHook('title')],
+  },
   fields: [
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-      unique: true,
-      index: true,
-    },
+    slugField('title'),
     {
       name: 'sortOrder',
       type: 'number',
@@ -101,3 +99,4 @@ export const Projects: CollectionConfig = {
   ],
   versions: { drafts: { autosave: true } },
 };
+

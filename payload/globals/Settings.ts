@@ -4,7 +4,7 @@ import { livePreviewBreakpoints, livePreviewUrl } from '../../lib/live-preview';
 
 export const Settings: GlobalConfig = {
   slug: 'settings',
-  label: 'Site Settings',
+  label: 'Settings',
   access: { read: () => true, update: ({ req }) => Boolean(req.user) },
   hooks: cmsGlobalCacheHooks('settings'),
   admin: { livePreview: { url: () => livePreviewUrl({ data: {}, globalSlug: 'settings' }), breakpoints: livePreviewBreakpoints } },
@@ -48,6 +48,15 @@ export const Settings: GlobalConfig = {
         { name: 'instagram', type: 'text' },
         { name: 'x', type: 'text' },
       ],
+    },
+    {
+      name: 'seedTool',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: './components/payload/SeedBanner#SeedBanner',
+        },
+      },
     },
   ],
 };

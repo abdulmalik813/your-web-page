@@ -20,10 +20,13 @@ import { revealDirectionForIndex } from '@/components/revealDirections';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { siteCardClass } from '@/components/siteStyles';
-import { RichText } from '@payloadcms/richtext-lexical/react';
+import { ResourceMediaBlock } from '@/components/ResourceMediaBlock';
+import { ResourceLinkBlock } from '@/components/ResourceLinkBlock';
+import { RichText, defaultJSXConverters } from '@payloadcms/richtext-lexical/react';
 import {
   getCmsFaqGroups,
   getCmsPage,
+  getCmsPages,
   getCmsProjectBySlug,
   getCmsProjects,
   getCmsResourceBySlug,
@@ -40,6 +43,77 @@ const pageCell = `${siteCardClass} flex flex-col gap-4 p-6 md:p-8`;
 const pageWrap = 'mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11';
 const pageTightSection = 'relative overflow-x-clip border-b border-border bg-transparent py-8 md:py-10 lg:py-14';
 
+const resourceConverters = {
+  ...defaultJSXConverters,
+  upload: ({ node }: any) => (
+    <ResourceMediaBlock
+      image={node.value}
+      caption={node.fields?.caption}
+      size={node.fields?.size}
+    />
+  ),
+  blocks: {
+    mediaBlock: ({ node }: any) => (
+      <ResourceMediaBlock
+        image={node.fields?.image}
+        caption={node.fields?.caption}
+        size={node.fields?.size}
+      />
+    ),
+    linkBlock: ({ node }: any) => (
+      <ResourceLinkBlock
+        label={node.fields?.label}
+        href={node.fields?.href}
+        style={node.fields?.style}
+        newTab={node.fields?.newTab}
+      />
+    ),
+  },
+};
+
+/**
+ * Pre-render every CMS page, service detail, project detail, and resource detail
+ * as static HTML at build time. Next.js ISR handles revalidation automatically
+ * via the cache tags set in cms.ts.
+ */
+export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
+  try {
+    const [pages, services, projects, resources] = await Promise.all([
+      getCmsPages(),
+      getCmsServices(),
+      getCmsProjects(),
+      getCmsResources(),
+    ]);
+
+    const params: { slug: string[] }[] = [
+      // Home page — empty slug array
+      { slug: [] },
+    ];
+
+    for (const page of pages) {
+      const s = String((page as { slug?: unknown }).slug ?? '');
+      if (s && s !== 'home') params.push({ slug: [s] });
+    }
+
+    for (const service of services) {
+      params.push({ slug: ['services', service.slug] });
+    }
+
+    for (const project of projects) {
+      params.push({ slug: ['our-work', project.slug] });
+    }
+
+    for (const resource of resources) {
+      params.push({ slug: ['resources', resource.slug] });
+    }
+
+    return params;
+  } catch {
+    // During local dev without a DB, fall back to dynamic rendering
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }): Promise<Metadata> {
   const { slug = [] } = await params;
   const page = await getCmsPage(slug.join('/'));
@@ -50,6 +124,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
         title: service.meta?.title || service.title,
         description: service.meta?.description || service.metaDescription,
         path: `/services/${service.slug}`,
+        image: service.image as { url?: string | null; sizes?: { og?: { url?: string | null } } } | null,
       });
     }
     if (slug[0] === 'our-work') {
@@ -58,6 +133,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
         title: project.meta?.title || project.title,
         description: project.meta?.description || project.summary,
         path: `/our-work/${project.slug}`,
+        image: project.image as { url?: string | null; sizes?: { og?: { url?: string | null } } } | null,
       });
     }
     if (slug[0] === 'resources') {
@@ -66,12 +142,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
         title: resource.meta?.title || resource.title,
         description: resource.meta?.description || resource.excerpt,
         path: `/resources/${resource.slug}`,
+        image: resource.image as { url?: string | null; sizes?: { og?: { url?: string | null } } } | null,
         type: 'article',
       });
     }
   }
   if (!page) return {};
-  const meta = page.meta as { title?: string; description?: string } | undefined;
+  const meta = page.meta as { title?: string; description?: string; image?: { url?: string | null; sizes?: { og?: { url?: string | null } } } | null } | undefined;
   const hero = Array.isArray(page.layout)
     ? page.layout.find((block: { blockType?: string }) => block.blockType === 'hero')
     : undefined;
@@ -79,6 +156,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
     title: meta?.title || page.title,
     description: meta?.description || hero?.lead || '',
     path: slug.length ? `/${slug.join('/')}` : '/',
+    image: meta?.image,
   });
 }
 
@@ -159,7 +237,7 @@ export default async function CatchAllPage({ params }: { params: Promise<{ slug?
                 <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs font-medium uppercase leading-5 tracking-[0.08em] text-muted-foreground"><span>{item.publishDate}</span><span>{item.readTime} min read</span>{item.tags.length ? <span>{item.tags.join(' · ')}</span> : null}</div>
               </PageHeader>
               {item.image ? <section className={pageSection}><div className={pageContainer}><MediaFigure image={item.image} alt={item.title} aspect="wide" sizes="(min-width: 1360px) 1280px, calc(100vw - 2rem)" /></div></section> : null}
-              <section className={pageSection}><div className={pageContainer}><Reveal className="max-w-[68ch] text-base leading-[1.75] [&_h2]:mb-[0.7em] [&_h2]:mt-[2.2em] [&_h2]:text-[clamp(1.4rem,2.6vw,2rem)] [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2:first-child]:mt-0 [&_li]:relative [&_li]:pl-6 [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:top-[0.68em] [&_li]:before:size-[7px] [&_li]:before:bg-primary [&_li]:before:content-[''] [&_ul]:mb-5 [&_ul]:grid [&_ul]:list-none [&_ul]:gap-2.5" direction="right"><article>{item.sections.map((section, index) => <div key={index}>{section.heading ? <h2>{section.heading}</h2> : null}{section.paragraphs?.map((paragraph, paragraphIndex) => <p key={paragraphIndex}>{paragraph}</p>)}{section.bullets?.length ? <ul>{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul> : null}</div>)}</article></Reveal></div></section>
+              <section className={pageSection}><div className={pageContainer}><Reveal className="max-w-[68ch] text-base leading-[1.75] [&_h2]:mb-[0.7em] [&_h2]:mt-[2.2em] [&_h2]:text-[clamp(1.4rem,2.6vw,2rem)] [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2:first-child]:mt-0 [&_p]:mb-4 [&_li]:relative [&_li]:pl-6 [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:top-[0.68em] [&_li]:before:size-[7px] [&_li]:before:bg-primary [&_li]:before:content-[''] [&_ul]:mb-5 [&_ul]:grid [&_ul]:list-none [&_ul]:gap-2.5" direction="right"><article>{item.content ? <RichText data={item.content as any} converters={resourceConverters as any} /> : null}</article></Reveal></div></section>
               <section className={pageSection}><div className={pageContainer}><Reveal className="mb-8 flex flex-wrap items-end justify-between gap-6" direction="right"><div><span className={pageLabel}>Keep reading</span><h2 className="mt-2 font-heading text-[clamp(2rem,4.6vw,4rem)] font-medium tracking-tight">More resources</h2></div><Button asChild variant="outline" className="rounded-sm border-border bg-card"><Link href="/resources">All resources</Link></Button></Reveal><Grid columns={3}>{more.map((resource, index) => <ResourceCard key={resource.slug} resource={resource} index={index} />)}</Grid></div></section>
               <CtaBand />
             </>
@@ -210,6 +288,8 @@ export default async function CatchAllPage({ params }: { params: Promise<{ slug?
             );
           case 'cta':
             return <CtaBand key={block.id || index} title={block.title} text={block.text} />;
+          case 'testimonials':
+            return <TestimonialsSection key={block.id || index} draft={draft} />;
           case 'cardGrid':
             return <CardGrid key={block.id || index} block={block} draft={draft} />;
           case 'form':

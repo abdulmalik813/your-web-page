@@ -46,6 +46,8 @@ export const livePreviewUrl = (args: LivePreviewUrlArgs = {}) => {
         route = '/faq';
         break;
       case 'testimonials':
+        route = '/testimonials';
+        break;
       case 'media':
       case 'users':
       default:

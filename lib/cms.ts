@@ -56,7 +56,7 @@ export interface ResourceEntry {
   publishDate: string;
   isoDate: string;
   readTime: number;
-  sections: ResourceSection[];
+  content?: unknown;
   meta?: { title?: string | null; description?: string | null };
   updatedAt?: string;
 }
@@ -173,7 +173,6 @@ function toProject(value: unknown): Project {
 
 function toResource(value: unknown): ResourceEntry {
   const doc = value as Record<string, unknown>;
-  const sections = Array.isArray(doc.sections) ? doc.sections : [];
   return {
     slug: String(doc.slug),
     title: String(doc.title),
@@ -184,14 +183,7 @@ function toResource(value: unknown): ResourceEntry {
     publishDate: String(doc.publishDate),
     isoDate: String(doc.isoDate),
     readTime: Number(doc.readTime),
-    sections: sections.map((row) => {
-      const section = row as { heading?: unknown; paragraphs?: unknown; bullets?: unknown };
-      return {
-        heading: section.heading ? String(section.heading) : undefined,
-        paragraphs: textRows(section.paragraphs),
-        bullets: textRows(section.bullets),
-      };
-    }),
+    content: doc.content,
     meta: metaFields(doc.meta),
     updatedAt: typeof doc.updatedAt === 'string' ? doc.updatedAt : undefined,
   };

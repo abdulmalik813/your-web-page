@@ -16,6 +16,71 @@ import { RESOURCES } from '@/data/resources';
 import { SERVICES } from '@/data/services';
 import { TESTIMONIALS } from '@/data/testimonials';
 
+// ─── Lexical helpers ──────────────────────────────────────────────────────────
+interface ResourceSection {
+  heading?: string;
+  paragraphs?: string[];
+  bullets?: string[];
+}
+
+type LexicalNode = Record<string, unknown>;
+
+function lexicalText(text: string): LexicalNode {
+  return { type: 'text', text, format: 0, style: '', mode: 'normal', detail: 0, version: 1 };
+}
+
+function lexicalParagraph(...children: LexicalNode[]): LexicalNode {
+  return { type: 'paragraph', format: '', indent: 0, version: 1, direction: 'ltr', textStyle: '', textFormat: 0, children };
+}
+
+function lexicalHeading(tag: 'h2' | 'h3' | 'h4', text: string): LexicalNode {
+  return { type: 'heading', tag, format: '', indent: 0, version: 1, direction: 'ltr', children: [lexicalText(text)] };
+}
+
+function lexicalBulletList(items: string[]): LexicalNode {
+  return {
+    type: 'list',
+    listType: 'bullet',
+    tag: 'ul',
+    format: '',
+    indent: 0,
+    version: 1,
+    start: 1,
+    direction: 'ltr',
+    children: items.map((text, i) => ({
+      type: 'listitem',
+      value: i + 1,
+      format: '',
+      indent: 0,
+      version: 1,
+      direction: 'ltr',
+      children: [lexicalText(text)],
+    })),
+  };
+}
+
+function sectionsToLexical(sections: ResourceSection[]): unknown {
+  const children: LexicalNode[] = sections.flatMap((section) => {
+    const nodes: LexicalNode[] = [];
+    if (section.heading) nodes.push(lexicalHeading('h2', section.heading));
+    for (const para of section.paragraphs ?? []) nodes.push(lexicalParagraph(lexicalText(para)));
+    if ((section.bullets ?? []).length) nodes.push(lexicalBulletList(section.bullets!));
+    return nodes;
+  });
+  // Always have at least one paragraph so Lexical doesn't reject an empty root
+  if (!children.length) children.push(lexicalParagraph(lexicalText('')));
+  return {
+    root: {
+      type: 'root',
+      format: '',
+      indent: 0,
+      version: 1,
+      direction: 'ltr',
+      children,
+    },
+  };
+}
+
 export interface SeedCollectionStats {
   created: number;
   updated: number;
@@ -83,7 +148,7 @@ export async function getPayloadSeedStatus(payload: Payload): Promise<SeedStatus
       resources: RESOURCES.length,
       faqs: faqCount,
       testimonials: TESTIMONIALS.length,
-      pages: 12,
+      pages: 13,
       forms: 2,
     },
     seededAt: null,
@@ -143,6 +208,7 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
         { label: 'Services', href: '/services' },
         { label: 'Our Work', href: '/our-work' },
         { label: 'Process', href: '/process' },
+        { label: 'Testimonials', href: '/testimonials' },
         { label: 'Resources', href: '/resources' },
         { label: 'About', href: '/about' },
       ],
@@ -161,6 +227,7 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
           { label: 'Our Work', href: '/our-work' },
           { label: 'Our Process', href: '/process' },
           { label: 'Where We Work', href: '/where-we-work' },
+          { label: 'Testimonials', href: '/testimonials' },
           { label: 'Resources', href: '/resources' },
           { label: 'FAQ', href: '/faq' },
         ] },
@@ -259,6 +326,11 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
     { slug: 'about', title: 'About', layout: [{ blockType: 'hero', eyebrow: 'About', title: 'A Charlottetown web studio', lead: 'We build dependable, fast websites, software and SaaS products.' }, { blockType: 'cardGrid', source: 'custom', cards: ABOUT_VALUES.map((item) => ({ number: item.number, title: item.title, description: item.description })) }] },
     { slug: 'process', title: 'Process', layout: [{ blockType: 'hero', eyebrow: 'Process', title: 'How we work', lead: 'Five stages, plain language at every step, and no surprises.' }, { blockType: 'cardGrid', source: 'custom', cards: PROCESS_STAGES.map((item) => ({ number: item.number, title: item.title, description: item.whatHappens })) }] },
     { slug: 'where-we-work', title: 'Where We Work', layout: [{ blockType: 'hero', eyebrow: 'Where we work', title: 'Charlottetown-based. Working worldwide.', lead: 'Local roots, remote-first working.' }, { blockType: 'cardGrid', source: 'custom', cards: REGION_TIERS.map((item) => ({ number: item.number, title: item.title, description: `${item.subtitle} — ${item.description}` })) }] },
+    { slug: 'testimonials', title: 'Testimonials', layout: [
+        { blockType: 'hero', eyebrow: 'Client Feedback', title: 'What our clients say about working with us', lead: 'Real feedback and honest words from founders, executives, and product leaders who trusted us with their websites and applications.', facts: [{ text: '100% verified client reviews' }, { text: 'Partnerships across North America' }, { text: 'Long-term ongoing care' }] },
+        { blockType: 'testimonials', eyebrow: 'What clients say', heading: 'In their words', limit: 12 },
+        { blockType: 'cta', eyebrow: 'Start here', title: 'Have a project in mind?', text: 'Tell us what you are building. We will come back with questions, ideas and a clear plan.', primaryLabel: 'Start a project', primaryHref: '/start-a-project', secondaryLabel: 'Contact us', secondaryHref: '/contact' },
+      ] },
     { slug: 'services', title: 'Services', layout: [{ blockType: 'hero', eyebrow: 'Services', title: 'Everything your website needs', lead: 'Design, development, online stores, custom software and ongoing care.' }, { blockType: 'cardGrid', source: 'services', limit: 50 }] },
     { slug: 'our-work', title: 'Our Work', layout: [{ blockType: 'hero', eyebrow: 'Our work', title: 'Websites, software and products', lead: 'A selection of the kinds of projects we build.' }, { blockType: 'cardGrid', source: 'projects', limit: 50 }] },
     { slug: 'resources', title: 'Resources', layout: [{ blockType: 'hero', eyebrow: 'Resources', title: 'Guides, checklists and notes', lead: 'Practical reading for anyone planning, building or looking after a website.' }] },
@@ -383,11 +455,7 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
       publishDate: resource.publishDate,
       isoDate: resource.isoDate,
       readTime: resource.readTime,
-      sections: resource.sections.map((section) => ({
-        heading: section.heading || '',
-        paragraphs: (section.paragraphs || []).map((text) => ({ text })),
-        bullets: (section.bullets || []).map((text) => ({ text })),
-      })),
+      content: sectionsToLexical(resource.sections),
     };
 
     if (existing.docs.length > 0) {

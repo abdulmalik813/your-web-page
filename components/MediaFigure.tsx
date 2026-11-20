@@ -1,36 +1,93 @@
 import Image from 'next/image';
-import type { MediaAsset } from '@/lib/cms';
+import { resolveMediaForDisplay, type PayloadMediaObject } from '@/lib/media';
+
+/** Legacy flat media shape (from cms.ts mappers) */
+interface FlatMediaAsset {
+  url: string;
+  alt?: string;
+}
+
+type MediaSource = PayloadMediaObject | FlatMediaAsset | null | undefined;
+
+function isFlatAsset(m: MediaSource): m is FlatMediaAsset {
+  return !!m && !('sizes' in m) && 'url' in m && typeof (m as FlatMediaAsset).url === 'string';
+}
 
 interface MediaFigureProps {
-  image?: MediaAsset | null;
+  image?: MediaSource;
   alt: string;
-  aspect?: 'card' | 'wide';
+  /**
+   * 'wide'  → hero / detail images   → picks `large` (1400w)
+   * 'card'  → grid cards             → picks `medium` (900w)
+   * 'thumb' → thumbnails             → picks `thumbnail` (300w)
+   */
+  aspect?: 'card' | 'wide' | 'thumb';
   className?: string;
+  /**
+   * Next/Image sizes hint.
+   * Defaults are set per aspect for sensible defaults.
+   */
   sizes?: string;
+  priority?: boolean;
 }
+
+const DEFAULT_SIZES: Record<NonNullable<MediaFigureProps['aspect']>, string> = {
+  wide:  '(min-width: 1360px) 1280px, calc(100vw - 2rem)',
+  card:  '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw',
+  thumb: '(min-width: 640px) 160px, 100px',
+};
+
+const ASPECT_CLASS: Record<NonNullable<MediaFigureProps['aspect']>, string> = {
+  wide:  'aspect-[21/9]',
+  card:  'aspect-[16/9]',
+  thumb: 'aspect-square',
+};
 
 export function MediaFigure({
   image,
   alt,
   aspect = 'card',
   className = '',
-  sizes = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw',
+  sizes,
+  priority = false,
 }: MediaFigureProps) {
-  if (!image?.url) return null;
+  if (!image) return null;
+
+  // Flat legacy asset (from cms.ts mappers that return { url, alt })
+  if (isFlatAsset(image)) {
+    if (!image.url) return null;
+    return (
+      <figure
+        className={`relative m-0 w-full overflow-hidden rounded-sm bg-muted ${ASPECT_CLASS[aspect]} ${className}`.trim()}
+      >
+        <Image
+          src={image.url}
+          alt={image.alt || alt}
+          fill
+          sizes={sizes ?? DEFAULT_SIZES[aspect]}
+          className="object-cover"
+          priority={priority}
+        />
+      </figure>
+    );
+  }
+
+  // Full Payload media object — resolve the right size
+  const { src, width, height, alt: mediaAlt } = resolveMediaForDisplay(image, aspect === 'thumb' ? 'thumb' : aspect);
+  if (!src) return null;
 
   return (
     <figure
-      className={`relative m-0 w-full overflow-hidden rounded-sm bg-muted ${
-        aspect === 'wide' ? 'aspect-[21/9]' : 'aspect-[16/9]'
-      } ${className}`.trim()}
+      className={`relative m-0 w-full overflow-hidden rounded-sm bg-muted ${ASPECT_CLASS[aspect]} ${className}`.trim()}
     >
       <Image
-        src={image.url}
-        alt={image.alt || alt}
+        src={src}
+        alt={mediaAlt || alt}
         fill
-        sizes={sizes}
-        unoptimized
+        sizes={sizes ?? DEFAULT_SIZES[aspect]}
         className="object-cover"
+        priority={priority}
+        {...(!width && !height ? {} : { width: undefined, height: undefined })}
       />
     </figure>
   );

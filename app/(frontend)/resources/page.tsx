@@ -8,7 +8,7 @@ import { notFound } from 'next/navigation';
 export async function generateMetadata() {
   const page = await getCmsPage('resources');
   if (!page) return {};
-  const meta = page?.meta as { title?: string; description?: string } | undefined;
+  const meta = page?.meta as { title?: string; description?: string; image?: { url?: string | null; sizes?: { og?: { url?: string | null } } } | null } | undefined;
   const hero = Array.isArray(page.layout)
     ? page.layout.find((block: { blockType?: string }) => block.blockType === 'hero')
     : undefined;
@@ -16,6 +16,7 @@ export async function generateMetadata() {
     title: meta?.title || page.title,
     description: meta?.description || hero?.lead || '',
     path: '/resources',
+    image: meta?.image,
   });
 }
 

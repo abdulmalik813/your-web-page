@@ -47,6 +47,9 @@ importers:
       '@payloadcms/storage-s3':
         specifier: 4.0.0-beta.10
         version: 4.0.0-beta.10(@types/react@19.3.0)(monaco-editor@0.57.0)(payload@4.0.0-beta.10(graphql@17.1.0)(supports-color@7.2.0)(typescript@5.9.3))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@7.2.0)(typescript@5.9.3)
+      '@payloadcms/transformer-sharp':
+        specifier: 4.0.0-beta.10
+        version: 4.0.0-beta.10(@types/node@20.19.43)(payload@4.0.0-beta.10(graphql@17.1.0)(supports-color@7.2.0)(typescript@5.9.3))
       '@payloadcms/ui':
         specifier: 4.0.0-beta.10
         version: 4.0.0-beta.10(@types/react@19.3.0)(monaco-editor@0.57.0)(payload@4.0.0-beta.10(graphql@17.1.0)(supports-color@7.2.0)(typescript@5.9.3))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@7.2.0)(typescript@5.9.3)
@@ -110,6 +113,9 @@ importers:
       graphql:
         specifier: ^17.1.0
         version: 17.1.0
+      handlebars:
+        specifier: ^4.7.10
+        version: 4.7.10
       input-otp:
         specifier: ^1.5.0
         version: 1.5.0(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -177,6 +183,9 @@ importers:
       '@tailwindcss/typography':
         specifier: ^0.5.19
         version: 0.5.20(tailwindcss@4.1.11)
+      '@types/handlebars':
+        specifier: ^4.1.0
+        version: 4.1.0
       '@types/node':
         specifier: ^20
         version: 20.19.43
@@ -1714,6 +1723,12 @@ packages:
     peerDependencies:
       payload: 4.0.0-beta.10
 
+  '@payloadcms/transformer-sharp@4.0.0-beta.10':
+    resolution: {integrity: sha512-qK8BZ7PKlhrh8jS34OLsrIYQa7470rDcz37ywRRa9vgCQKxqfadu9p/2Cqxxel7A/UClGRdOpdQ/wWs06Mqv4g==}
+    engines: {node: ^24.22.3 || >=26.13.1}
+    peerDependencies:
+      payload: 4.0.0-beta.10
+
   '@payloadcms/translations@4.0.0-beta.10':
     resolution: {integrity: sha512-XCvJbVWiUxIE1pHjboX+7s1FhbR30jss9PdiuMSEJvtRi4vB8+GdZSH0H2D4YMQgDV5QSqNfmxpRr6os3Vhocg==}
 
@@ -2722,6 +2737,10 @@ packages:
 
   '@types/estree@1.0.10':
     resolution: {integrity: sha512-lTyOMnOcmRBzdCv6/4zUZCrEhV0xrqQiUZBZtVcbmLHBXKLnN8q89v/wKRF/Q0HbwVsqbIG3o5HDoFl9sduM+g==}
+
+  '@types/handlebars@4.1.0':
+    resolution: {integrity: sha512-gq9YweFKNNB1uFK71eRqsd4niVkXrxHugqWFQkeLRJvGjnxsLr16bYtcsG4tOFwmYi0Bax+wCkbf1reUfdl4kA==}
+    deprecated: This is a stub types definition. handlebars provides its own type definitions, so you do not need this installed.
 
   '@types/hast@3.0.5':
     resolution: {integrity: sha512-rp/ezSWaD1m44dPKICGhiskI13nVr7qTloFwDa/IYkhhf5nzwP+zIQcIJh3WIFSBOy/H1PzB40jPjMDksN4F+g==}
@@ -4633,6 +4652,11 @@ packages:
     resolution: {integrity: sha512-+CqsMbHPiSTdtSO14O51eMNlrp9N79gmeqmXeouJOhfucAedHw9noVe/n5uJk3tbKE6a+6ZCQg3RPhVhHByAIw==}
     engines: {node: '>=18'}
 
+  handlebars@4.7.10:
+    resolution: {integrity: sha512-P5VJMVM7qgBn6vjXMw8WG9uVI+ncf2pi72j4de4yz5ZULLj2RGqLYaKOYGsgyrViQ0tePOVlN1tDCCXXtFqXKg==}
+    engines: {node: '>=0.4.7'}
+    hasBin: true
+
   happy-dom@21.0.4:
     resolution: {integrity: sha512-tFm+GaLBgo6o0awHnvHaNoraVo27qJ+2tZEtZ+cIa08hXbeitrxAJajLI05hsUy/2/YTKcUjQYzHe5mCcraLBw==}
     engines: {node: '>=20.0.0'}
@@ -5765,6 +5789,9 @@ packages:
   negotiator@1.1.0:
     resolution: {integrity: sha512-NMPBRMJgiQHjbd8phG3Vebdx4kZ1H121rbl5IkMqeOsahptB9BKo/d7oJ3zTXqTgagn2bWlNSXkh0QUGM31RYg==}
     engines: {node: '>=18'}
+
+  neo-async@2.6.2:
+    resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
 
   next-themes@0.4.6:
     resolution: {integrity: sha512-pZvgD5L0IEvX5/9GWyHMf3m8BKiVQwsCMHfoFosXtXBMnaS0ZnIJ9ST4b4NqLVKDEm8QBxoNNGNaBv2JNF6XNA==}
@@ -7154,6 +7181,11 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  uglify-js@3.19.3:
+    resolution: {integrity: sha512-v3Xu+yuwBXisp6QYTcH4UbH+xYJXqnq2m/LtQVWKWzYc1iehYnLixoQDN9FH6/j9/oybfd6W9Ghwkl8+UMKTKQ==}
+    engines: {node: '>=0.8.0'}
+    hasBin: true
+
   uint8array-extras@1.6.0:
     resolution: {integrity: sha512-8iAasVS4wUx0gPLjH8Xtz2PeDzTSiy8QiLGu2DT3X5GU+egFEQhpnbtkehbAwjvDcxIERmCYcysiODFmE3Ud0Q==}
     engines: {node: '>=18'}
@@ -7400,6 +7432,9 @@ packages:
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
+
+  wordwrap@1.0.0:
+    resolution: {integrity: sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==}
 
   wrap-ansi@6.2.0:
     resolution: {integrity: sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==}
@@ -9188,6 +9223,13 @@ snapshots:
       - supports-color
       - typescript
 
+  '@payloadcms/transformer-sharp@4.0.0-beta.10(@types/node@20.19.43)(payload@4.0.0-beta.10(graphql@17.1.0)(supports-color@7.2.0)(typescript@5.9.3))':
+    dependencies:
+      payload: 4.0.0-beta.10(graphql@17.1.0)(supports-color@7.2.0)(typescript@5.9.3)
+      sharp: 0.35.5(@types/node@20.19.43)
+    transitivePeerDependencies:
+      - '@types/node'
+
   '@payloadcms/translations@4.0.0-beta.10':
     dependencies:
       date-fns: 4.4.0
@@ -10294,6 +10336,10 @@ snapshots:
       '@types/estree': 1.0.10
 
   '@types/estree@1.0.10': {}
+
+  '@types/handlebars@4.1.0':
+    dependencies:
+      handlebars: 4.7.10
 
   '@types/hast@3.0.5':
     dependencies:
@@ -12616,6 +12662,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  handlebars@4.7.10:
+    dependencies:
+      minimist: 1.2.8
+      neo-async: 2.6.2
+      source-map: 0.6.1
+      wordwrap: 1.0.0
+    optionalDependencies:
+      uglify-js: 3.19.3
+
   happy-dom@21.0.4:
     dependencies:
       '@types/node': 20.19.43
@@ -13785,6 +13840,8 @@ snapshots:
   negotiator@1.1.0:
     dependencies:
       content-type: 2.1.0
+
+  neo-async@2.6.2: {}
 
   next-themes@0.4.6(react-dom@19.3.1(react@19.3.1))(react@19.3.1):
     dependencies:
@@ -15501,6 +15558,9 @@ snapshots:
 
   typescript@5.9.3: {}
 
+  uglify-js@3.19.3:
+    optional: true
+
   uint8array-extras@1.6.0: {}
 
   unbox-primitive@1.1.0:
@@ -15808,6 +15868,8 @@ snapshots:
       winston-transport: 4.9.0
 
   word-wrap@1.2.5: {}
+
+  wordwrap@1.0.0: {}
 
   wrap-ansi@6.2.0:
     dependencies:

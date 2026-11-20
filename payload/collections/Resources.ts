@@ -1,6 +1,29 @@
-import type { CollectionConfig } from 'payload';
+﻿import type { CollectionConfig } from 'payload';
+import {
+  lexicalEditor,
+  BlocksFeature,
+  HeadingFeature,
+  BoldFeature,
+  ItalicFeature,
+  UnderlineFeature,
+  StrikethroughFeature,
+  SubscriptFeature,
+  SuperscriptFeature,
+  InlineCodeFeature,
+  ParagraphFeature,
+  AlignFeature,
+  IndentFeature,
+  OrderedListFeature,
+  UnorderedListFeature,
+  ChecklistFeature,
+  LinkFeature,
+  BlockquoteFeature,
+  HorizontalRuleFeature,
+  UploadFeature,
+} from '@payloadcms/richtext-lexical';
 import { cmsCollectionCacheHooks } from '../../lib/cms-cache';
 import { livePreviewBreakpoints, livePreviewUrl } from '../../lib/live-preview';
+import { slugField, makeSlugHook } from '../fields/slug';
 
 export const Resources: CollectionConfig = {
   slug: 'resources',
@@ -18,15 +41,12 @@ export const Resources: CollectionConfig = {
     update: ({ req }) => Boolean(req.user),
     delete: ({ req }) => Boolean(req.user),
   },
-  hooks: cmsCollectionCacheHooks('resources'),
+  hooks: {
+    ...cmsCollectionCacheHooks('resources'),
+    beforeValidate: [makeSlugHook('title')],
+  },
   fields: [
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-      unique: true,
-      index: true,
-    },
+    slugField('title'),
     {
       name: 'sortOrder',
       type: 'number',
@@ -88,38 +108,86 @@ export const Resources: CollectionConfig = {
       min: 1,
     },
     {
-      name: 'sections',
-      type: 'array',
+      name: 'content',
+      type: 'richText',
       required: true,
-      fields: [
-        {
-          name: 'heading',
-          type: 'text',
-        },
-        {
-          name: 'paragraphs',
-          type: 'array',
-          fields: [
-            {
-              name: 'text',
-              type: 'textarea',
-              required: true,
+      editor: lexicalEditor({
+        features: () => [
+          ParagraphFeature(),
+          HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
+          BoldFeature(),
+          ItalicFeature(),
+          UnderlineFeature(),
+          StrikethroughFeature(),
+          SubscriptFeature(),
+          SuperscriptFeature(),
+          InlineCodeFeature(),
+          AlignFeature(),
+          IndentFeature(),
+          OrderedListFeature(),
+          UnorderedListFeature(),
+          ChecklistFeature(),
+          BlockquoteFeature(),
+          HorizontalRuleFeature(),
+          LinkFeature({
+            enabledCollections: ['pages', 'resources', 'services', 'projects'],
+          }),
+          UploadFeature({
+            collections: {
+              media: {
+                fields: [
+                  { name: 'caption', type: 'text' },
+                  { name: 'size', type: 'select', options: ['full', 'wide', 'medium'], defaultValue: 'wide' },
+                ],
+              },
             },
-          ],
-        },
-        {
-          name: 'bullets',
-          type: 'array',
-          fields: [
-            {
-              name: 'text',
-              type: 'text',
-              required: true,
-            },
-          ],
-        },
-      ],
+          }),
+          BlocksFeature({
+            blocks: [
+              {
+                slug: 'mediaBlock',
+                interfaceName: 'ResourceMediaBlock',
+                labels: { singular: 'Media Block', plural: 'Media Blocks' },
+                fields: [
+                  { name: 'image', type: 'upload', relationTo: 'media', required: true },
+                  { name: 'caption', type: 'text' },
+                  {
+                    name: 'size',
+                    type: 'select',
+                    options: [
+                      { label: 'Full width', value: 'full' },
+                      { label: 'Wide (default)', value: 'wide' },
+                      { label: 'Medium', value: 'medium' },
+                    ],
+                    defaultValue: 'wide',
+                  },
+                ],
+              },
+              {
+                slug: 'linkBlock',
+                interfaceName: 'ResourceLinkBlock',
+                labels: { singular: 'Link / Button Block', plural: 'Link / Button Blocks' },
+                fields: [
+                  { name: 'label', type: 'text', required: true },
+                  { name: 'href', type: 'text', required: true },
+                  {
+                    name: 'style',
+                    type: 'select',
+                    options: [
+                      { label: 'Button', value: 'button' },
+                      { label: 'Plain link', value: 'link' },
+                    ],
+                    defaultValue: 'button',
+                  },
+                  { name: 'newTab', type: 'checkbox', defaultValue: false },
+                ],
+              },
+            ],
+          }),
+        ],
+      }),
     },
   ],
   versions: { drafts: { autosave: true } },
 };
+

@@ -15,7 +15,8 @@ export const Media: CollectionConfig = {
   },
   hooks: cmsMediaCacheHooks(),
   upload: {
-    mimeTypes: ['image/*'],
+    adminThumbnail: 'thumbnail',
+    mimeTypes: ['image/*']
   },
   fields: [
     {
@@ -26,6 +27,26 @@ export const Media: CollectionConfig = {
     {
       name: 'caption',
       type: 'textarea',
+    },
+    {
+      name: 'creditText',
+      type: 'text',
+    },
+    {
+      name: 'creator',
+      type: 'text',
+    },
+    {
+      name: 'license',
+      type: 'text',
+    },
+    {
+      name: 'copyrightNotice',
+      type: 'text',
+    },
+    {
+      name: 'acquireLicensePage',
+      type: 'text',
     },
   ],
 };
