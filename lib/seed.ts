@@ -15,6 +15,7 @@ import { PROJECTS } from '@/data/projects';
 import { RESOURCES } from '@/data/resources';
 import { SERVICES } from '@/data/services';
 import { TESTIMONIALS } from '@/data/testimonials';
+import type { LexicalNodes_48719D92, Resource } from '@/payload-types';
 
 // ─── Lexical helpers ──────────────────────────────────────────────────────────
 interface ResourceSection {
@@ -23,21 +24,26 @@ interface ResourceSection {
   bullets?: string[];
 }
 
-type LexicalNode = Record<string, unknown>;
+type LexicalNode = LexicalNodes_48719D92;
+type LexicalTextNode = Extract<LexicalNode, { type: 'text' }>;
+type LexicalParagraphNode = Extract<LexicalNode, { type: 'paragraph' }>;
+type LexicalHeadingNode = Extract<LexicalNode, { type: 'heading' }>;
+type LexicalListNode = Extract<LexicalNode, { type: 'list' }>;
+type LexicalListItemNode = Extract<LexicalNode, { type: 'listitem' }>;
 
-function lexicalText(text: string): LexicalNode {
+function lexicalText(text: string): LexicalTextNode {
   return { type: 'text', text, format: 0, style: '', mode: 'normal', detail: 0, version: 1 };
 }
 
-function lexicalParagraph(...children: LexicalNode[]): LexicalNode {
+function lexicalParagraph(...children: LexicalNode[]): LexicalParagraphNode {
   return { type: 'paragraph', format: '', indent: 0, version: 1, direction: 'ltr', textStyle: '', textFormat: 0, children };
 }
 
-function lexicalHeading(tag: 'h2' | 'h3' | 'h4', text: string): LexicalNode {
+function lexicalHeading(tag: 'h2' | 'h3' | 'h4', text: string): LexicalHeadingNode {
   return { type: 'heading', tag, format: '', indent: 0, version: 1, direction: 'ltr', children: [lexicalText(text)] };
 }
 
-function lexicalBulletList(items: string[]): LexicalNode {
+function lexicalBulletList(items: string[]): LexicalListNode {
   return {
     type: 'list',
     listType: 'bullet',
@@ -47,7 +53,7 @@ function lexicalBulletList(items: string[]): LexicalNode {
     version: 1,
     start: 1,
     direction: 'ltr',
-    children: items.map((text, i) => ({
+    children: items.map((text, i): LexicalListItemNode => ({
       type: 'listitem',
       value: i + 1,
       format: '',
@@ -59,12 +65,12 @@ function lexicalBulletList(items: string[]): LexicalNode {
   };
 }
 
-function sectionsToLexical(sections: ResourceSection[]): unknown {
+function sectionsToLexical(sections: ResourceSection[]): Resource['content'] {
   const children: LexicalNode[] = sections.flatMap((section) => {
     const nodes: LexicalNode[] = [];
     if (section.heading) nodes.push(lexicalHeading('h2', section.heading));
     for (const para of section.paragraphs ?? []) nodes.push(lexicalParagraph(lexicalText(para)));
-    if ((section.bullets ?? []).length) nodes.push(lexicalBulletList(section.bullets!));
+    if (section.bullets?.length) nodes.push(lexicalBulletList(section.bullets));
     return nodes;
   });
   // Always have at least one paragraph so Lexical doesn't reject an empty root

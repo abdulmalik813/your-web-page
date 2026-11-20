@@ -262,27 +262,43 @@ export default buildConfig({
                 ...field,
                 admin: {
                   ...(field.admin ?? {}),
-                  description: 'Emails are processed with Handlebars — use {{fieldName}} for submission values.',
+                  description:
+                    "Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. Handlebars expressions are supported.",
                 },
-                fields: (field.fields ?? []).concat([
-                  {
-                    name: 'messageType',
-                    type: 'select',
-                    defaultValue: 'richText',
-                    options: [
-                      { label: 'Rich Text (Lexical)', value: 'richText' },
-                      { label: 'Raw HTML', value: 'html' },
-                    ],
-                  },
-                  {
-                    name: 'htmlMessage',
-                    type: 'code',
-                    admin: {
-                      language: 'html',
-                      condition: (_, siblingData) => siblingData?.messageType === 'html',
-                    },
-                  },
-                ]),
+                fields: (field.fields ?? []).flatMap((f: any) => {
+                  if (f.name === 'message') {
+                    const modifiedMessage = {
+                      ...f,
+                      admin: {
+                        ...(f.admin ?? {}),
+                        condition: (_: any, siblingData: any) => siblingData?.messageType !== 'html',
+                      },
+                    };
+                    return [
+                      {
+                        name: 'messageType',
+                        type: 'select',
+                        defaultValue: 'rich_text',
+                        required: true,
+                        options: [
+                          { label: 'Rich Text', value: 'rich_text' },
+                          { label: 'Custom HTML', value: 'html' },
+                        ],
+                      },
+                      modifiedMessage,
+                      {
+                        name: 'htmlMessage',
+                        type: 'code',
+                        label: 'HTML Message',
+                        admin: {
+                          language: 'html',
+                          condition: (_: any, siblingData: any) => siblingData?.messageType === 'html',
+                        },
+                      },
+                    ];
+                  }
+                  return [f];
+                }),
               };
             }
             return field;

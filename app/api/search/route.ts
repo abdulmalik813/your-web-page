@@ -1,5 +1,5 @@
 import config from '@payload-config';
-import { getPayload } from 'payload';
+import { getPayload, type Where } from 'payload';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest): Promise<Response> {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   const payload = await getPayload({ config });
 
   try {
-    const andConditions: any[] = [];
+    const andConditions: Where[] = [];
 
     if (collection) {
       andConditions.push({
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       });
     }
 
-    const where = andConditions.length > 0 ? { and: andConditions } : {};
+    const where: Where = andConditions.length > 0 ? { and: andConditions } : {};
 
     // 1. Query the Payload Search Plugin collection
     const searchResults = await payload.find({
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     // 2. Fallback to direct collection query if search index has not indexed docs yet
     if (collection === 'resources') {
-      const fallbackAnd: any[] = [];
+      const fallbackAnd: Where[] = [];
       if (q) {
         fallbackAnd.push({
           or: [
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       if (category && category !== 'All') {
         fallbackAnd.push({ category: { equals: category } });
       }
-      const fallbackWhere = fallbackAnd.length > 0 ? { and: fallbackAnd } : {};
+      const fallbackWhere: Where = fallbackAnd.length > 0 ? { and: fallbackAnd } : {};
 
       const fallback = await payload.find({
         collection: 'resources',

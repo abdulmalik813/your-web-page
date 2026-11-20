@@ -8,7 +8,7 @@ interface ResourceMediaBlockProps {
   size?: BlockSize | string | null;
 }
 
-const sizeToAspect: Record<string, 'wide' | 'card' | 'square'> = {
+const sizeToAspect: Record<string, 'wide' | 'card'> = {
   full: 'wide',
   wide: 'wide',
   medium: 'card',

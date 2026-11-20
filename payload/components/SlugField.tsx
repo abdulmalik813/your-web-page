@@ -62,7 +62,6 @@ export const SlugField: React.FC<SlugFieldProps> = ({
         <div style={{ flex: 1 }}>
           <TextInput
             path={path}
-            name={path}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setValue(e.target.value);
               setLocked(true);

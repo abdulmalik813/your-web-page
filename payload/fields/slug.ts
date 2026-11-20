@@ -1,5 +1,6 @@
-import type { Field } from 'payload';
-import type { BeforeValidateHook } from 'payload';
+import type { CollectionBeforeValidateHook, TextField } from 'payload';
+
+type SingleTextField = Extract<TextField, { hasMany?: false }>;
 
 /** Convert any string to a URL-safe slug */
 export function toSlug(value: string): string {
@@ -18,7 +19,7 @@ export function toSlug(value: string): string {
  *
  * Usage: add to `hooks.beforeValidate` on the collection.
  */
-export function makeSlugHook(sourceField = 'title'): BeforeValidateHook {
+export function makeSlugHook(sourceField = 'title'): CollectionBeforeValidateHook {
   return ({ data, originalDoc }) => {
     // If the slug is already set and not being cleared, leave it alone
     const incomingSlug = data?.slug;
@@ -44,7 +45,7 @@ export function makeSlugHook(sourceField = 'title'): BeforeValidateHook {
  * @param watchField - The field name to watch/generate from (default: 'title')
  * @param overrides  - Any Field overrides to merge in
  */
-export function slugField(watchField = 'title', overrides: Partial<Field> = {}): Field {
+export function slugField(watchField = 'title', overrides: Partial<SingleTextField> = {}): SingleTextField {
   return {
     name: 'slug',
     type: 'text',

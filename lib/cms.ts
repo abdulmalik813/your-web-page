@@ -53,6 +53,7 @@ export interface ResourceEntry {
   excerpt: string;
   category: ResourceCategory;
   tags: string[];
+  sections?: ResourceSection[];
   publishDate: string;
   isoDate: string;
   readTime: number;

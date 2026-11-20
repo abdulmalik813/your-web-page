@@ -435,7 +435,7 @@ export interface Form {
     url?: string | null;
   };
   /**
-   * Emails are processed with Handlebars — use {{fieldName}} for submission values.
+   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. Handlebars expressions are supported.
    */
   emails?:
     | {
@@ -445,8 +445,8 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
+        messageType: 'rich_text' | 'html';
         message?: LexicalRichText<LexicalNodes_83E8DF84> | null;
-        messageType?: ('richText' | 'html') | null;
         htmlMessage?: string | null;
         id?: string | null;
       }[]
@@ -1856,8 +1856,8 @@ export interface FormsSelect<T extends boolean = true> {
         replyTo?: T;
         emailFrom?: T;
         subject?: T;
-        message?: T;
         messageType?: T;
+        message?: T;
         htmlMessage?: T;
         id?: T;
       };

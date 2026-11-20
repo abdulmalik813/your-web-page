@@ -20,7 +20,7 @@ export function filterResources(resources: ResourceEntry[], category: ResourceFi
       entry.category,
       entry.excerpt,
       ...entry.tags,
-      ...entry.sections.flatMap((section) => [
+      ...(entry.sections ?? []).flatMap((section) => [
         section.heading || '',
         ...(section.paragraphs || []),
         ...(section.bullets || []),

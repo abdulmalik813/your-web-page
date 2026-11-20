@@ -73,15 +73,18 @@ export const CacheBustButton: React.FC = () => {
               width: '100%',
             }}
           >
-            <RefreshIcon
+            <span
               style={{
+                display: 'inline-flex',
                 width: '14px',
                 height: '14px',
                 flexShrink: 0,
                 opacity: 0.85,
                 animation: loading ? 'spin 1s linear infinite' : undefined,
               }}
-            />
+            >
+              <RefreshIcon size={16} />
+            </span>
             {loading ? 'Clearing cache…' : 'Bust All Cache'}
           </span>
         </button>
