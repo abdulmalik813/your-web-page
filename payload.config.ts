@@ -245,7 +245,9 @@ export default buildConfig({
 
         let formDoc: any;
         try {
-          formDoc = await payload.findByID({ collection: 'forms', id: formId });
+          // `emails` is admin-only at field level, so a normal read returns it
+          // empty here and the plugin would fall back to a blank message.
+          formDoc = await payload.findByID({ collection: 'forms', id: formId, overrideAccess: true, depth: 0 });
         } catch {
           return emailsToSend;
         }
