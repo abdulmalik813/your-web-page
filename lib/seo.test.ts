@@ -15,7 +15,9 @@ test('local preview URLs replace the wildcard bind address with localhost', () =
 
   try {
     assert.equal(getBaseUrl(), 'http://localhost:3000');
-    const previewUrl = new URL(livePreviewUrl({ collectionSlug: 'pages', data: { slug: 'contact' } }));
+    const previewPath = livePreviewUrl({ collectionSlug: 'pages', data: { slug: 'contact' } });
+    assert.ok(previewPath.startsWith('/api/draft/enable?'));
+    const previewUrl = new URL(previewPath, getBaseUrl());
     assert.equal(previewUrl.origin, 'http://localhost:3000');
     assert.equal(previewUrl.searchParams.get('path'), '/contact');
   } finally {

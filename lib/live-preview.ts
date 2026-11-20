@@ -71,7 +71,10 @@ export const livePreviewUrl = (args: LivePreviewUrlArgs = {}) => {
     previewSecret: getPreviewSecret(),
   });
 
-  return `${previewBase()}/api/draft/enable?${params.toString()}`;
+  // Return a relative URL so Payload LivePreview automatically resolves against
+  // the browser's active origin (window.location.origin). This prevents 0.0.0.0
+  // or build-time domain mismatches in production and container environments.
+  return `/api/draft/enable?${params.toString()}`;
 };
 
 export const livePreviewBreakpoints = [
