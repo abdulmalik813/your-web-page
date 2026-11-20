@@ -124,6 +124,18 @@ export default buildConfig({
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: '— CMS' },
+    timezones: {
+      defaultTimezone: 'America/Halifax',
+      supportedTimezones: [
+        { label: 'Atlantic — Halifax', value: 'America/Halifax' },
+        { label: 'Newfoundland — St. John’s', value: 'America/St_Johns' },
+        { label: 'Eastern — Toronto', value: 'America/Toronto' },
+        { label: 'Central — Winnipeg', value: 'America/Winnipeg' },
+        { label: 'Mountain — Edmonton', value: 'America/Edmonton' },
+        { label: 'Pacific — Vancouver', value: 'America/Vancouver' },
+        { label: 'UTC', value: 'UTC' },
+      ],
+    },
     livePreview: {
       url: ({ data, collectionConfig, globalConfig }) =>
         livePreviewUrl({ data, collectionConfig, globalConfig }),
@@ -141,6 +153,11 @@ export default buildConfig({
   csrf: allowedOrigins,
   email,
   collections: [Pages, Services, Projects, Newsletter, Subscribers, Faqs, Testimonials, Media, Users],
+  jobs: {
+    // Runs queued jobs (including scheduled publish) every minute. Requires a
+    // long-running Node process — this app is served with `next start`.
+    autoRun: [{ cron: '* * * * *', queue: 'default', limit: 10 }],
+  },
   globals: [Settings, Navigation, Footer],
   editor: lexicalEditor(),
   secret: requireEnv('PAYLOAD_SECRET'),

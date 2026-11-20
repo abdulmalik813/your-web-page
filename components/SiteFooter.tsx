@@ -7,7 +7,7 @@ interface SiteFooterProps {
   footer: any;
 }
 
-const footerLink = 'w-fit text-muted-foreground underline decoration-transparent underline-offset-4 transition-colors hover:text-primary hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring';
+const footerLink = 'w-fit text-muted-foreground underline decoration-transparent underline-offset-4 transition-colors hover:text-primary-strong hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring';
 
 export function SiteFooter({ settings, footer }: SiteFooterProps) {
   const year = new Date().getFullYear();
@@ -36,7 +36,7 @@ export function SiteFooter({ settings, footer }: SiteFooterProps) {
           </div>
           {(footer.columns || []).map((column: any) => (
             <div className="min-w-0 border-t border-border/60 py-6 sm:py-7 lg:border-l lg:border-t-0 lg:pl-6" key={column.id || column.label}>
-              <h2 className="mb-4 font-mono text-xs font-bold uppercase leading-5 tracking-[0.12em] text-primary">{column.label}</h2>
+              <h2 className="mb-4 border-l-4 border-primary pl-3 font-mono text-xs font-bold uppercase leading-5 tracking-[0.12em] text-foreground">{column.label}</h2>
               <ul className="m-0 grid list-none gap-2 p-0">
                 {(column.items || []).map((item: any) => {
                   const link = resolveLink(item.link ?? item);

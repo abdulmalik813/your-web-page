@@ -1,6 +1,14 @@
 import type { Metadata } from 'next';
 import { getServerSideURL } from './get-url';
 
+/** 1200×630 branded card used when a page or article has no artwork of its own. */
+export const DEFAULT_OG_IMAGE_PATH = '/og-default.jpg';
+
+export interface SeoImage {
+  url?: string | null;
+  sizes?: { og?: { url?: string | null } };
+}
+
 export function getBaseUrl(): string {
   const url = getServerSideURL();
   if (!url) throw new Error('NEXT_PUBLIC_SERVER_URL is required');
@@ -16,9 +24,7 @@ export function buildCanonicalUrl(path: string): string {
  * Resolve the best OG-sized URL from a Payload Media object.
  * Prefers the `og` image size (1200×630), falls back to the original URL.
  */
-export function resolveOgImageUrl(
-  mediaObj: { url?: string | null; sizes?: { og?: { url?: string | null } } } | null | undefined,
-): string | undefined {
+export function resolveOgImageUrl(mediaObj: SeoImage | null | undefined): string | undefined {
   if (!mediaObj) return undefined;
   const base = getBaseUrl();
   const ogUrl = mediaObj.sizes?.og?.url;
@@ -34,21 +40,40 @@ export function buildPageMetadata({
   image,
   fallbackImage,
   type = 'website',
+  keywords,
+  authors,
+  publishedTime,
+  modifiedTime,
+  section,
+  rss = false,
 }: {
   title: string;
   description: string;
   path: string;
-  image?: { url?: string | null; sizes?: { og?: { url?: string | null } } } | null;
-  fallbackImage?: { url?: string | null; sizes?: { og?: { url?: string | null } } } | null;
+  image?: SeoImage | null;
+  fallbackImage?: SeoImage | null;
   type?: 'website' | 'article';
+  keywords?: string[];
+  authors?: string[];
+  publishedTime?: string;
+  modifiedTime?: string;
+  section?: string;
+  rss?: boolean;
 }): Metadata {
   const url = buildCanonicalUrl(path);
-  const ogImage = resolveOgImageUrl(image ?? fallbackImage);
+  const ogImage = resolveOgImageUrl(image ?? fallbackImage) ?? buildCanonicalUrl(DEFAULT_OG_IMAGE_PATH);
+  const isArticle = type === 'article';
+  const cleanKeywords = keywords?.map((keyword) => keyword.trim()).filter(Boolean);
 
   return {
     title,
     description,
-    alternates: { canonical: url },
+    ...(cleanKeywords?.length ? { keywords: cleanKeywords } : {}),
+    ...(authors?.length ? { authors: authors.map((name) => ({ name })) } : {}),
+    alternates: {
+      canonical: url,
+      ...(rss ? { types: { 'application/rss+xml': buildCanonicalUrl('/feed.xml') } } : {}),
+    },
     robots: {
       index: true,
       follow: true,
@@ -68,6 +93,15 @@ export function buildPageMetadata({
       type,
       siteName: process.env.NEXT_PUBLIC_SITE_NAME || title,
       ...(ogImage ? { images: [{ url: ogImage, width: 1200, height: 630 }] } : {}),
+      ...(isArticle
+        ? {
+            ...(publishedTime ? { publishedTime } : {}),
+            ...(modifiedTime ? { modifiedTime } : {}),
+            ...(authors?.length ? { authors } : {}),
+            ...(section ? { section } : {}),
+            ...(cleanKeywords?.length ? { tags: cleanKeywords } : {}),
+          }
+        : {}),
     },
     twitter: {
       card: 'summary_large_image',
@@ -78,20 +112,42 @@ export function buildPageMetadata({
   };
 }
 
-export const STATIC_ROUTES = ['/'] as const;
+export const STATIC_ROUTES = [
+  '/',
+  '/services',
+  '/our-work',
+  '/newsletters',
+  '/process',
+  '/about',
+  '/where-we-work',
+  '/testimonials',
+  '/faq',
+  '/contact',
+  '/privacy',
+  '/terms',
+] as const;
 
 export interface SitemapItem {
   url: string;
   lastModified: string;
-  changeFrequency: 'weekly' | 'monthly';
+  changeFrequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
   priority: number;
 }
 
+/**
+ * Static routes only. The live sitemap adds every CMS page and detail route
+ * on top of these entries.
+ */
 export function getAllSitemapEntries(): SitemapItem[] {
+  const now = new Date().toISOString();
   return STATIC_ROUTES.map((route) => ({
     url: `${getBaseUrl()}${route === '/' ? '' : route}`,
-    lastModified: new Date().toISOString(),
-    changeFrequency: route === '/' ? 'weekly' : 'monthly',
+    lastModified: now,
+    changeFrequency: route === '/' ? 'daily' : 'monthly',
     priority: route === '/' ? 1 : 0.8,
   }));
+}
+
+export function absoluteUrl(path: string): string {
+  return buildCanonicalUrl(path);
 }

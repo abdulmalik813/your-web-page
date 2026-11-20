@@ -87,19 +87,14 @@ function sectionsToLexical(sections: NewsletterSection[]): Newsletter['content']
   };
 }
 
-export interface SeedCollectionStats {
-  created: number;
-  updated: number;
-}
-
 export interface SeedReport {
-  services: SeedCollectionStats;
-  projects: SeedCollectionStats;
-  newsletter: SeedCollectionStats;
-  faqs: SeedCollectionStats;
-  testimonials: SeedCollectionStats;
-  pages: SeedCollectionStats;
-  forms: SeedCollectionStats;
+  services: number;
+  projects: number;
+  newsletter: number;
+  faqs: number;
+  testimonials: number;
+  pages: number;
+  forms: number;
   seededAt: string;
 }
 
@@ -122,7 +117,6 @@ export interface SeedStatus {
     pages: number;
     forms: number;
   };
-  seededAt: string | null;
 }
 
 export async function getPayloadSeedStatus(payload: Payload): Promise<SeedStatus> {
@@ -157,19 +151,67 @@ export async function getPayloadSeedStatus(payload: Payload): Promise<SeedStatus
       pages: 12,
       forms: 1,
     },
-    seededAt: null,
   };
 }
 
+type SeedableCollection =
+  | 'form-submissions'
+  | 'forms'
+  | 'pages'
+  | 'services'
+  | 'projects'
+  | 'newsletter'
+  | 'faqs'
+  | 'testimonials';
+
+/** Delete every document in a seeded collection so the seed always rebuilds clean. */
+async function wipeCollection(payload: Payload, collection: SeedableCollection): Promise<number> {
+  const existing = await payload.find({
+    collection,
+    limit: 1000,
+    pagination: false,
+    depth: 0,
+    overrideAccess: true,
+  });
+  for (const doc of existing.docs as { id: string | number }[]) {
+    await payload.delete({ collection, id: doc.id, overrideAccess: true });
+  }
+  return existing.docs.length;
+}
+
+
+async function wipeSearchIndex(payload: Payload): Promise<void> {
+  const results = await payload.find({ collection: 'search', limit: 1000, pagination: false, overrideAccess: true });
+  for (const doc of results.docs) {
+    await payload.delete({ collection: 'search', id: doc.id, overrideAccess: true });
+  }
+}
+
 export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> {
+  // The seed is the source of truth. Clear the seeded collections first so
+  // re-seeding never leaves stale pages, drafts or duplicate slugs behind.
+  for (const collection of [
+    'form-submissions',
+    'pages',
+    'services',
+    'projects',
+    'newsletter',
+    'faqs',
+    'testimonials',
+    'forms',
+  ] as const) {
+    await wipeCollection(payload, collection);
+  }
+  await wipeSearchIndex(payload);
+
   const report: SeedReport = {
-    services: { created: 0, updated: 0 },
-    projects: { created: 0, updated: 0 },
-    newsletter: { created: 0, updated: 0 },
-    faqs: { created: 0, updated: 0 },
-    testimonials: { created: 0, updated: 0 },
-    pages: { created: 0, updated: 0 },
-    forms: { created: 0, updated: 0 },
+    services: 0,
+    projects: 0,
+    newsletter: 0,
+    faqs: 0,
+    testimonials: 0,
+    pages: 0,
+    forms: 0,
     seededAt: new Date().toISOString(),
   };
 
@@ -179,6 +221,11 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
       brand: COMPANY.brand,
       shortMark: COMPANY.shortMark,
       domain: COMPANY.domain,
+      meta: {
+        title: 'Web design, development and care in Charlottetown, PEI',
+        description:
+          'Your Web Page designs and builds fast websites, online stores and custom software from Charlottetown, Prince Edward Island. Fixed scope, clean code and direct support from the people doing the work.',
+      },
       email: COMPANY.email,
       phone: COMPANY.phone,
       phoneHref: COMPANY.phoneHref,
@@ -272,8 +319,9 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
     },
   ];
 
+  let contactFormId: string | number | null = null;
+
   for (const form of formSeed) {
-    const existing = await payload.find({ collection: 'forms', where: { title: { equals: form.title } }, limit: 1, overrideAccess: true });
     const data: any = {
       title: form.title,
       submitButtonLabel: form.buttonLabel,
@@ -318,25 +366,14 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
         },
       ],
     };
-    if (existing.docs.length) {
-      await payload.update({ collection: 'forms', id: existing.docs[0].id, data, overrideAccess: true });
-      report.forms.updated += 1;
-    } else {
-      await payload.create({ collection: 'forms', data, overrideAccess: true });
-      report.forms.created += 1;
-    }
-  }
-
-  // Retire the former second form; keep it if old submissions still reference it.
-  const retiredForms = await payload.find({ collection: 'forms', where: { title: { equals: 'Start a Project' } }, limit: 100, overrideAccess: true });
-  for (const retired of retiredForms.docs) {
-    const submissions = await payload.count({ collection: 'form-submissions', where: { form: { equals: retired.id } }, overrideAccess: true });
-    if (submissions.totalDocs === 0) await payload.delete({ collection: 'forms', id: retired.id, overrideAccess: true });
+    const created = await payload.create({ collection: 'forms', data, overrideAccess: true });
+    report.forms += 1;
+    if (form.title === 'Contact') contactFormId = created.id;
   }
 
   const initialPages: any[] = [
     { slug: 'home', title: 'Home', layout: [
-        { blockType: 'hero', eyebrow: 'Web studio · Based in Charlottetown, Canada', title: 'Websites, software & SaaS.', highlight: 'Built properly.', lead: 'Your Web Page is a Charlottetown-based company that designs and builds websites, software and SaaS products for businesses across Prince Edward Island, Canada and around the world. Clear scope, clean code and real people to talk to.', primaryLink: { type: 'external', url: '/contact', label: 'Start a project' }, secondaryLink: { type: 'external', url: '/our-work', label: 'See our work' }, facts: [{ text: 'Based in Charlottetown, PEI' }, { text: 'Clients across Canada & worldwide' }, { text: 'Remote-first, in person on the Island' }] },
+        { blockType: 'hero', eyebrow: 'Web studio · Based in Charlottetown, Canada', title: 'Websites, software & SaaS.', highlight: 'Built properly.', lead: 'Your Web Page designs and builds websites, online stores and custom software from Charlottetown. You work directly with the people doing the work: fixed scope in writing, clean code, and a phone number that reaches someone on the Island.', primaryLink: { type: 'external', url: '/contact', label: 'Start a project' }, secondaryLink: { type: 'external', url: '/our-work', label: 'See our work' }, facts: [{ text: 'Based in Charlottetown, PEI' }, { text: 'Clients across Canada & worldwide' }, { text: 'Remote-first, in person on the Island' }] },
         { blockType: 'cardGrid', eyebrow: '01 — Services', heading: 'What we build', source: 'services', limit: 6 },
         { blockType: 'cardGrid', eyebrow: '02 — Selected work', heading: 'Recent projects', source: 'projects', limit: 3 },
         { blockType: 'cardGrid', eyebrow: '03 — How we work', heading: 'Four steps, no surprises', source: 'custom', cards: HOME_PROCESS_STEPS.map((step) => ({ number: step.number, title: step.title, description: step.description })) },
@@ -346,15 +383,20 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
         { blockType: 'cardGrid', eyebrow: 'FAQ', heading: 'Quick answers', source: 'faqs', limit: 4 },
         { blockType: 'cta', eyebrow: 'Start here', title: 'Have a project in mind?', text: 'Tell us what you are building. We will come back with questions, ideas and a clear plan.', primaryLink: { type: 'external', url: '/contact', label: 'Start a project' } },
       ] },
-    { slug: 'about', title: 'About', layout: [{ blockType: 'hero', eyebrow: 'About', title: 'A Charlottetown web studio', lead: 'We build dependable, fast websites, software and SaaS products.' }, { blockType: 'cardGrid', source: 'custom', cards: ABOUT_VALUES.map((item) => ({ number: item.number, title: item.title, description: item.description })) }] },
+    { slug: 'about', title: 'About', layout: [{ blockType: 'hero', eyebrow: 'About', title: 'A Charlottetown web studio', lead: 'A small studio in Charlottetown, building websites, stores and custom software since 2019.' }, { blockType: 'content', eyebrow: 'The studio', heading: 'Small team, direct contact', content: sectionsToLexical([
+          { paragraphs: [
+            'Most of our work comes from referrals: a plumber who saw a competitor’s site, a retailer tired of reconciling stock by hand, a founder who needs a first version of an app built properly. We take on a handful of projects at a time so the person you meet is the person writing the code.',
+            'We build with Next.js, TypeScript and Payload, and we keep a short list of tools we know well rather than chasing whatever shipped last month. Every project ends with the domain, hosting and repository in your name, whether or not you stay on a care plan.',
+          ] },
+        ]), columns: 'two' }, { blockType: 'cardGrid', source: 'custom', cards: ABOUT_VALUES.map((item) => ({ number: item.number, title: item.title, description: item.description })) }] },
     { slug: 'process', title: 'Process', layout: [{ blockType: 'hero', eyebrow: 'Process', title: 'How we work', lead: 'Five stages, plain language at every step, and no surprises.' }, { blockType: 'cardGrid', source: 'custom', cards: PROCESS_STAGES.map((item) => ({ number: item.number, title: item.title, description: item.whatHappens })) }] },
-    { slug: 'where-we-work', title: 'Where We Work', layout: [{ blockType: 'hero', eyebrow: 'Where we work', title: 'Charlottetown-based. Working worldwide.', lead: 'Local roots, remote-first working.' }, { blockType: 'cardGrid', source: 'custom', cards: REGION_TIERS.map((item) => ({ number: item.number, title: item.title, description: `${item.subtitle} — ${item.description}` })) }] },
+    { slug: 'where-we-work', title: 'Where We Work', layout: [{ blockType: 'hero', eyebrow: 'Where we work', title: 'Charlottetown-based. Working worldwide.', lead: 'Local roots, remote-first working.' }, { blockType: 'cardGrid', source: 'custom', cards: REGION_TIERS.map((item) => ({ number: item.number, title: item.title, description: `${item.subtitle} — ${item.description}` })) }, { blockType: 'cardGrid', eyebrow: 'Remote work', heading: 'How a remote project actually runs', source: 'custom', cards: REMOTE_PRACTICES.map((item) => ({ number: item.number, title: item.title, description: item.description })) }] },
     { slug: 'testimonials', title: 'Testimonials', layout: [
         { blockType: 'hero', eyebrow: 'Client Feedback', title: 'What our clients say about working with us', lead: 'Real feedback and honest words from founders, executives, and product leaders who trusted us with their websites and applications.', facts: [{ text: '100% verified client reviews' }, { text: 'Partnerships across North America' }, { text: 'Long-term ongoing care' }] },
         { blockType: 'testimonials', eyebrow: 'What clients say', heading: 'In their words', limit: 12 },
         { blockType: 'cta', eyebrow: 'Start here', title: 'Have a project in mind?', text: 'Tell us what you are building. We will come back with questions, ideas and a clear plan.', primaryLink: { type: 'external', url: '/contact', label: 'Start a project' } },
       ] },
-    { slug: 'services', title: 'Services', layout: [{ blockType: 'hero', eyebrow: 'Services', title: 'Everything your website needs', lead: 'Design, development, online stores, custom software and ongoing care.' }, { blockType: 'cardGrid', source: 'services', limit: 50 }] },
+    { slug: 'services', title: 'Services', layout: [{ blockType: 'hero', eyebrow: 'Services', title: 'Everything your website needs', lead: 'Design, development, online stores, custom software and ongoing care.' }, { blockType: 'cardGrid', source: 'services', limit: 50 }, { blockType: 'cardGrid', eyebrow: 'Who we build for', heading: 'Businesses we know well', source: 'custom', cards: SECTORS.map((item) => ({ number: item.number, title: item.title, description: item.description })) }] },
     { slug: 'our-work', title: 'Our Work', layout: [{ blockType: 'hero', eyebrow: 'Our work', title: 'Websites, software and products', lead: 'A selection of the kinds of projects we build.' }, { blockType: 'cardGrid', source: 'projects', limit: 50 }] },
     { slug: 'newsletters', title: 'Newsletters', layout: [{ blockType: 'hero', eyebrow: 'Newsletters', title: 'Newsletters', lead: 'Practical reading for anyone planning, building or looking after a website.' }] },
     { slug: 'faq', title: 'FAQ', layout: [{ blockType: 'hero', eyebrow: 'FAQ', title: 'Questions, answered', lead: 'Cannot find what you are looking for? Get in touch.' }, { blockType: 'cardGrid', source: 'faqs', limit: 100 }] },
@@ -380,33 +422,14 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
   ];
 
   for (const page of initialPages) {
-    const existing = await payload.find({ collection: 'pages', where: { slug: { equals: page.slug } }, limit: 1, overrideAccess: true });
-    const formTitle = page.slug === 'contact' ? 'Contact' : null;
-    const formDoc = formTitle ? await payload.find({ collection: 'forms', where: { title: { equals: formTitle } }, limit: 1, overrideAccess: true }) : null;
-    const layout = page.layout.map((block: any) => block.blockType === 'form' && formDoc?.docs[0] ? { ...block, form: formDoc.docs[0].id } : block);
-    const data: any = { ...page, layout, _status: 'published' };
-    if (existing.docs.length) {
-      await payload.update({ collection: 'pages', id: existing.docs[0].id, data, overrideAccess: true });
-      report.pages.updated += 1;
-    } else {
-      await payload.create({ collection: 'pages', data, overrideAccess: true });
-      report.pages.created += 1;
-    }
-  }
-
-  const retiredPages = await payload.find({ collection: 'pages', where: { slug: { equals: 'start-a-project' } }, limit: 100, overrideAccess: true });
-  for (const retired of retiredPages.docs) {
-    await payload.delete({ collection: 'pages', id: retired.id, overrideAccess: true });
+    const layout = page.layout.map((block: any) =>
+      block.blockType === 'form' && contactFormId ? { ...block, form: contactFormId } : block,
+    );
+    await payload.create({ collection: 'pages', data: { ...page, layout, _status: 'published' }, overrideAccess: true });
+    report.pages += 1;
   }
 
   for (const [index, service] of SERVICES.entries()) {
-    const existing = await payload.find({
-      collection: 'services',
-      where: { slug: { equals: service.slug } },
-      limit: 1,
-      overrideAccess: true,
-    });
-
     const data = {
       slug: service.slug,
       sortOrder: index + 1,
@@ -423,32 +446,15 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
       })),
     };
 
-    if (existing.docs.length > 0) {
-      await payload.update({
-        collection: 'services',
-        id: existing.docs[0].id,
-        data,
-        overrideAccess: true,
-      });
-      report.services.updated += 1;
-    } else {
-      await payload.create({
-        collection: 'services',
-        data,
-        overrideAccess: true,
-      });
-      report.services.created += 1;
-    }
+    await payload.create({
+      collection: 'services',
+      data,
+      overrideAccess: true,
+    });
+    report.services += 1;
   }
 
   for (const [index, project] of PROJECTS.entries()) {
-    const existing = await payload.find({
-      collection: 'projects',
-      where: { slug: { equals: project.slug } },
-      limit: 1,
-      overrideAccess: true,
-    });
-
     const data = {
       slug: project.slug,
       sortOrder: index + 1,
@@ -462,32 +468,15 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
       outcomes: project.outcomes.map((text) => ({ text })),
     };
 
-    if (existing.docs.length > 0) {
-      await payload.update({
-        collection: 'projects',
-        id: existing.docs[0].id,
-        data,
-        overrideAccess: true,
-      });
-      report.projects.updated += 1;
-    } else {
-      await payload.create({
-        collection: 'projects',
-        data,
-        overrideAccess: true,
-      });
-      report.projects.created += 1;
-    }
+    await payload.create({
+      collection: 'projects',
+      data,
+      overrideAccess: true,
+    });
+    report.projects += 1;
   }
 
   for (const [index, newsletter] of NEWSLETTERS.entries()) {
-    const existing = await payload.find({
-      collection: 'newsletter',
-      where: { slug: { equals: newsletter.slug } },
-      limit: 1,
-      overrideAccess: true,
-    });
-
     const data = {
       slug: newsletter.slug,
       sortOrder: index + 1,
@@ -499,36 +488,20 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
       isoDate: newsletter.isoDate,
       readTime: newsletter.readTime,
       content: sectionsToLexical(newsletter.sections),
+      _status: 'published' as const,
     };
 
-    if (existing.docs.length > 0) {
-      await payload.update({
-        collection: 'newsletter',
-        id: existing.docs[0].id,
-        data,
-        overrideAccess: true,
-      });
-      report.newsletter.updated += 1;
-    } else {
-      await payload.create({
-        collection: 'newsletter',
-        data: { ...data, _status: 'published' },
-        overrideAccess: true,
-      });
-      report.newsletter.created += 1;
-    }
+    await payload.create({
+      collection: 'newsletter',
+      data,
+      overrideAccess: true,
+    });
+    report.newsletter += 1;
   }
 
   let faqSortOrder = 1;
   for (const group of FAQ_GROUPS) {
     for (const item of group.items) {
-      const existing = await payload.find({
-        collection: 'faqs',
-        where: { keyId: { equals: item.id } },
-        limit: 1,
-        overrideAccess: true,
-      });
-
       const data = {
         keyId: item.id,
         sortOrder: faqSortOrder++,
@@ -542,33 +515,16 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
         featuredOnHome: Boolean(item.featuredOnHome),
       };
 
-      if (existing.docs.length > 0) {
-        await payload.update({
-          collection: 'faqs',
-          id: existing.docs[0].id,
-          data,
-          overrideAccess: true,
-        });
-        report.faqs.updated += 1;
-      } else {
-        await payload.create({
-          collection: 'faqs',
-          data,
-          overrideAccess: true,
-        });
-        report.faqs.created += 1;
-      }
+      await payload.create({
+        collection: 'faqs',
+        data,
+        overrideAccess: true,
+      });
+      report.faqs += 1;
     }
   }
 
   for (const testimonial of TESTIMONIALS) {
-    const existing = await payload.find({
-      collection: 'testimonials',
-      where: { keyId: { equals: testimonial.id } },
-      limit: 1,
-      overrideAccess: true,
-    });
-
     const data = {
       keyId: testimonial.id,
       quote: testimonial.quote,
@@ -578,45 +534,13 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
       approved: testimonial.approved,
     };
 
-    if (existing.docs.length > 0) {
-      await payload.update({
-        collection: 'testimonials',
-        id: existing.docs[0].id,
-        data,
-        overrideAccess: true,
-      });
-      report.testimonials.updated += 1;
-    } else {
-      await payload.create({
-        collection: 'testimonials',
-        data,
-        overrideAccess: true,
-      });
-      report.testimonials.created += 1;
-    }
+    await payload.create({
+      collection: 'testimonials',
+      data,
+      overrideAccess: true,
+    });
+    report.testimonials += 1;
   }
-
-  const dedupe = async (collection: 'services' | 'projects' | 'newsletter' | 'faqs' | 'testimonials' | 'pages' | 'forms', key: 'slug' | 'keyId' | 'title') => {
-    const result = await payload.find({ collection, limit: 1000, sort: 'createdAt', overrideAccess: true });
-    const seen = new Set<string>();
-    for (const doc of result.docs as any[]) {
-      const value = String(doc[key] ?? '').trim();
-      if (!value) continue;
-      if (seen.has(value)) {
-        await payload.delete({ collection, id: doc.id, overrideAccess: true });
-      } else {
-        seen.add(value);
-      }
-    }
-  };
-
-  await dedupe('services', 'slug');
-  await dedupe('projects', 'slug');
-  await dedupe('newsletter', 'slug');
-  await dedupe('faqs', 'keyId');
-  await dedupe('testimonials', 'keyId');
-  await dedupe('pages', 'slug');
-  await dedupe('forms', 'title');
 
   const [pageDocs, serviceDocs] = await Promise.all([
     payload.find({ collection: 'pages', limit: 1000, pagination: false, overrideAccess: true }),
@@ -652,7 +576,7 @@ export async function seedAllPayloadData(payload: Payload): Promise<SeedReport> 
           ? {
               ...servicesNavItem,
               dropdownEyebrow: 'Services',
-              dropdownHeading: 'Thoughtful digital work, built around your goals.',
+              dropdownHeading: 'Websites, stores and software, built by the people you talk to.',
               dropdownCtaLabel: 'Explore all services',
               children: servicesDropdownItems,
             }

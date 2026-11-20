@@ -124,7 +124,7 @@ export function SiteHeader({ settings, navigation }: SiteHeaderProps) {
                       <NavigationMenuContent className="left-0 top-full mt-2 max-h-[75vh] w-[min(72vw,54rem)] min-w-[40rem] overflow-auto rounded-sm border border-border bg-popover p-0 text-popover-foreground shadow-none ring-1 ring-border group-data-[viewport=false]/navigation-menu:mt-2 group-data-[viewport=false]/navigation-menu:overflow-auto group-data-[viewport=false]/navigation-menu:rounded-sm group-data-[viewport=false]/navigation-menu:bg-popover group-data-[viewport=false]/navigation-menu:text-popover-foreground group-data-[viewport=false]/navigation-menu:shadow-none group-data-[viewport=false]/navigation-menu:ring-border">
                         <div className="grid sm:grid-cols-[minmax(12rem,0.72fr)_minmax(0,1.28fr)]">
                           <div className="border-b border-border bg-muted/40 p-5 sm:border-b-0 sm:border-r sm:p-6">
-                            <p className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-primary">{eyebrow}</p>
+                            <p className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-primary-strong">{eyebrow}</p>
                             {heading ? (
                               <p className="mt-3 max-w-[25ch] font-heading text-2xl leading-tight tracking-tight text-foreground">{heading}</p>
                             ) : null}
@@ -132,7 +132,7 @@ export function SiteHeader({ settings, navigation }: SiteHeaderProps) {
                               <Link
                                 className={cn(
                                   'group flex min-h-11 items-center justify-between gap-3 border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground no-underline transition-colors hover:border-primary/50 hover:bg-card',
-                                  pathname === link.href && 'border-primary/50 text-primary',
+                                  pathname === link.href && 'border-primary/50 text-primary-strong',
                                 )}
                                 href={link.href}
                                 target={link.newTab ? '_blank' : undefined}
@@ -159,7 +159,7 @@ export function SiteHeader({ settings, navigation }: SiteHeaderProps) {
                                     <Link
                                       className={cn(
                                         'group flex h-full min-h-16 min-w-0 items-center justify-between gap-3 bg-popover px-4 py-3 text-sm font-medium text-muted-foreground no-underline transition-colors hover:bg-muted hover:text-foreground',
-                                        childIsActive && 'bg-primary/10 text-primary',
+                                        childIsActive && 'bg-primary/10 text-primary-strong',
                                       )}
                                       href={child.href}
                                       target={child.newTab ? '_blank' : undefined}
@@ -240,7 +240,7 @@ export function SiteHeader({ settings, navigation }: SiteHeaderProps) {
                               <AccordionItem className="border-b-0" value={id || link.href}>
                                 <AccordionTrigger className={cn(
                                   'rounded-sm px-4 py-3 text-base font-medium no-underline hover:bg-accent hover:no-underline',
-                                  active && 'bg-primary/10 text-primary',
+                                  active && 'bg-primary/10 text-primary-strong',
                                 )}>
                                   {link.label}
                                 </AccordionTrigger>
@@ -250,7 +250,7 @@ export function SiteHeader({ settings, navigation }: SiteHeaderProps) {
                                       <Button
                                         asChild
                                         variant="ghost"
-                                        className={cn(mobileLinkClass, pathname === link.href && 'bg-primary/10 text-primary')}
+                                        className={cn(mobileLinkClass, pathname === link.href && 'bg-primary/10 text-primary-strong')}
                                         style={{ textDecoration: 'none' }}
                                       >
                                         <Link
@@ -270,7 +270,7 @@ export function SiteHeader({ settings, navigation }: SiteHeaderProps) {
                                           <Button
                                             asChild
                                             variant="ghost"
-                                            className={cn(mobileLinkClass, childIsActive && 'bg-primary/10 text-primary')}
+                                            className={cn(mobileLinkClass, childIsActive && 'bg-primary/10 text-primary-strong')}
                                             style={{ textDecoration: 'none' }}
                                           >
                                             <Link
@@ -298,7 +298,7 @@ export function SiteHeader({ settings, navigation }: SiteHeaderProps) {
                           <Button
                             asChild
                             variant="ghost"
-                            className={cn(mobileLinkClass, active && 'bg-primary/10 text-primary')}
+                            className={cn(mobileLinkClass, active && 'bg-primary/10 text-primary-strong')}
                             style={{ textDecoration: 'none' }}
                           >
                             <Link

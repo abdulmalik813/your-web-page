@@ -19,6 +19,8 @@ import { Card } from '@/components/ui/card';
 import { siteCardClass } from '@/components/siteStyles';
 import { getCmsFaqGroups, getCmsProjects, getCmsNewsletters, getCmsServices } from '@/lib/cms';
 import { legacyCmsLink, legacyLink, resolveLink } from '@/lib/links';
+import { JsonLd } from '@/components/JsonLd';
+import { breadcrumbNode, faqNode, webPageNode } from '@/lib/schema';
 
 const pageLabel = 'font-mono text-xs font-medium uppercase leading-5 tracking-[0.14em]';
 const pageWrap = 'mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11';
@@ -41,9 +43,22 @@ function richTextToText(value: unknown): string {
 
 export function CmsPageLayout({ page, isHome, draft }: { page: any; isHome: boolean; draft: boolean }) {
   const layout = Array.isArray(page.layout) ? page.layout : [];
+  const pagePath = isHome ? '/' : `/${page.slug}`;
+  const hero = layout.find((block: any) => block.blockType === 'hero');
+  const description = page?.meta?.description || hero?.lead || '';
+  const hasFaqs = layout.some((block: any) => block.blockType === 'cardGrid' && block.source === 'faqs');
 
   return (
     <>
+      <JsonLd
+        nodes={[
+          webPageNode({ path: pagePath, title: page.title, description }),
+          ...(isHome
+            ? []
+            : [breadcrumbNode([{ label: 'Home', href: '/' }, { label: page.title }], pagePath)]),
+        ]}
+      />
+      {hasFaqs ? <FaqJsonLd draft={draft} /> : null}
       {layout.map((block: any, index: number) => {
         switch (block.blockType) {
           case 'hero': {
@@ -54,9 +69,9 @@ export function CmsPageLayout({ page, isHome, draft }: { page: any; isHome: bool
                 <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(var(--border)_0.7px,transparent_0.7px)] [background-size:24px_24px]" aria-hidden="true" />
                 <div className="relative mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11">
                   <div className={`grid grid-cols-1 items-center gap-8 py-8 md:py-10 lg:py-14 ${isHome ? 'lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10' : ''}`}>
-                    <Reveal className="relative z-10 flex flex-col items-start gap-7" direction="left">
-                      {block.eyebrow ? <p className="font-mono text-xs font-semibold uppercase leading-5 tracking-[0.12em] text-primary">{block.eyebrow}</p> : null}
-                      <h1 className="max-w-[13ch] break-words font-heading text-[clamp(3rem,7.5vw,7.3rem)] font-medium leading-[0.88] tracking-[-0.06em] [overflow-wrap:anywhere]">{block.title}{block.highlight ? <> <mark className="bg-transparent italic text-primary">{block.highlight}</mark></> : null}</h1>
+                    <Reveal className="relative z-10 flex flex-col items-start gap-7" direction="left" animate={false}>
+                      {block.eyebrow ? <p className="font-mono text-xs font-semibold uppercase leading-5 tracking-[0.12em] text-primary-strong">{block.eyebrow}</p> : null}
+                      <h1 className="max-w-[13ch] break-words font-heading text-[clamp(3rem,7.5vw,7.3rem)] font-medium leading-[0.88] tracking-[-0.06em] [overflow-wrap:anywhere]">{block.title}{block.highlight ? <> <mark className="bg-transparent italic text-primary-strong">{block.highlight}</mark></> : null}</h1>
                       {block.lead ? <p className="max-w-[58ch] text-[clamp(1.05rem,1.5vw,1.25rem)] leading-[1.7] text-foreground font-medium">{block.lead}</p> : null}
                       <div className="flex flex-wrap gap-3">
                         {primary ? <Button asChild className="group h-12 gap-3 rounded-sm bg-primary px-6 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"><Link href={primary.href} target={primary.newTab ? '_blank' : undefined} rel={primary.newTab ? 'noopener noreferrer' : undefined}>{primary.label}<ArrowRight className="transition-transform group-hover:translate-x-1" size={15} aria-hidden="true" /></Link></Button> : null}
@@ -75,7 +90,7 @@ export function CmsPageLayout({ page, isHome, draft }: { page: any; isHome: bool
               <section className={pageTightSection} key={block.id || index}>
                 <div className={pageWrap}>
                   {block.eyebrow || block.heading ? <Reveal className="mb-8 flex flex-wrap items-end justify-between gap-6" direction="left"><div>{block.eyebrow ? <span className={pageLabel}>{block.eyebrow}</span> : null}{block.heading ? <h2 className="mt-3 break-words font-heading text-[clamp(2rem,4.6vw,4rem)] font-medium leading-tight tracking-tight [overflow-wrap:anywhere]">{block.heading}</h2> : null}</div></Reveal> : null}
-                  <Reveal direction="right"><div className="max-w-[68ch] text-base leading-[1.75] [&_h2]:mb-[0.7em] [&_h2]:mt-[2.2em] [&_h2]:font-heading [&_h2]:text-[clamp(1.6rem,2.6vw,2.3rem)] [&_h2]:font-medium [&_h2]:tracking-tight [&_h2:first-child]:mt-0 [&_li]:relative [&_li]:pl-6 [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:top-[0.68em] [&_li]:before:size-[7px] [&_li]:before:bg-primary [&_li]:before:content-[''] [&_ul]:mb-5 [&_ul]:grid [&_ul]:list-none [&_ul]:gap-2.5 [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2"><RichText data={block.content} /></div></Reveal>
+                  <Reveal direction="right"><div className="max-w-[68ch] text-base leading-[1.75] [&_h2]:mb-[0.7em] [&_h2]:mt-[2.2em] [&_h2]:font-heading [&_h2]:text-[clamp(1.6rem,2.6vw,2.3rem)] [&_h2]:font-medium [&_h2]:tracking-tight [&_h2:first-child]:mt-0 [&_li]:relative [&_li]:pl-6 [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:top-[0.68em] [&_li]:before:size-[7px] [&_li]:before:bg-primary [&_li]:before:content-[''] [&_ul]:mb-5 [&_ul]:grid [&_ul]:list-none [&_ul]:gap-2.5 [&_a]:font-medium [&_a]:text-primary-strong [&_a]:underline [&_a]:underline-offset-2"><RichText data={block.content} /></div></Reveal>
                 </div>
               </section>
             );
@@ -147,14 +162,14 @@ async function CardGrid({ block, draft }: { block: any; draft: boolean }) {
         {link ? (
           <Link className="block h-full min-w-0 rounded-sm no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring" href={link.href} target={link.newTab ? '_blank' : undefined} rel={link.newTab ? 'noopener noreferrer' : undefined}>
             <Card className={`${siteCardClass} flex h-full flex-col gap-4 p-6`}>
-              <span className="font-mono text-xs font-semibold tracking-[0.04em] text-primary">{card.number}</span>
+              <span className="font-mono text-xs font-semibold tracking-[0.04em] text-primary-strong">{card.number}</span>
               <h3 className="break-words font-heading text-[clamp(1.4rem,2vw,1.9rem)] font-medium leading-tight tracking-tight [overflow-wrap:anywhere]">{card.title}</h3>
               <p className="break-words text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">{card.description}</p>
             </Card>
           </Link>
         ) : (
           <Card className={`${siteCardClass} flex h-full flex-col gap-4 p-6`}>
-            <span className="font-mono text-xs font-semibold tracking-[0.04em] text-primary">{card.number}</span>
+            <span className="font-mono text-xs font-semibold tracking-[0.04em] text-primary-strong">{card.number}</span>
             <h3 className="break-words font-heading text-[clamp(1.4rem,2vw,1.9rem)] font-medium leading-tight tracking-tight [overflow-wrap:anywhere]">{card.title}</h3>
             <p className="break-words text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">{card.description}</p>
           </Card>
@@ -163,6 +178,13 @@ async function CardGrid({ block, draft }: { block: any; draft: boolean }) {
       );
     })}</Grid></div></section>
   );
+}
+
+async function FaqJsonLd({ draft }: { draft: boolean }) {
+  const groups = await getCmsFaqGroups(draft);
+  const items = groups.flatMap((group) => group.items);
+  if (!items.length) return null;
+  return <JsonLd nodes={[faqNode(items)]} />;
 }
 
 async function FormBlock({ block }: { block: any }) {

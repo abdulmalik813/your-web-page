@@ -72,7 +72,7 @@ export function PayloadForm({ form, direction = 'right' }: PayloadFormProps) {
       <Reveal className="h-full" direction={direction}>
         <Card className={`${siteCardClass} h-full p-0`} role="status">
           <CardHeader className="gap-4 p-6 md:p-8">
-            <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-primary">Message received</p>
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.08em] text-primary-strong">Message received</p>
             <CardTitle className="break-words font-heading text-3xl font-medium tracking-tight [overflow-wrap:anywhere]">
               Thank you
             </CardTitle>

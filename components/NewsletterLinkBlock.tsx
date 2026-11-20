@@ -18,7 +18,7 @@ export function NewsletterLinkBlock({ label, href, style, newTab }: NewsletterLi
         href={href}
         target={target}
         rel={rel}
-        className="font-medium text-primary underline underline-offset-2 hover:no-underline"
+        className="font-medium text-primary-strong underline underline-offset-2 hover:no-underline"
       >
         {label}
       </Link>

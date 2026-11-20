@@ -84,7 +84,8 @@ export interface Testimonial {
 }
 
 async function getPayloadClient(): Promise<Payload> {
-  return getPayload({ config });
+  // `cron: true` initializes Payload's jobs autoRun so scheduled publishes run.
+  return getPayload({ config, cron: true });
 }
 
 function textRows(rows: unknown): string[] {
@@ -205,6 +206,7 @@ async function queryServices(draft = false): Promise<Service[]> {
 
 const getCachedServices = unstable_cache(queryServices, ['cms-services'], {
   tags: ['collection-services'],
+  revalidate: 300,
 });
 
 export function getCmsServices(draft = false): Promise<Service[]> {
@@ -228,6 +230,7 @@ export function getCmsServiceBySlug(slug: string, draft = false): Promise<Servic
   if (draft) return queryServiceBySlug(slug, true);
   return unstable_cache(() => queryServiceBySlug(slug), ['cms-service', slug], {
     tags: ['collection-services'],
+    revalidate: 300,
   })();
 }
 
@@ -246,6 +249,7 @@ async function queryProjects(draft = false): Promise<Project[]> {
 
 const getCachedProjects = unstable_cache(queryProjects, ['cms-projects'], {
   tags: ['collection-projects'],
+  revalidate: 300,
 });
 
 export function getCmsProjects(draft = false): Promise<Project[]> {
@@ -269,6 +273,7 @@ export function getCmsProjectBySlug(slug: string, draft = false): Promise<Projec
   if (draft) return queryProjectBySlug(slug, true);
   return unstable_cache(() => queryProjectBySlug(slug), ['cms-project', slug], {
     tags: ['collection-projects'],
+    revalidate: 300,
   })();
 }
 
@@ -288,6 +293,7 @@ async function queryNewsletters(draft = false): Promise<NewsletterEntry[]> {
 
 const getCachedNewsletters = unstable_cache(queryNewsletters, ['cms-newsletter'], {
   tags: ['collection-newsletter'],
+  revalidate: 300,
 });
 
 export function getCmsNewsletters(draft = false): Promise<NewsletterEntry[]> {
@@ -311,6 +317,7 @@ export function getCmsNewsletterBySlug(slug: string, draft = false): Promise<New
   if (draft) return queryNewsletterBySlug(slug, true);
   return unstable_cache(() => queryNewsletterBySlug(slug), ['cms-newsletter', slug], {
     tags: ['collection-newsletter'],
+    revalidate: 300,
   })();
 }
 
@@ -342,6 +349,7 @@ async function queryFaqGroups(draft = false): Promise<FaqGroup[]> {
 
 const getCachedFaqGroups = unstable_cache(queryFaqGroups, ['cms-faq-groups'], {
   tags: ['collection-faqs'],
+  revalidate: 300,
 });
 
 export function getCmsFaqGroups(draft = false): Promise<FaqGroup[]> {
@@ -379,6 +387,7 @@ async function queryApprovedTestimonials(draft = false): Promise<Testimonial[]> 
 
 const getCachedApprovedTestimonials = unstable_cache(queryApprovedTestimonials, ['cms-testimonials'], {
   tags: ['collection-testimonials'],
+  revalidate: 300,
 });
 
 export function getCmsApprovedTestimonials(draft = false): Promise<Testimonial[]> {
@@ -403,6 +412,7 @@ export function getCmsPage(slug: string, draft = false): Promise<any | null> {
   const normalized = slug.replace(/^\/+|\/+$/g, '') || 'home';
   return unstable_cache(() => queryPage(normalized), ['cms-page', normalized], {
     tags: ['collection-pages'],
+    revalidate: 300,
   })();
 }
 
@@ -413,6 +423,7 @@ async function querySettings(draft = false): Promise<any> {
 
 const getCachedSettings = unstable_cache(() => querySettings(false), ['cms-global-settings'], {
   tags: ['global-settings'],
+  revalidate: 300,
 });
 
 export function getCmsSettings(draft = false): Promise<any> {
@@ -426,6 +437,7 @@ async function queryNavigation(draft = false): Promise<any> {
 
 const getCachedNavigation = unstable_cache(() => queryNavigation(false), ['cms-global-navigation'], {
   tags: ['global-navigation'],
+  revalidate: 300,
 });
 
 export function getCmsNavigation(draft = false): Promise<any> {
@@ -439,6 +451,7 @@ async function queryFooter(draft = false): Promise<any> {
 
 const getCachedFooter = unstable_cache(() => queryFooter(false), ['cms-global-footer'], {
   tags: ['global-footer'],
+  revalidate: 300,
 });
 
 export function getCmsFooter(draft = false): Promise<any> {
@@ -460,4 +473,5 @@ async function queryPages(): Promise<any[]> {
 
 export const getCmsPages = unstable_cache(queryPages, ['cms-pages'], {
   tags: ['collection-pages'],
+  revalidate: 300,
 });

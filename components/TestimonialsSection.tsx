@@ -15,7 +15,7 @@ export async function TestimonialsSection({ draft = false }: { draft?: boolean }
       <div className="relative mx-auto w-full max-w-[1360px] px-4 py-8 sm:px-6 md:py-10 lg:py-14 lg:px-11">
         <Reveal className="mb-10 flex flex-wrap items-end justify-between gap-6" direction="left">
           <div>
-            <span className="mb-3 block font-mono text-xs font-semibold uppercase leading-5 tracking-[0.1em] text-primary">What clients say</span>
+            <span className="mb-3 block font-mono text-xs font-semibold uppercase leading-5 tracking-[0.1em] text-primary-strong">What clients say</span>
             <h2 id="testimonials-heading" className="break-words font-heading text-[clamp(2rem,4.6vw,4rem)] font-medium leading-[0.98] tracking-[-0.045em] [overflow-wrap:anywhere]">In their words</h2>
           </div>
         </Reveal>
@@ -23,7 +23,7 @@ export async function TestimonialsSection({ draft = false }: { draft?: boolean }
           {approved.map((item, index) => (
             <Reveal className="h-full" delay={index * 0.08} direction={revealDirectionForIndex(index)} interactive key={item.id}>
               <Card className={`${siteCardClass} flex h-full flex-col gap-5 p-6`}>
-                <span className="grid size-11 place-items-center bg-primary/10 font-heading text-4xl leading-none text-primary" aria-hidden="true">“</span>
+                <span className="grid size-11 place-items-center bg-primary/10 font-heading text-4xl leading-none text-primary-strong" aria-hidden="true">“</span>
                 <blockquote className="break-words font-heading text-xl leading-snug [overflow-wrap:anywhere]">{item.quote}</blockquote>
                 <div className="mt-auto border-t border-border/60 pt-4 text-sm leading-relaxed text-muted-foreground">
                   <b className="mb-1 block font-sans text-xs font-semibold uppercase tracking-wide text-foreground">{item.authorName}</b>

@@ -1,41 +1,19 @@
-'use client';
-
-import { useRef } from 'react';
-import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import { siteCardClass } from './siteStyles';
 
+/**
+ * Static composition; the subtle scroll parallax is CSS-only so this stays a
+ * server component and never repaints after hydration.
+ */
 export function HeroScene() {
-  const sceneRef = useRef<HTMLDivElement>(null);
-  const reduceMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: sceneRef,
-    offset: ['start end', 'end start'],
-  });
-  const parallaxY = useTransform(scrollYProgress, [0, 1], [22, -30]);
-
   return (
     <div
-      ref={sceneRef}
       className="relative mx-auto w-full max-w-[610px] py-8 [perspective:1400px] sm:py-12"
       role="img"
       aria-label="A layered three-dimensional website interface"
     >
-      <motion.div
-        className="relative isolate"
-        style={{
-          y: reduceMotion ? 0 : parallaxY,
-          transformStyle: 'preserve-3d',
-        }}
-      >
+      <div className="hero-parallax relative isolate [transform-style:preserve-3d]">
         <div className="pointer-events-none absolute -z-10 inset-x-3 inset-y-4 rounded-sm border border-primary/15 bg-accent/40 sm:[transform:translateZ(-42px)_rotateY(7deg)_rotateX(-3deg)]" aria-hidden="true" />
-        <motion.div
-          className={`relative z-10 ${siteCardClass} p-2 sm:p-3`}
-          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-          whileInView={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, y: 0 }}
-          viewport={{ once: false, amount: 0.2 }}
-          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-          style={{ transformStyle: 'preserve-3d' }}
-        >
+        <div className={`relative z-10 ${siteCardClass} p-2 sm:p-3`} style={{ transformStyle: 'preserve-3d' }}>
           <div className="overflow-hidden rounded-sm border border-border bg-background/95 backdrop-blur-md">
             <div className="flex items-center justify-between bg-foreground px-4 py-3 text-background">
               <div className="flex items-center gap-1.5" aria-hidden="true">
@@ -48,7 +26,7 @@ export function HeroScene() {
             </div>
             <div className="grid gap-6 p-5 sm:grid-cols-[1fr_0.9fr] sm:gap-8 sm:p-8">
               <div className="flex flex-col justify-center">
-                <span className="mb-4 font-mono text-xs font-semibold uppercase tracking-[0.12em] text-primary">Strategy · Design · Development</span>
+                <span className="mb-4 font-mono text-xs font-semibold uppercase tracking-[0.12em] text-primary-strong">Strategy · Design · Development</span>
                 <h2 className="mb-4 font-heading text-[clamp(1.7rem,3.8vw,3rem)] leading-[0.98] tracking-[-0.04em] text-foreground">
                   Made for the next chapter.
                 </h2>
@@ -82,8 +60,8 @@ export function HeroScene() {
               ))}
             </div>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 }

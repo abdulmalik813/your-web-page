@@ -3,12 +3,14 @@ import { Archivo, JetBrains_Mono } from 'next/font/google';
 import { MotionShell } from '@/components/MotionShell';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
-import { PayloadLivePreview } from '@/components/PayloadLivePreview';
+import { PreviewLivePreview } from '@/components/PreviewLivePreview';
 import { PayloadAdminBar } from '@/components/PayloadAdminBar';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { SiteBackground } from '@/components/SiteBackground';
 import { getCmsFooter, getCmsNavigation, getCmsSettings } from '@/lib/cms';
-import { buildCanonicalUrl, getBaseUrl, resolveOgImageUrl } from '@/lib/seo';
+import { buildCanonicalUrl, DEFAULT_OG_IMAGE_PATH, getBaseUrl, resolveOgImageUrl } from '@/lib/seo';
+import { organizationNode, websiteNode } from '@/lib/schema';
+import { JsonLd } from '@/components/JsonLd';
 import { draftMode } from 'next/headers';
 import './globals.css';
 
@@ -36,18 +38,39 @@ export async function generateMetadata(): Promise<Metadata> {
   const brand = settings?.brand || '';
   const description = settings?.meta?.description || '';
   const title = settings?.meta?.title || brand;
-  const image = resolveOgImageUrl(settings?.meta?.image);
+  const image = resolveOgImageUrl(settings?.meta?.image) ?? buildCanonicalUrl(DEFAULT_OG_IMAGE_PATH);
   return {
     metadataBase: new URL(getBaseUrl()),
-    title,
+    applicationName: brand,
+    category: 'technology',
+    title: {
+      default: title,
+      template: brand ? `%s | ${brand}` : '%s',
+    },
+    keywords: [
+      'web design Charlottetown',
+      'web development Prince Edward Island',
+      'website design PEI',
+      'ecommerce development Canada',
+      'custom software Charlottetown',
+      'SaaS development Canada',
+      'website care and support PEI',
+    ],
+    authors: brand ? [{ name: brand, url: buildCanonicalUrl('/') }] : undefined,
+    creator: brand || undefined,
+    publisher: brand || undefined,
+    referrer: 'origin-when-cross-origin',
+    alternates: {
+      canonical: buildCanonicalUrl('/'),
+      types: {
+        'application/rss+xml': buildCanonicalUrl('/feed.xml'),
+      },
+    },
     icons: {
       apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
       other: [{ rel: 'mask-icon', url: '/brand/safari-pinned-tab.svg', color: '#f97316' }],
     },
     description,
-    alternates: {
-      canonical: buildCanonicalUrl('/'),
-    },
     openGraph: {
       title,
       description,
@@ -74,37 +97,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     getCmsFooter(draft),
   ]);
 
-  const localBusiness = {
-    '@context': 'https://schema.org',
-    '@type': 'LocalBusiness',
-    name: settings.brand,
-    legalName: settings.legal?.entity,
-    url: getBaseUrl(),
-    email: settings.email,
-    telephone: settings.schemaTelephone,
-    description: settings.meta?.description || '',
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: settings.location?.city,
-      addressRegion: settings.location?.provinceCode,
-      addressCountry: settings.location?.countryCode,
-    },
-    areaServed: (settings.areaServed || []).map((item: { label: string }) => item.label),
-  };
+  const structuredData = [organizationNode(settings), websiteNode(settings)];
 
   return (
     <html lang="en-CA" className={`${archivo.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <body className="min-h-screen font-sans text-foreground" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <SiteBackground />
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }} />
+          <JsonLd nodes={structuredData} />
           <PayloadAdminBar draftEnabled={draft} />
           <SiteHeader settings={settings} navigation={navigation} />
           <main id="main" tabIndex={-1} className="relative z-10 w-full max-w-full overflow-x-clip outline-none">
             <MotionShell>{children}</MotionShell>
           </main>
           <SiteFooter settings={settings} footer={footer} />
-          {draft && <PayloadLivePreview />}
+          {draft && <PreviewLivePreview />}
         </ThemeProvider>
       </body>
     </html>

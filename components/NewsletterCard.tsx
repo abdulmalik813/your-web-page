@@ -14,7 +14,7 @@ export function NewsletterCard({ newsletter, index = 0 }: { newsletter: Newslett
         <Card className={`${siteCardClass} flex h-full flex-col gap-4 p-4 transition-colors duration-300 group-hover:border-primary/50 md:p-5`}>
           <MediaFigure image={newsletter.image} alt={newsletter.title} />
           <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs font-semibold uppercase leading-5 tracking-[0.08em]">
-            <span className="text-primary">{newsletter.category}</span>
+            <span className="text-primary-strong">{newsletter.category}</span>
             <span className="font-medium text-muted-foreground">{newsletter.readTime} min read</span>
           </div>
           <h3 className="break-words font-heading text-[clamp(1.4rem,2vw,1.9rem)] font-medium leading-[1.05] tracking-[-0.03em] [overflow-wrap:anywhere]">{newsletter.title}</h3>

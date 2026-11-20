@@ -170,6 +170,7 @@ export function NewsletterBrowser({ newsletter }: { newsletter: NewsletterEntry[
                   className="h-9 rounded-sm px-3"
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
+                  aria-label="Previous page"
                 >
                   <ChevronLeft className="size-4" aria-hidden="true" />
                   <span className="hidden sm:inline">Previous</span>
@@ -208,6 +209,7 @@ export function NewsletterBrowser({ newsletter }: { newsletter: NewsletterEntry[
                   className="h-9 rounded-sm px-3"
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === pageCount}
+                  aria-label="Next page"
                 >
                   <span className="hidden sm:inline">Next</span>
                   <ChevronRight className="size-4" aria-hidden="true" />

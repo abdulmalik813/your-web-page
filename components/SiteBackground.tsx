@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useReducedMotion } from 'motion/react';
 
 interface Particle {
   x: number;
@@ -15,7 +14,6 @@ interface Particle {
 
 export function SiteBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -27,9 +25,11 @@ export function SiteBackground() {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isDarkMode = () => document.documentElement.classList.contains('dark');
 
-    const particleCount = Math.min(Math.floor((width * height) / 35000), 40);
+    const maxParticles = width < 768 ? 18 : 40;
+    const particleCount = Math.min(Math.floor((width * height) / 35000), maxParticles);
     const particles: Particle[] = [];
 
     for (let i = 0; i < particleCount; i++) {
@@ -69,7 +69,14 @@ export function SiteBackground() {
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
 
-    const render = () => {
+    let lastFrame = 0;
+    const render = (time: number) => {
+      animationFrameId = requestAnimationFrame(render);
+
+      // Cap to ~30fps and stop drawing while the tab is hidden.
+      if (document.hidden || time - lastFrame < 33) return;
+      lastFrame = time;
+
       ctx.clearRect(0, 0, width, height);
 
       const dark = isDarkMode();
@@ -128,18 +135,31 @@ export function SiteBackground() {
         }
       }
 
+    };
+
+    // Start drawing after the page has hydrated and gone idle, so the
+    // continuous animation does not compete with the initial render.
+    let idleHandle: number | undefined;
+    let startTimeout: ReturnType<typeof setTimeout> | undefined;
+    const start = () => {
       animationFrameId = requestAnimationFrame(render);
     };
 
-    animationFrameId = requestAnimationFrame(render);
+    if (typeof window.requestIdleCallback === 'function') {
+      idleHandle = window.requestIdleCallback(start, { timeout: 2500 });
+    } else {
+      startTimeout = setTimeout(start, 1200);
+    }
 
     return () => {
+      if (idleHandle !== undefined) window.cancelIdleCallback(idleHandle);
+      if (startTimeout !== undefined) clearTimeout(startTimeout);
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [reduceMotion]);
+  }, []);
 
   return (
     <div
@@ -151,34 +171,22 @@ export function SiteBackground() {
 
       {/* ── LIGHT MODE: Soft, restrained orange ambient warmth (not vibrant or washed out) ── */}
       <div
-        className="absolute -right-24 -top-32 h-[550px] w-[550px] rounded-full opacity-30 blur-[110px] dark:opacity-0 sm:h-[700px] sm:w-[700px]"
-        style={{
-          background: 'radial-gradient(circle, #f97316 0%, transparent 68%)',
-          animation: reduceMotion ? 'none' : 'ambient-drift-1 24s ease-in-out infinite alternate',
-        }}
+        className="ambient-1 absolute -right-24 -top-32 h-[550px] w-[550px] rounded-full opacity-30 blur-[110px] dark:opacity-0 sm:h-[700px] sm:w-[700px]"
+        style={{ background: 'radial-gradient(circle, #f97316 0%, transparent 68%)' }}
       />
       <div
-        className="absolute -left-20 top-[40%] h-[450px] w-[450px] rounded-full opacity-20 blur-[100px] dark:opacity-0 sm:h-[600px] sm:w-[600px]"
-        style={{
-          background: 'radial-gradient(circle, #fb923c 0%, transparent 65%)',
-          animation: reduceMotion ? 'none' : 'ambient-drift-2 28s ease-in-out infinite alternate',
-        }}
+        className="ambient-2 absolute -left-20 top-[40%] h-[450px] w-[450px] rounded-full opacity-20 blur-[100px] dark:opacity-0 sm:h-[600px] sm:w-[600px]"
+        style={{ background: 'radial-gradient(circle, #fb923c 0%, transparent 65%)' }}
       />
 
       {/* ── DARK MODE: Subtle restrained orange ambient warmth ── */}
       <div
-        className="absolute -right-20 -top-24 hidden h-[550px] w-[550px] rounded-full blur-[110px] dark:block dark:opacity-25 sm:h-[700px] sm:w-[700px]"
-        style={{
-          background: 'radial-gradient(circle, #f97316 0%, transparent 68%)',
-          animation: reduceMotion ? 'none' : 'ambient-drift-1 24s ease-in-out infinite alternate',
-        }}
+        className="ambient-1 absolute -right-20 -top-24 hidden h-[550px] w-[550px] rounded-full blur-[110px] dark:block dark:opacity-25 sm:h-[700px] sm:w-[700px]"
+        style={{ background: 'radial-gradient(circle, #f97316 0%, transparent 68%)' }}
       />
       <div
-        className="absolute -left-20 top-[40%] hidden h-[450px] w-[450px] rounded-full blur-[100px] dark:block dark:opacity-15 sm:h-[600px] sm:w-[600px]"
-        style={{
-          background: 'radial-gradient(circle, #f97316 0%, transparent 65%)',
-          animation: reduceMotion ? 'none' : 'ambient-drift-2 28s ease-in-out infinite alternate',
-        }}
+        className="ambient-2 absolute -left-20 top-[40%] hidden h-[450px] w-[450px] rounded-full blur-[100px] dark:block dark:opacity-15 sm:h-[600px] sm:w-[600px]"
+        style={{ background: 'radial-gradient(circle, #f97316 0%, transparent 65%)' }}
       />
 
       {/* Architectural Micro-Grid (restrained opacity) */}
@@ -226,6 +234,11 @@ export function SiteBackground() {
           0%   { transform: translate(0, 0) scale(1); }
           50%  { transform: translate(-35px, -30px) scale(1.08); }
           100% { transform: translate(25px, -15px) scale(0.95); }
+        }
+        .ambient-1 { animation: ambient-drift-1 24s ease-in-out infinite alternate; }
+        .ambient-2 { animation: ambient-drift-2 28s ease-in-out infinite alternate; }
+        @media (prefers-reduced-motion: reduce) {
+          .ambient-1, .ambient-2 { animation: none; }
         }
       `}</style>
     </div>

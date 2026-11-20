@@ -9,7 +9,7 @@ export default function NotFound() {
       <div className="mx-auto w-full max-w-[1360px] px-4 py-[clamp(40px,7vw,96px)] sm:px-6 lg:px-11">
         <Reveal>
           <Card className="mx-auto flex w-full max-w-3xl flex-col items-start gap-5 rounded-sm border border-border bg-card p-6 text-card-foreground sm:p-10">
-            <p className="m-0 font-mono text-xs font-semibold uppercase leading-5 tracking-[0.1em] text-primary">Error 404</p>
+            <p className="m-0 font-mono text-xs font-semibold uppercase leading-5 tracking-[0.1em] text-primary-strong">Error 404</p>
             <CardTitle className="font-heading text-[clamp(5rem,22vw,10rem)] font-medium leading-[0.9] tracking-tight">404</CardTitle>
             <CardDescription className="max-w-[62ch] text-base leading-relaxed text-muted-foreground">We could not find that page. It may have moved, or the address may be mistyped.</CardDescription>
             <div className="mt-2 flex flex-wrap gap-3">

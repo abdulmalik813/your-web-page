@@ -14,8 +14,10 @@ import { Reveal } from '@/components/Reveal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { siteCardClass } from '@/components/siteStyles';
-import { getCmsServiceBySlug, getCmsServices, getCmsProjectBySlug, getCmsProjects, getCmsNewsletterBySlug, getCmsNewsletters } from '@/lib/cms';
+import { getCmsServiceBySlug, getCmsServices, getCmsProjectBySlug, getCmsProjects, getCmsNewsletterBySlug, getCmsNewsletters, getCmsSettings } from '@/lib/cms';
 import { legacyLink, resolveLink } from '@/lib/links';
+import { JsonLd } from '@/components/JsonLd';
+import { articleNode, breadcrumbNode, projectNode, serviceNode, webPageNode } from '@/lib/schema';
 
 const pageSection = 'relative overflow-x-clip border-b border-border bg-muted/20 py-8 md:py-10 lg:py-14';
 const pageContainer = 'mx-auto w-full max-w-[1360px] px-4 sm:px-6 lg:px-11';
@@ -56,15 +58,25 @@ const newsletterConverters = {
 };
 
 export async function DetailPage({ slug, draft }: { slug: string[]; draft: boolean }) {
+    const settings = await getCmsSettings(draft);
     if (slug.length === 2) {
       if (slug[0] === 'services') {
         const item = await getCmsServiceBySlug(slug[1], draft);
         if (item) {
           const all = await getCmsServices(draft);
           const related = all.filter((service) => service.slug !== item.slug).slice(0, 3);
+          const servicePath = `/services/${item.slug}`;
+          const serviceCrumbs = [{ label: 'Home', href: '/' }, { label: 'Services', href: '/services' }, { label: item.title }];
           return (
             <>
-              <PageHeader label="Service" title={item.title} lead={item.intro} breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Services', href: '/services' }, { label: item.title }]}>
+              <JsonLd
+                nodes={[
+                  webPageNode({ path: servicePath, title: item.title, description: item.metaDescription }),
+                  breadcrumbNode(serviceCrumbs, servicePath),
+                  serviceNode(item, servicePath),
+                ]}
+              />
+              <PageHeader label="Service" title={item.title} lead={item.intro} breadcrumbs={serviceCrumbs}>
                 <div className="mt-7 flex flex-wrap gap-3"><Button asChild className="h-12 rounded-sm bg-primary px-6 font-semibold text-primary-foreground"><Link href="/contact">Start a project</Link></Button></div>
               </PageHeader>
               {item.image ? <section className={pageSection}><div className={pageContainer}><MediaFigure image={item.image} alt={item.title} aspect="wide" sizes="(min-width: 1360px) 1280px, calc(100vw - 2rem)" /></div></section> : null}
@@ -75,7 +87,7 @@ export async function DetailPage({ slug, draft }: { slug: string[]; draft: boole
               <section className={pageSection}><div className={pageContainer}><Grid columns={3}>
                 <Reveal className="h-full" direction="left"><Card className={pageCell}><span className={pageLabel}>What is included</span><ul className="list-none space-y-2.5">{item.included.map((text) => <li className="relative pl-6 before:absolute before:left-0 before:top-[0.68em] before:size-2 before:bg-primary before:content-['']" key={text}>{text}</li>)}</ul></Card></Reveal>
                 <Reveal className="h-full" direction="up"><Card className={pageCell}><span className={pageLabel}>Who it is for</span><ul className="list-none space-y-2.5">{item.forWho.map((text) => <li className="relative pl-6 before:absolute before:left-0 before:top-[0.68em] before:size-2 before:bg-primary before:content-['']" key={text}>{text}</li>)}</ul></Card></Reveal>
-                <Reveal className="h-full" direction="right"><Card className={pageCell}><span className={pageLabel}>How it works</span><ol className="[counter-reset:steps] space-y-3.5">{item.steps.map((step) => <li className="relative [counter-increment:steps] pl-11 before:absolute before:left-0 before:top-0 before:grid before:size-[30px] before:place-items-center before:bg-primary/10 before:font-mono before:text-[13px] before:font-bold before:text-primary before:content-[counter(steps)]" key={step.title}><b className="block font-semibold">{step.title}</b>{step.description}</li>)}</ol></Card></Reveal>
+                <Reveal className="h-full" direction="right"><Card className={pageCell}><span className={pageLabel}>How it works</span><ol className="[counter-reset:steps] space-y-3.5">{item.steps.map((step) => <li className="relative [counter-increment:steps] pl-11 before:absolute before:left-0 before:top-0 before:grid before:size-[30px] before:place-items-center before:bg-primary/10 before:font-mono before:text-[13px] before:font-bold before:text-primary-strong before:content-[counter(steps)]" key={step.title}><b className="block font-semibold">{step.title}</b>{step.description}</li>)}</ol></Card></Reveal>
               </Grid></div></section>
               <section className={pageSection}><div className={pageContainer}><div className="mb-8 flex flex-wrap items-end justify-between gap-6"><div><span className={pageLabel}>Related</span><h2 className="mt-3 break-words text-[clamp(1.9rem,4.4vw,3.6rem)] font-black uppercase leading-[0.98] tracking-tight [overflow-wrap:anywhere]">Other services</h2></div></div><Grid columns={3}>{related.map((service, index) => <ServiceCard key={service.slug} service={service} index={index} />)}</Grid></div></section>
               <CtaBand />
@@ -88,9 +100,18 @@ export async function DetailPage({ slug, draft }: { slug: string[]; draft: boole
         if (item) {
           const all = await getCmsProjects(draft);
           const more = all.filter((project) => project.slug !== item.slug).slice(0, 3);
+                    const projectPath = `/our-work/${item.slug}`;
+          const projectCrumbs = [{ label: 'Home', href: '/' }, { label: 'Our Work', href: '/our-work' }, { label: item.title }];
           return (
             <>
-              <PageHeader label="Project" title={item.title} lead={item.summary} breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Our Work', href: '/our-work' }, { label: item.title}]} />
+              <JsonLd
+                nodes={[
+                  webPageNode({ path: projectPath, title: item.title, description: item.summary }),
+                  breadcrumbNode(projectCrumbs, projectPath),
+                  projectNode(item, projectPath),
+                ]}
+              />
+              <PageHeader label="Project" title={item.title} lead={item.summary} breadcrumbs={projectCrumbs} />
               {item.image ? <section className={pageSection}><div className={pageContainer}><MediaFigure image={item.image} alt={item.title} aspect="wide" sizes="(min-width: 1360px) 1280px, calc(100vw - 2rem)" /></div></section> : null}
               <section className={pageSection}><div className={pageContainer}><div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.8fr_1.2fr]">
                 <Reveal className="h-full" direction="left"><Card className={pageCell}><dl className="m-0 grid gap-0">{[['Type', item.type], ['Our role', item.role], ['Built with', item.tags.join(', ')]].map(([label, value], index) => <div className={`border-t border-border py-4 ${index === 0 ? 'border-t-0 pt-0' : ''}`} key={label}><dt className={`${pageLabel} mb-1 text-muted-foreground`}>{label}</dt><dd className="m-0 break-words font-semibold [overflow-wrap:anywhere]">{value}</dd></div>)}</dl></Card></Reveal>
@@ -107,9 +128,24 @@ export async function DetailPage({ slug, draft }: { slug: string[]; draft: boole
         if (item) {
           const all = await getCmsNewsletters(draft);
           const more = all.filter((entry) => entry.slug !== item.slug).slice(0, 3);
+          const articlePath = `/newsletters/${item.slug}`;
+          const articleCrumbs = [{ label: 'Home', href: '/' }, { label: 'Newsletters', href: '/newsletters' }, { label: item.title }];
           return (
             <>
-              <PageHeader label="Newsletter" title={item.title} lead={item.excerpt} breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Newsletters', href: '/newsletters' }, { label: item.title }]}>
+              <JsonLd
+                nodes={[
+                  webPageNode({
+                    path: articlePath,
+                    title: item.title,
+                    description: item.excerpt,
+                    datePublished: new Date(`${item.isoDate}T09:00:00-04:00`).toISOString(),
+                    dateModified: item.updatedAt,
+                  }),
+                  breadcrumbNode(articleCrumbs, articlePath),
+                  articleNode({ entry: item, settings, path: articlePath }),
+                ]}
+              />
+              <PageHeader label="Newsletter" title={item.title} lead={item.excerpt} breadcrumbs={articleCrumbs}>
                 <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs font-medium uppercase leading-5 tracking-[0.08em] text-muted-foreground"><span>{item.publishDate}</span><span>{item.readTime} min read</span>{item.tags.length ? <span>{item.tags.join(' · ')}</span> : null}</div>
               </PageHeader>
               {item.image ? <section className={pageSection}><div className={pageContainer}><MediaFigure image={item.image} alt={item.title} aspect="wide" sizes="(min-width: 1360px) 1280px, calc(100vw - 2rem)" /></div></section> : null}

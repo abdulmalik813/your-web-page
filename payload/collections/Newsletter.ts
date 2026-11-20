@@ -1,4 +1,4 @@
-﻿import type { CollectionConfig } from 'payload';
+﻿import type { CollectionBeforeChangeHook, CollectionConfig } from 'payload';
 import {
   lexicalEditor,
   BlocksFeature,
@@ -26,6 +26,48 @@ import { livePreviewBreakpoints, livePreviewUrl } from '../../lib/live-preview';
 import { slugField, makeSlugHook } from '../fields/slug';
 import { linkField } from '../fields/link';
 
+const ATLANTIC_TIMEZONE = 'America/Halifax';
+
+function atlanticDateParts(date: Date) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    day: '2-digit',
+    month: '2-digit',
+    timeZone: ATLANTIC_TIMEZONE,
+    year: 'numeric',
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((item) => item.type === type)?.value ?? '';
+  return {
+    day: part('day'),
+    iso: `${part('year')}-${part('month')}-${part('day')}`,
+    label: new Intl.DateTimeFormat('en-CA', {
+      day: 'numeric',
+      month: 'long',
+      timeZone: ATLANTIC_TIMEZONE,
+      year: 'numeric',
+    }).format(date),
+  };
+}
+
+/**
+ * When a draft is published — either by hand or by a scheduled publish job —
+ * stamp the display and ISO dates with the Atlantic-time publish moment.
+ * An editor-supplied date change is preserved.
+ */
+const stampPublishDate: CollectionBeforeChangeHook = ({ data, operation, originalDoc }) => {
+  const becomingPublished =
+    operation === 'update' && data?._status === 'published' && originalDoc?._status !== 'published';
+  const editorChangedDate = Boolean(data?.isoDate) && data.isoDate !== originalDoc?.isoDate;
+
+  if (becomingPublished && !editorChangedDate) {
+    const now = atlanticDateParts(new Date());
+    data.isoDate = now.iso;
+    data.publishDate = now.label;
+  }
+
+  return data;
+};
+
 export const Newsletter: CollectionConfig = {
   slug: 'newsletter',
   dbName: 'newsletter',
@@ -47,6 +89,7 @@ export const Newsletter: CollectionConfig = {
   hooks: {
     ...cmsCollectionCacheHooks('newsletter'),
     beforeValidate: [makeSlugHook('title')],
+    beforeChange: [stampPublishDate],
   },
   fields: [
     { name: 'sendNewsletter', type: 'ui', admin: { components: { Field: '@/payload/components/admin/SendNewsletter#SendNewsletter' } } },
@@ -190,6 +233,11 @@ export const Newsletter: CollectionConfig = {
       }),
     },
   ],
-  versions: { drafts: { autosave: true } },
+  versions: {
+    drafts: {
+      autosave: true,
+      schedulePublish: { timeFormat: 'h:mm aa', timeIntervals: 15 },
+    },
+  },
 };
 

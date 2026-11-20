@@ -62,6 +62,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
         path: `/services/${service.slug}`,
         image: service.image as { url?: string | null; sizes?: { og?: { url?: string | null } } } | null,
         fallbackImage,
+        keywords: [service.title, 'Charlottetown', 'Prince Edward Island', 'Canada'],
       });
     }
     if (slug[0] === 'our-work') {
@@ -72,6 +73,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
         path: `/our-work/${project.slug}`,
         image: project.image as { url?: string | null; sizes?: { og?: { url?: string | null } } } | null,
         fallbackImage,
+        keywords: [project.title, project.type, ...project.tags, 'Prince Edward Island'],
       });
     }
     if (slug[0] === 'newsletters') {
@@ -83,6 +85,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
         image: entry.image as { url?: string | null; sizes?: { og?: { url?: string | null } } } | null,
         fallbackImage,
         type: 'article',
+        keywords: entry.tags,
+        authors: [settings?.brand || 'Your Web Page'],
+        publishedTime: new Date(`${entry.isoDate}T09:00:00-04:00`).toISOString(),
+        modifiedTime: entry.updatedAt,
+        section: entry.category,
+        rss: true,
       });
     }
   }
@@ -97,6 +105,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
     path: slug.length ? `/${slug.join('/')}` : '/',
     image: meta?.image,
     fallbackImage,
+    keywords: [page.title, 'Charlottetown', 'Prince Edward Island', 'Canada'],
   });
 }
 

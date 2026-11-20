@@ -97,10 +97,10 @@ export function PayloadAdminBarClient({
         {/* Left Side: Brand badge, Status indicator, Current target */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <Link
-            className="group inline-flex min-h-7 items-center gap-2 rounded-sm border border-border bg-background px-2.5 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-foreground no-underline transition-colors hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="group inline-flex min-h-7 items-center gap-2 rounded-sm border border-border bg-background px-2.5 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-foreground no-underline transition-colors hover:border-primary hover:text-primary-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             href={`${adminUrl}/admin`}
           >
-            <LayoutDashboard aria-hidden="true" className="size-3.5 text-primary transition-transform group-hover:scale-110" />
+            <LayoutDashboard aria-hidden="true" className="size-3.5 text-primary-strong transition-transform group-hover:scale-110" />
             <span>Admin</span>
           </Link>
 
@@ -109,7 +109,7 @@ export function PayloadAdminBarClient({
             className="inline-flex items-center gap-1.5"
           >
             {draftEnabled ? (
-              <span className="inline-flex items-center gap-1.5 rounded-sm border border-primary/40 bg-primary/10 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-primary">
+              <span className="inline-flex items-center gap-1.5 rounded-sm border border-primary/40 bg-primary/10 px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-primary-strong">
                 <span className="size-1.5 rounded-full bg-primary animate-pulse" aria-hidden="true" />
                 Draft Preview
               </span>
@@ -168,7 +168,7 @@ export function PayloadAdminBarClient({
           >
             {draftEnabled ? (
               <>
-                <EyeOff aria-hidden="true" className="size-3.5 text-primary" />
+                <EyeOff aria-hidden="true" className="size-3.5 text-primary-strong" />
                 <span>Exit</span>
               </>
             ) : (

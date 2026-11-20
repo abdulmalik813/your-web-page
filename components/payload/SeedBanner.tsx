@@ -23,19 +23,18 @@ interface SeedStatusResponse {
     pages: number;
     forms: number;
   };
-  seededAt: string | null;
 }
 
 interface SeedPostResponse {
   ok: boolean;
   report?: {
-    services: { created: number; updated: number };
-    projects: { created: number; updated: number };
-    newsletter: { created: number; updated: number };
-    faqs: { created: number; updated: number };
-    testimonials: { created: number; updated: number };
-    pages: { created: number; updated: number };
-    forms: { created: number; updated: number };
+    services: number;
+    projects: number;
+    newsletter: number;
+    faqs: number;
+    testimonials: number;
+    pages: number;
+    forms: number;
     seededAt: string;
   };
   status?: SeedStatusResponse;
@@ -111,7 +110,7 @@ export const SeedBanner: React.FC = () => {
 
       const r = data.report;
       setFeedback(
-        `Seed complete: Services (${r.services.created} created, ${r.services.updated} updated), Projects (${r.projects.created} created, ${r.projects.updated} updated), Newsletters (${r.newsletter.created} created, ${r.newsletter.updated} updated), FAQs (${r.faqs.created} created, ${r.faqs.updated} updated), Pages (${r.pages.created} created, ${r.pages.updated} updated), Forms (${r.forms.created} created, ${r.forms.updated} updated), Testimonials (${r.testimonials.created} created, ${r.testimonials.updated} updated).`
+        `Seed complete: ${r.services} services, ${r.projects} projects, ${r.newsletter} newsletters, ${r.faqs} FAQs, ${r.testimonials} testimonials, ${r.pages} pages and ${r.forms} forms created.`
       );
       router.refresh();
     } catch {
@@ -162,10 +161,10 @@ export const SeedBanner: React.FC = () => {
             Your Web Page — Content Seeding
           </div>
           <h2 style={{ margin: '0 0 8px', fontSize: '20px', lineHeight: 1.2 }}>
-            {allSeeded ? 'Payload CMS is seeded with current site data' : 'Seed current website data into Payload CMS'}
+            {allSeeded ? 'Site content is seeded' : 'Seed site content into Payload CMS'}
           </h2>
           <p style={{ margin: 0, fontSize: '14px', color: 'var(--theme-elevation-700)' }}>
-            Imports Pages, Forms, Services, Projects, Newsletters, FAQs, and Testimonials from the seed source without creating duplicates.
+            Replaces pages, services, projects, newsletters, FAQs, testimonials and forms with the seed source. Media and subscribers are kept.
           </p>
         </div>
 
@@ -177,10 +176,10 @@ export const SeedBanner: React.FC = () => {
             size="medium"
           >
             {loading
-              ? 'Seeding CMS...'
+              ? 'Seeding…'
               : allSeeded
-                ? 'Re-seed / Sync All Data'
-                : 'Seed All Site Data'}
+                ? 'Re-seed site content'
+                : 'Seed site content'}
           </Button>
         </div>
       </div>

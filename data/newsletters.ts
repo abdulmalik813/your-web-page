@@ -37,49 +37,48 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     slug: 'what-a-business-website-needs',
     title: 'What a business website actually needs',
     excerpt:
-      'A practical look at what earns enquiries on day one, and what extra features can wait until later.',
+      'The five pages that earn enquiries, the details customers check before calling, and the features you can skip for now.',
     category: 'Guide',
     tags: ['Planning', 'Small Business', 'Content'],
     publishDate: 'November 12, 2026',
     isoDate: '2026-11-12',
-    readTime: 5,
+    readTime: 4,
     sections: [
       {
         paragraphs: [
-          'Most small business websites fall short for the exact same reason: they spend the opening screen talking about the company’s internal story instead of answering what the visitor arrived to find. When a customer opens your link from a search result or a referral, they want to know three things within a few seconds: what you offer, where you operate and how to take the next step.',
-          'Getting those fundamentals right does more for real enquiries than decorative animations or sprawling multi-layered menus. Whether you run a trades business in Charlottetown, a retail storefront serving Prince Edward Island or a software team working across Canada, clarity beats volume every single time.',
+          'A customer who finds you through search gives the site about five seconds. In that time they are trying to answer three questions: what do you sell, do you serve my area, and what happens if I get in touch. Everything else is secondary.',
+          'We have rebuilt enough small business sites to know which pages earn enquiries and which ones sit unread. Here is the short version.',
         ],
       },
       {
-        heading: 'The essentials on day one',
+        heading: 'The five pages that do the work',
         bullets: [
-          'A plain-language headline at the top of the home page stating what you do, who you serve and where you work.',
-          'Dedicated pages or clear sections for each core service, written around the customer’s problem rather than internal jargon.',
-          'Accurate contact details—email, telephone number and city or service region—placed consistently in the header and footer so nobody has to hunt.',
-          'Mobile-first layouts tested on real phones, because travellers, local shoppers and busy buyers frequently browse on narrow screens over patchy mobile data.',
-          'Authentic visuals or clean structural diagrams showing your real premises, finished work or product workflow rather than generic stock scenes.',
-          'One unmistakable next step on every page, such as calling directly, requesting an appointment or filling in a short project enquiry form.',
+          'Home: a headline that names the service and the place. "Bike rentals in Brackley Beach" beats "Welcome to our website" every time.',
+          'Services: one page per service, each with who it is for, what is included and a starting price or range. If you will not publish a price, say what affects it.',
+          'Proof: six to ten photos of finished work, or three short case notes with the problem and the result.',
+          'About: a real name, a face, a street address and how long you have been doing this.',
+          'Contact: a form, a phone number that dials on a tap, your hours and a map link that opens the right app.',
         ],
       },
       {
-        heading: 'Structuring pages for real visitors',
+        heading: 'Answer the four questions people ask before they call',
         paragraphs: [
-          'Think about how two very different visitors read your site. Someone referred by a neighbour or colleague already trusts you and mainly wants to verify your hours, service area and how to reach you. Someone arriving cold from a search engine needs clear evidence that you understand their situation and routinely handle projects like theirs.',
-          'A lean site map—Home, Services, Our Work or Examples, About, FAQ and Contact—covers both visitors cleanly without overwhelming your menu. Instead of burying schedules, menus or service specifications inside awkward downloadable PDFs that pinch-and-zoom poorly on phones, publish that information directly in readable HTML pages that load immediately.',
+          'Most industries have the same four: how much, how long, what area do you cover, and what do I need to have ready. Put those answers on the service pages rather than in a brochure PDF nobody opens on a phone.',
+          'A short price range does more than a "contact us for a quote" button. It filters out the enquiries you did not want and gives the serious ones confidence to call.',
         ],
       },
       {
-        heading: 'Answering hesitation before someone leaves',
+        heading: 'What can wait',
         paragraphs: [
-          'Every industry has four or five recurring questions people ask before picking up the phone: how long work typically takes, which areas you cover, what someone needs to prepare beforehand and what happens after launch. Addressing those questions directly in plain language builds immediate credibility and cuts down repetitive back-and-forth emails.',
-          'Short, honest answers right beside your service descriptions help serious buyers decide to get in touch, while filtering out enquiries that are not a good fit before anyone wastes time on a mismatch.',
+          'Booking engines, chat widgets, a blog and a newsletter signup are all reasonable additions once the core site is live and someone is responsible for keeping them current. Added on day one, they mostly add maintenance and page weight.',
+          'The same goes for animations. A page that fades in on scroll is not why anyone hires you, and it makes the site slower and harder to test.',
         ],
       },
       {
-        heading: 'What can safely wait for later',
+        heading: 'Photos matter more than the copy',
         paragraphs: [
-          'Complex interactive calculators, elaborate scroll-jacking transitions, multi-author editorial hubs and automated chat pop-ups rarely help a new website launch faster or convert better. Worse, every unnecessary widget adds ongoing maintenance work, slows down mobile page loads and introduces potential accessibility barriers.',
-          'Start with a tight, accurate site whose copy you can keep current through seasonal shifts and service updates. Once your core pages are live and generating real conversations, you can expand deliberately based on actual customer feedback rather than assumptions.',
+          'A phone photo in daylight of your actual shop, team or finished job outperforms a stock image of a smiling stranger in a hard hat. If you have nothing usable, block out an hour and shoot twenty photos; we can crop and colour-correct them.',
+          'If you have existing print photos, find the originals rather than scanning the brochure. A 300 dpi print file is usually enough for a web hero image; a screenshot from Facebook is not.',
         ],
       },
     ],
@@ -88,54 +87,48 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     slug: 'choosing-a-website-platform',
     title: 'Choosing a platform for your website',
     excerpt:
-      'Website builders, content management systems and custom builds, and how to decide which fits your business.',
+      'Builders, WordPress and custom Next.js builds compared by what you edit, what you pay monthly and how easily you can leave.',
     category: 'Guide',
     tags: ['Architecture', 'CMS', 'Planning'],
     publishDate: 'November 5, 2026',
     isoDate: '2026-11-05',
-    readTime: 6,
+    readTime: 5,
     sections: [
       {
         paragraphs: [
-          'Every website project reaches the same early fork in the road: should you use an all-in-one website builder, a traditional content management system or a custom-built web application? None of these routes is universally right for every organization. Each trades layout flexibility, ongoing upkeep, speed and long-term portability differently depending on what your website actually has to do.',
-          'Picking a tool simply because a colleague uses it often leaves businesses either boxed into a rigid template six months later or stuck maintaining heavy software and plugins they never needed in the first place.',
+          'Every project hits the same question early: hosted builder, WordPress, or a custom build? The honest answer depends on how often you change the site, who does the editing and how much of your business runs through it.',
+          'Ignore feature checklists. Ask what happens in two years when the person who built it is gone.',
         ],
       },
       {
-        heading: 'All-in-one website builders',
+        heading: 'Start with how often you edit',
         paragraphs: [
-          'Hosted site builders bundle templates, drag-and-drop editing and web hosting under one monthly roof. They work sensibly for straightforward brochure sites when a sole proprietor needs to publish basic information quickly with minimal technical requirements.',
-          'The trade-off is long-term control and performance. Layout rules are constrained by the template engine, pages often carry heavy third-party scripts that slow mobile rendering, and moving your website to independent hosting later usually requires rebuilding from scratch because the platform owns the rendering layer.',
+          'If the site changes four times a year and holds ten pages, a hosted builder is defensible. You will outgrow the template eventually, but the cost of entry is low and you can launch this month.',
+          'If someone updates hours, menus, products or posts weekly, pay for a proper content model now. Retyping content into rigid template fields gets old fast, and it is how sites end up out of date.',
         ],
       },
       {
-        heading: 'Content management systems',
-        paragraphs: [
-          'A dedicated content management system (CMS)—whether traditional or modern headless tooling—shines when your team updates pages, events, product catalogues or newsletter articles every week. Structured content fields, editorial drafts and role permissions keep regular publishing orderly for non-technical staff.',
-          'Traditional plugin-heavy CMS setups require disciplined care, because unpatched extensions are a frequent source of sluggish performance and security vulnerabilities. A modern headless setup separates your editing interface from the fast public storefront, avoiding plugin sprawl while keeping editing simple.',
-        ],
-      },
-      {
-        heading: 'Custom builds and web applications',
-        paragraphs: [
-          'Custom engineering using modern frameworks such as Next.js and TypeScript is the strongest fit when fast load times, strict accessibility, bespoke layout design, multi-step intake forms, client portals or external API integrations matter. You receive clean, portable source code without paying for bloated features nobody on your team uses.',
-          'Custom builds benefit from thoughtful scoping up front and a clear workflow for ongoing edits—either structured TypeScript content files, a lightweight headless CMS, or periodic updates handled through a care arrangement.',
-        ],
-      },
-      {
-        heading: 'Four questions to settle the choice',
+        heading: 'The three realistic options',
         bullets: [
-          'What must the site actually do on launch day, beyond displaying clear text, imagery and an enquiry form?',
-          'Who on your team will edit pages each month, and how comfortable are they working inside software dashboards?',
-          'Which external systems—such as online bookings, payment processors, inventory databases or email tools—need to stay synchronized?',
-          'Where do you expect your website or digital product to grow over the next two to three years?',
+          'Hosted builders (Squarespace, Wix): quickest to launch, no server to manage. Limited layout control, heavier pages, and moving later usually means rebuilding.',
+          'WordPress: enormous plugin ecosystem and plenty of local help. Also the most common source of slow, compromised sites we are asked to fix. It needs disciplined updates and a short plugin list.',
+          'Custom Next.js with a headless CMS: fastest pages, layout designed for your content, and clean code you own. Higher upfront cost, and you need someone to maintain it.',
         ],
       },
       {
-        heading: 'Making a calm long-term call',
+        heading: 'Four questions before you commit',
+        bullets: [
+          'Can I export my content and redirects if I leave? Ask for a sample export, not a promise.',
+          'Who owns the domain and hosting account, and whose email is the billing contact?',
+          'How many plugins or third-party scripts ship on the home page? Every one is a future update and a performance cost.',
+          'Can a staff member publish a page without calling a developer, and is there a preview before it goes live?',
+        ],
+      },
+      {
+        heading: 'What we choose, and why',
         paragraphs: [
-          'If your answers point mostly to static informational pages that change four times a year, keep the stack lean and simple. If your business workflow revolves around customer accounts, tailored intake logic or recurring publishing, invest in clean architecture early so you never have to rebuild twice.',
-          'Whichever route you choose, make sure you retain clear ownership of your domain name, your written copy, your photographs and any custom code created for your organization. Being able to move hosting or bring in another developer without losing your web address or content is the clearest sign you picked a healthy foundation.',
+          'For most client sites we build with Next.js, TypeScript and Payload as the CMS. Pages load fast, the editing screens match the content, and the repository belongs to the client at handover. For a store-first business, Shopify is often the better call; we would rather say that than rebuild what Shopify already does well.',
+          'Whichever route you take, keep the domain, DNS, analytics and content in accounts you control. That single decision protects you more than any platform choice.',
         ],
       },
     ],
@@ -144,7 +137,7 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     slug: 'website-launch-checklist',
     title: 'A website launch checklist',
     excerpt:
-      'Ten practical checks to run before pointing any domain name at a new or redesigned website.',
+      'Twelve checks to run before pointing DNS at a new site, from form delivery and redirects to SPF records and a 404 page.',
     category: 'Checklist',
     tags: ['Launch', 'QA', 'Operations'],
     publishDate: 'October 28, 2026',
@@ -153,30 +146,43 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     sections: [
       {
         paragraphs: [
-          'Launch week is when rushed mistakes happen: an enquiry form still pointed at a developer’s test inbox, a forgotten redirect breaking old search links, or an unverified SSL certificate triggering security warnings in a customer’s browser. Working calmly through a written checklist takes roughly an hour and prevents avoidable embarrassment on opening day.',
-          'Before switching DNS records or announcing a new website publicly, we verify every single item below on a staging preview that matches production as closely as possible. Taking twenty extra minutes here saves hours of frantic debugging once real visitors start clicking links.',
+          'Launch mistakes are almost always the same ones: a form still pointed at a test inbox, a redirect missing for the old pricing page, or an SSL warning on the www version. An hour of checks prevents all of it.',
+          'This is the list we work through on a staging copy before touching DNS.',
         ],
       },
       {
-        heading: 'Ten items to verify before DNS cutover',
+        heading: 'Content and links',
         bullets: [
-          'Proofread every page carefully on both desktop and phone: check business names, Canadian spellings, opening hours, street or city details, clickable phone links and email addresses.',
-          'Submit every contact and intake form end to end, confirming client and server validation errors behave properly and confirmation emails arrive reliably in the intended inbox.',
-          'Click every header link, dropdown item, footer link, card link and call-to-action button to ensure zero dead ends, broken anchors or accidental 404 responses.',
-          'Inspect responsive layout across narrow phones (360px to 390px), tablets and wide desktop monitors to verify zero clipped headings, overlapping elements or horizontal page scrolling.',
-          'Test full keyboard navigation by tabbing through menus, dropdown toggles, filter controls, accordions and form inputs so focus outlines stay visible and logical.',
-          'Review unique page titles, meta descriptions, canonical URLs, OpenGraph social preview tags, robots directives and your XML sitemap so search engines index the exact structure intended.',
-          'Map permanent 301 redirects from any retired URLs on your previous website so existing search listings, bookmarks and printed QR codes land cleanly on the nearest matching new pages.',
-          'Confirm HTTPS encryption and automatic SSL certificate renewal work smoothly across both the apex domain and www subdomain without mixed-content warnings.',
-          'Verify automated off-site backups are active and run a quick check on restoration procedures so recovery is proven before traffic arrives.',
-          'Update your Google Business Profile, chamber listings and social bios so every public profile points directly to the new address.',
+          'Proofread on a phone, not just a laptop. Check the phone number, address, hours and business name on every template.',
+          'Click every navigation item, footer link, card and button. Watch for 404s and links that open in the same tab when they should not.',
+          'Check the 404 page itself. It should offer the menu and a way back, not a default server error.',
+          'Confirm the favicon and social share image are the new ones, not last year’s logo.',
         ],
       },
       {
-        heading: 'During and right after DNS cutover',
+        heading: 'Forms and email',
+        bullets: [
+          'Submit every form and confirm the email arrives in the real inbox, not spam. Check the reply-to address too.',
+          'Test validation: empty required fields, a malformed email, and the success message.',
+          'Verify SPF and DKIM records before launch. Missing records are the usual reason enquiry emails land in spam.',
+          'If the form sends an auto-reply, read it as a customer would.',
+        ],
+      },
+      {
+        heading: 'Technical checks',
+        bullets: [
+          'Test at 360 px, 768 px and 1440 px. Look for sideways scrolling and clipped headings.',
+          'Tab through the menu, forms and accordions. Focus should stay visible and Escape should close any open menu.',
+          'Check page titles, meta descriptions, canonical URLs and the sitemap. Every page should have a unique title.',
+          'Map 301 redirects from every old URL that still gets traffic, including printed QR codes and old campaign links.',
+          'Confirm HTTPS on both the apex domain and www, with no mixed-content warnings.',
+        ],
+      },
+      {
+        heading: 'The switch itself',
         paragraphs: [
-          'Lower your DNS Time-to-Live (TTL) value a day or two before launch where possible so domain changes propagate briskly across internet service providers. Once the new records go live, open the site from an external mobile connection outside your office network to confirm HTTPS loads cleanly, submit one final live test enquiry through the real contact form and verify server logs look completely clean.',
-          'Keep your previous site’s files and database archived safely for at least thirty days after launch as an extra safety net while search engines finish re-indexing your updated pages. Also double-check email records—such as MX, SPF and DKIM—so changing web hosting never interrupts your company inbox. Finally, keep a short written note of every domain registrar, hosting login and SSL renewal setting in one shared company file so nobody has to guess during future updates or team handovers. Taking an unhurried hour for these checks makes launch day quiet, predictable and stress-free.',
+          'Lower DNS TTL to 300 seconds a day before the switch so changes propagate quickly. Make the change in the morning, mid-week, when you can watch it. Then test the live site from a phone on mobile data, outside your office network.',
+          'Keep the old site archived for 30 days and leave the redirects in place permanently. Submit the sitemap in Search Console and check for crawl errors a week later.',
         ],
       },
     ],
@@ -185,52 +191,50 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     slug: 'local-seo-basics-pei',
     title: 'Local SEO basics for PEI businesses',
     excerpt:
-      'How to make it straightforward for Islanders and seasonal visitors to find your business in search.',
+      'What actually moves the needle for Island businesses: a complete Google profile, consistent details and pages built around real services.',
     category: 'Guide',
     tags: ['SEO', 'Charlottetown', 'Local Search'],
     publishDate: 'October 20, 2026',
     isoDate: '2026-10-20',
-    readTime: 5,
+    readTime: 4,
     sections: [
       {
         paragraphs: [
-          'Local search visibility rarely requires complicated tricks or opaque monthly gimmicks. For businesses in Charlottetown, Summerside and communities across Prince Edward Island, showing up reliably in search comes down to making it effortless for both human visitors and search engines to verify three clear facts: who you are, what you do and where you serve.',
-          'On Prince Edward Island, search behaviour also shifts noticeably across the calendar. Summer brings visitors searching on their phones while already travelling along the Island’s highways, whereas autumn and winter favour deliberate local enquiries, home maintenance and year-round service relationships. Strong technical and content foundations serve both seasons equally well.',
+          'Local search is less mysterious than the industry makes it sound. Google is trying to confirm three things: who you are, what you do and where you serve. Most of the work is making those facts easy to verify and keeping them current.',
+          'On PEI the calendar matters too. Summer searches come from phones already on the road; winter searches are more deliberate. Both need the same accurate hours and service area.',
         ],
       },
       {
-        heading: 'Keep your Google Business Profile complete and accurate',
-        paragraphs: [
-          'Before fine-tuning technical tags on your website, claim and thoroughly fill out your Google Business Profile. Choose accurate primary and secondary business categories, define your true service areas across PEI, upload crisp photographs of your storefront, workshop or finished work, and update seasonal hours promptly—especially ahead of Victoria Day weekend, Old Home Week and shoulder-season changes.',
-          'A neglected profile with wrong winter hours frustrates local customers faster than almost any website flaw, and updating it takes less than five minutes.',
-        ],
-      },
-      {
-        heading: 'Stay strictly consistent everywhere',
-        paragraphs: [
-          'Use the exact same business name, telephone number and geographic details across your website, your Google Business Profile, social channels and local chamber or trade association directories. Old trading names, disconnected phone numbers or mismatched city labels create unnecessary doubt for search crawlers trying to verify that multiple mentions belong to the same business.',
-        ],
-      },
-      {
-        heading: 'Structure website pages around real services and places',
+        heading: 'Fix your Google Business Profile first',
         bullets: [
-          'Give each primary service its own dedicated page with clear headings rather than compressing six distinct offerings into a single vague paragraph.',
-          'Reference Charlottetown, Prince Edward Island or the specific regions you serve naturally inside headings, body copy and page descriptions where genuinely helpful to a customer.',
-          'Embed clean LocalBusiness structured data (JSON-LD) in your site layout so search engines read your legal entity, contact phone, email and service areas unambiguously.',
-          'Keep pages fast over mobile connections and never lock crucial details—like seasonal hours, menus or service lists—inside heavy image flyers that search engines cannot read.',
+          'Pick the most specific primary category, then add two or three secondary ones that genuinely apply.',
+          'Set your service area to the places you actually travel to, not the whole province.',
+          'Add real photos: storefront, interior, team, finished work. Update them seasonally.',
+          'Keep hours accurate, including holiday exceptions. Wrong winter hours generate more angry calls than a dated website.',
+          'Answer questions and reviews from the same account, in your own voice.',
         ],
       },
       {
-        heading: 'Earn and respond to genuine reviews',
+        heading: 'Keep your details identical everywhere',
         paragraphs: [
-          'Steady, authentic customer reviews carry real weight in local search results and human decision-making alike. Make a habit of sharing your direct review link with happy customers right after wrapping up a job, and take two minutes to write a polite, specific reply to every review—whether glowing or constructive.',
+          'Use the same business name, phone number and address on your site, your Google profile, Facebook, your chamber listing and any trade directory. An old trading name or a disconnected second number makes it harder for search engines to connect the mentions to one business.',
+          'If you have moved or changed numbers, update the old listings rather than leaving them to rot. Duplicate listings split your reviews and your ranking.',
         ],
       },
       {
-        heading: 'Measure what matters over the long run',
+        heading: 'Build pages around services, not keywords',
+        bullets: [
+          'One page per service, with the service in the heading and the places you serve mentioned where it reads naturally.',
+          'Add LocalBusiness structured data with your legal name, phone, email and area served.',
+          'Publish prices or ranges where you can. Pages with concrete detail get more clicks from search results.',
+          'Keep menus, schedules and service lists as HTML text, not images or PDFs that search engines cannot read.',
+        ],
+      },
+      {
+        heading: 'Reviews and measurement',
         paragraphs: [
-          'Focus less on vanity keyword fluctuations week to week and more on real business outcomes: telephone calls, completed enquiry forms, booking requests and directional clicks from people actually located inside your service region. Plain-spoken pages paired with accurate profiles compound steadily over time.',
-          'Remember too that on PEI, word of mouth and search work hand in hand. When someone hears your business recommended at a coffee shop in Charlottetown or a rink in Cornwall, the first thing they do is type your name into a phone. Making sure your website loads cleanly, shows clear services and confirms you are open turns that referral into a phone call.',
+          'Ask for a review the day you finish a job, with a direct link. Reply to every one, including the bad ones, within a couple of days. Volume and recency both matter, and a calm reply to criticism does more for trust than ten five-star ratings.',
+          'Track calls and form submissions rather than keyword rankings. If the phone rings more and the enquiries are the right kind, the search work is doing its job.',
         ],
       },
     ],
@@ -239,43 +243,44 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     slug: 'prepare-for-a-design-project',
     title: 'What to prepare before a design project',
     excerpt:
-      'A short preparation list that makes your first project conversation faster and sharper.',
+      'Eight things worth gathering before kickoff, and what to do if you have almost none of them.',
     category: 'Checklist',
     tags: ['Design', 'Preparation', 'Discovery'],
     publishDate: 'October 9, 2026',
     isoDate: '2026-10-09',
-    readTime: 5,
+    readTime: 4,
     sections: [
       {
         paragraphs: [
-          'You do not need finished copywriting, formal brand manuals or polished wireframes before reaching out about a new website. Part of our job is helping organize rough ideas into a clear structure that works for your customers. Still, pulling together a handful of practical items beforehand makes the opening discovery call sharper and helps design move forward without guesswork.',
-          'Think of this checklist as a quick gathering exercise rather than homework. Spend thirty minutes pulling what you already have into one shared folder before our first conversation, and note anything that still needs creating from scratch.',
+          'You do not need finished copy, a brand manual or wireframes to start. But half an hour of gathering makes the first call sharper and saves a week later.',
+          'Here is what we actually use during discovery, in rough order of importance.',
         ],
       },
       {
-        heading: 'Helpful items to gather before kick-off',
+        heading: 'Gather these eight things',
         bullets: [
-          'Your main objective: define clearly what the website should achieve over the next six to twelve months—whether that means steadier phone enquiries, online store sales, consultation bookings or clearer explanations of a complex service.',
-          'Two or three reference websites you genuinely respect (either inside your field or from completely different industries), paired with one short sentence on what works well on each one.',
-          'Existing brand assets: original vector logo files (SVG, EPS, AI or clean PDF), established brand colour codes and any typography already used across signage or printed materials.',
-          'Authentic photographs of your premises, team members, equipment or finished work—uncompressed originals straight from a camera or phone work far better than small files saved back down from social media.',
-          'Rough notes, printed brochures or current website pages describing what you sell and the recurring questions customers ask every week.',
-          'One designated decision-maker on your side who can collect internal opinions and provide consolidated, clear approvals at each milestone.',
-          'Account notes or login access for your domain registrar and current web hosting provider so launch logistics are understood well ahead of deadline.',
+          'One sentence on what the site must achieve in the next six months. "More booked consultations" is enough; "increase brand awareness" is not.',
+          'Two or three sites you like, each with one line on what works. Industry does not matter; structure and tone do.',
+          'Your logo in the best format you have. Vector (SVG, AI, EPS) is ideal, a large PNG will do.',
+          'Ten to twenty photos of your premises, team, products or finished work. Originals from a camera or phone, not files saved down from social media.',
+          'The ten questions customers ask you on the phone most often. That list becomes your FAQ and half your service copy.',
+          'Any print material with wording you want to keep: brochures, menus, price sheets, tender documents.',
+          'Logins or account notes for your domain registrar and current hosting, so launch does not stall.',
+          'The name of the one person who signs off, and how quickly they can turn around feedback.',
         ],
       },
       {
-        heading: 'What if several items are missing?',
+        heading: 'What to do if you have none of it',
         paragraphs: [
-          'Most businesses are missing at least two or three things on that list, and that is completely normal. If you only have a low-resolution logo on an old letterhead, we can tidy and redraw it cleanly for crisp web display. If you have no photography yet, we can plan structured graphic layouts and help map a practical photo shot list you can capture in an afternoon.',
-          'The same applies to written copy. Bring rough bullet points, voice memos or answers to customer questions, and we can help organize them into clean, scannable web pages that sound genuinely like your business.',
+          'Most clients arrive with three or four of those. That is normal. For copy, record a five-minute voice note answering the ten customer questions and we will shape it into pages. For photos, we can plan a shot list you capture in an afternoon with a phone.',
+          'For the logo, a clean redraw of a low-resolution file is usually a few hours of work. It is rarely worth designing a new identity mid-project unless the old one is actively causing confusion.',
         ],
       },
       {
-        heading: 'Why early clarity saves weeks later',
+        heading: 'Decisions that save the most time',
         paragraphs: [
-          'Reviewing real goals, real constraints and real raw material during week one avoids dramatic late-stage changes when layouts are already built. Knowing which existing tools must stay connected—such as email newsletters, booking calendars or payment accounts—also prevents technical surprises halfway through development. Even half an hour spent gathering these notes pays back many times over once design begins.',
-          'It also helps to note any upcoming seasonal deadlines, trade shows or printed materials that will carry the new website address, along with any legal notices, bilingual requirements or industry disclaimers your business must publish clearly on every page. Sharing those details right at kick-off ensures the whole site launches accurate and complete.',
+          'Settle two things before design starts: who your main customer is, and what you want them to do. Every layout argument gets easier once those are written down.',
+          'Also flag fixed dates early. A tourism season, a trade show or a printed sign with the new address all constrain the schedule more than any design preference.',
         ],
       },
     ],
@@ -284,7 +289,7 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     slug: 'how-long-does-a-website-take',
     title: 'How long does a website take?',
     excerpt:
-      'What genuinely shapes a project timeline, and the simplest ways to keep momentum steady.',
+      'Realistic timelines for a marketing site, a store and a first software release, and the one delay that affects almost every project.',
     category: 'Notes',
     tags: ['Timeline', 'Process', 'Planning'],
     publishDate: 'September 30, 2026',
@@ -293,37 +298,38 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     sections: [
       {
         paragraphs: [
-          '“How soon can we launch?” is almost always one of the first questions raised on an opening call. The honest answer is that realistic timelines depend far less on how quickly code can be written and far more on four practical variables: scope, content readiness, decision speed and external integrations.',
-          'Understanding how those four levers interact lets you plan sensibly around a real target date—such as the start of a tourist season, an upcoming conference or a product release—without rushing testing or cutting corners on accessibility.',
+          '"How soon can we launch?" is usually the second question on a first call. Code is rarely the bottleneck. Content, feedback and third-party approvals are.',
+          'These ranges come from our own projects, not a sales deck.',
         ],
       },
       {
-        heading: 'The four things that shape any schedule',
+        heading: 'Typical timelines',
         bullets: [
-          'Scope and complexity: a focused five-page service website with a clean enquiry form moves considerably faster than a full e-commerce store with tiered shipping rules or a multi-user SaaS web application.',
-          'Content readiness: having clear service notes, product information and authentic photographs ready early keeps layout design anchored in real words rather than temporary filler.',
-          'Feedback turnaround: timely, consolidated review from a single decision-maker keeps weekly build milestones moving steadily instead of stalling between conflicting internal opinions.',
-          'External integrations and approvals: connecting point-of-sale software, legacy accounting tools, payment merchant verification or bilingual French translation introduces coordination steps outside either team’s direct control.',
+          'Five-page marketing site: four to six weeks from kickoff, assuming copy and photos arrive on schedule.',
+          'Ten to fifteen pages with a CMS: six to eight weeks.',
+          'Online store with 100 to 300 products: eight to twelve weeks, including product data and test orders.',
+          'Custom software or SaaS first release: six to eight weeks to something usable, then two-week milestones.',
         ],
       },
       {
-        heading: 'The single biggest cause of delay',
+        heading: 'The delay that affects almost every project',
         paragraphs: [
-          'Across almost every web project, waiting on final text and photography delays launch day far more often than visual design or engineering combined. Writing plainly about your own business takes real concentration when you are already busy serving customers during the day.',
-          'The simplest remedy is to agree during week one exactly who is drafting each page, set modest writing deadlines alongside design milestones, and review real copy inside preview layouts as early as possible rather than waiting for perfection.',
+          'Waiting on final text and photography costs more launch days than design and development combined. Writing plainly about your own business is hard when you are also running it, and it is easy to keep postponing.',
+          'The fix is unglamorous: assign each page to one person, set a date for a rough draft, and review real copy inside the layout rather than in a document. Rough copy in place beats perfect copy in a drawer.',
         ],
       },
       {
-        heading: 'Why phased launches often work best',
+        heading: 'Where integrations add time',
         paragraphs: [
-          'If you are working toward an immovable date—say, welcoming visitors ahead of the summer season or launching a new service line—consider breaking the build into two calm stages. Stage one puts your essential pages, clean mobile experience and enquiry path live on time. Stage two layers on secondary newsletter, expanded product lines or deeper integrations once the core site is already earning enquiries.',
+          'Payment provider verification, POS exports, booking systems and accounting software all involve another company’s process. Merchant accounts can take a week to approve; a POS vendor may take three days to answer an email. Build that into the plan rather than discovering it in week six.',
+          'Bilingual launches add a translation round, and translation usually needs approved English copy first. Sequence it rather than running both at once.',
         ],
       },
       {
-        heading: 'Keeping momentum calm and predictable',
+        heading: 'Phasing a fixed date',
         paragraphs: [
-          'When scope stays focused, one person consolidates feedback and content arrives in steady pieces, small business websites and focused software releases move smoothly from first sketch to launch. If a hard calendar date matters for your business, share that milestone on day one so we can plan scope, milestones and review windows realistically around it.',
-          'Above all, leave room for calm testing before going live. Rushing final QA in the last hour before an announcement is how broken links, mistyped phone numbers and unconfigured forms slip through. Building a realistic schedule protects both launch quality and your team’s sanity, giving everyone confidence when you share the new link with customers across Prince Edward Island, Canada and around the world. Steady weekly check-ins keep everyone aligned from kickoff to handover and ensure no detail gets dropped along the way, even during your busiest seasonal weeks on the calendar.',
+          'If you have a hard date, split the work. Launch the essential pages, mobile layout and enquiry path first; add the blog, secondary services or deeper integrations a month later. A smaller site that is live and correct beats a complete site that misses the season.',
+          'Whatever the plan, keep a week for testing at the end. The last-minute rush is how broken forms and mistyped phone numbers get published.',
         ],
       },
     ],
@@ -332,52 +338,54 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     slug: 'accessibility-basics-for-business-sites',
     title: 'Accessibility basics every website should cover',
     excerpt:
-      'A walkthrough of keyboard navigation, colour contrast, semantic headings and accessible forms.',
+      'Five practical fixes: heading structure, contrast ratios, keyboard focus, form labels and reduced motion.',
     category: 'Tutorial',
     tags: ['Accessibility', 'WCAG', 'HTML'],
     publishDate: 'September 18, 2026',
     isoDate: '2026-09-18',
-    readTime: 6,
+    readTime: 5,
     sections: [
       {
         paragraphs: [
-          'Web accessibility is sometimes treated like a late compliance check bolted onto a website right before launch. In practice, accessible websites are simply clearer, faster and easier for everyone to read and operate—whether someone uses a screen reader, navigates exclusively by keyboard, reads outdoors on a bright phone screen or deals with temporary hand fatigue.',
-          'Building sound accessibility habits into the first layout takes minimal extra time compared to retrofitting an inaccessible template months after launch. Here are the five core practices we apply to every website and web application we build.',
+          'Accessibility is often treated as a compliance task for the end of a project. In practice it makes the site clearer for everyone: someone reading outdoors on a phone, someone with a temporary hand injury, someone using a screen reader.',
+          'These five checks cover most of what goes wrong on a business site.',
         ],
       },
       {
-        heading: '1. Use native HTML landmarks and sequential headings',
+        heading: '1. Use real headings and landmarks',
         paragraphs: [
-          'Assistive technologies rely on semantic landmarks (`<header>`, `<nav>`, `<main>`, `<footer>`) and clean heading hierarchy (`<h1>` through `<h4>`) to map out a page and jump directly to relevant sections. Always keep a single `<h1>` per page describing its main topic, never skip heading levels just to make text look larger, and use native `<button>` and `<a href>` elements for interactive controls instead of clickable `<div>` containers.',
-          'Descriptive link text matters just as much: writing “Read the launch checklist” gives far better context than five links on a single page all labelled “Click here”.',
+          'Wrap the page in `<header>`, `<nav>`, `<main>` and `<footer>`, and use one `<h1>` for the page topic, then `<h2>` and `<h3>` in order. Do not pick a heading level because of its size; style it with CSS instead.',
+          'Use `<button>` for actions and `<a href>` for navigation. A clickable `<div>` is invisible to a keyboard and to assistive technology.',
         ],
       },
       {
-        heading: '2. Respect colour contrast on every surface',
+        heading: '2. Check contrast, not just colour',
         paragraphs: [
-          'Body text needs strong luminance contrast against its background—at least 4.5:1 under WCAG AA standards, and 3:1 for large display headings. Watch carefully for pale grey metadata text on white backgrounds or bright brand accents placed directly as text on light surfaces. For example, high-visibility orange works cleanly as a solid button or highlight block paired with pure black text, whereas orange text directly on white fails readability checks.',
+          'Body text needs 4.5:1 against its background; large headings need 3:1. Pale grey captions on white and brand-coloured text on white are the usual failures.',
+          'An orange button with black text passes easily. Orange text on white does not, even if it looks fine on your monitor. Check the actual hex values rather than trusting your eye.',
         ],
       },
       {
-        heading: '3. Support full keyboard navigation and focus visibility',
+        heading: '3. Make the keyboard path work',
         bullets: [
-          'Include a “Skip to content” link as the very first focusable element so keyboard visitors can jump straight past repeated top navigation bars.',
-          'Keep unmistakable `:focus-visible` outlines on every link, button, dropdown toggle, checkbox and form input—never hide focus rings without providing an equally clear alternative.',
-          'Ensure dropdown menus and mobile navigation drawers open cleanly with Enter or Space and dismiss immediately when the user presses Escape.',
+          'Add a "Skip to content" link as the first focusable element.',
+          'Never remove the focus ring without replacing it with something equally visible.',
+          'Menus should open with Enter or Space and close with Escape.',
+          'Tab through the whole page once before launch. If you lose track of where you are, so will a keyboard user.',
         ],
       },
       {
-        heading: '4. Label, explain and validate forms properly',
+        heading: '4. Label every form field',
         paragraphs: [
-          'Placeholder hints inside inputs disappear the moment someone types and cannot replace a persistent `<label>`. Connect every control to an explicit label, group related checkboxes inside a `<fieldset>` with a `<legend>`, mark invalid inputs using `aria-invalid="true"`, associate error text via `aria-describedby` and announce errors in clear text rather than relying on border colour alone.',
-          'When validation fails on submission, move keyboard focus straight to the first field that needs attention so the user does not have to hunt up and down the page.',
+          'A placeholder disappears as soon as someone types and is not a label. Use a visible `<label>` tied to each input, group related choices in a `<fieldset>` with a `<legend>`, and mark errors with `aria-invalid` plus text that explains what to fix.',
+          'On a failed submit, move focus to the first field with an error. Do not rely on a red border alone.',
         ],
       },
       {
-        heading: '5. Respect reduced-motion preferences',
+        heading: '5. Respect motion and zoom',
         paragraphs: [
-          'Some visitors experience motion sickness or distraction from sweeping transitions. Wrapping visual transitions with `@media (prefers-reduced-motion: reduce)` ensures your interface remains crisp, snappy and comfortable for everyone.',
-          'Finally, test your pages yourself before launch using only the Tab, Shift+Tab, Enter and Escape keys, then zoom the browser to 200 percent. Those two quick habits catch more real-world usability issues in ten minutes than any automated checklist on its own.',
+          'Wrap large transitions in `@media (prefers-reduced-motion: reduce)`. Then zoom the browser to 200 percent and check nothing overlaps or disappears.',
+          'Two habits catch most real problems in ten minutes: navigate with only Tab, Shift+Tab, Enter and Escape, then zoom to 200 percent. Automated tools help, but they miss both.',
         ],
       },
     ],
@@ -386,7 +394,7 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     slug: 'getting-an-online-store-ready',
     title: 'Getting an online store ready to sell',
     excerpt:
-      'What Canadian makers and retailers should prepare—from product photography and variants to taxes and shipping.',
+      'Product data, five test orders, HST, shipping zones and the policies customers look for before they pay.',
     category: 'Checklist',
     tags: ['E-commerce', 'Retail', 'Canadian Tax'],
     publishDate: 'September 4, 2026',
@@ -395,38 +403,42 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     sections: [
       {
         paragraphs: [
-          'Preparing an online store requires a bit more operational planning than launching an informational website, because live inventory counts, payment processing, Canadian sales tax and physical shipping parcels are all involved. Organizing your product data and fulfilment rules before store design starts keeps development calm and avoids last-minute checkout surprises.',
-          'Whether you sell five signature items out of a Charlottetown studio or two hundred products shipped nationwide, working through these details beforehand ensures your store feels effortless on launch day.',
+          'An online store carries more operational weight than a brochure site: live stock, tax, payments and parcels that have to physically arrive. The setup work is mostly boring data entry, and skipping it shows up as refunds and support emails.',
+          'Work through this before design starts.',
         ],
       },
       {
-        heading: 'Product catalogue essentials',
+        heading: 'Product data people need',
         bullets: [
-          'Clear, searchable product names paired with practical descriptions covering dimensions, materials, sizing guidance, care instructions and exactly what arrives in the box.',
-          'Consistent product photographs shot in even natural or studio lighting against clean backgrounds, alongside close-up detail shots showing texture, fasteners or scale.',
-          'A complete list of options and variants—such as size, colour, flavour or pack quantity—along with SKU codes if you also manage stock inside a physical shop or studio.',
-          'Accurate starting inventory counts and a clear rule for out-of-stock products: hide temporarily, display “Sold out” clearly, or allow backorders with honest dispatch dates.',
+          'A name a customer would search for, plus a short description with dimensions, materials, care instructions and what is in the box.',
+          'Variants and SKUs, even if you only have a few. You will need them when stock syncs with the shop till.',
+          'Weight and box dimensions for every product. Guessed weights lead to carrier surcharges after the first week.',
+          'A rule for sold-out items: hide, show "Sold out", or allow backorders with a real dispatch date.',
+          'Five photos per product where possible: front, detail, scale, packaging, in use.',
         ],
       },
       {
-        heading: 'Canadian taxes, shipping zones and local pickup',
+        heading: 'Tax and shipping decisions',
         paragraphs: [
-          'Decide ahead of build time where you intend to ship and how orders physically leave your door. Many PEI retailers start smoothly with three clear fulfilment options: free local pickup at a Charlottetown location or market stall, flat-rate or weight-based parcel shipping across Canada, and tracked international shipping where customs rules make sense.',
-          'Confirm your GST/HST registration status and provincial sales tax rules early so every tax calculation—including shipping tax rules where applicable—can be verified inside test orders before opening to buyers. Double-check parcel weights and box dimensions too, as inaccurate weights lead to unexpected carrier surcharges after orders ship.',
+          'In PEI the HST is 15 per cent. Confirm your registration and whether you charge tax on shipping before test orders, not after. If you sell into other provinces, decide whether to register there or keep it simple at launch.',
+          'For shipping, start with what you can actually fulfil: local pickup, a flat rate across Canada, and tracked parcel rates for heavier orders. Add international shipping only if you can handle customs paperwork and returns.',
         ],
       },
       {
-        heading: 'Payment, confirmation emails and order workflow',
-        paragraphs: [
-          'Think through the moment right after a customer completes checkout. Who packs the order, which email inbox receives the alert, how packing slips are printed and how tracking numbers reach the buyer? Running five complete test orders—covering single items, multi-item carts, local pickup and refunds—proves the whole chain works cleanly.',
+        heading: 'Five test orders before opening',
+        bullets: [
+          'One item, paid by card, shipped to an Ontario address.',
+          'Two different variants in one cart, with the correct stock decrement.',
+          'Local pickup, with the confirmation email explaining where and when.',
+          'A discount code, if you use them, including an expired one.',
+          'A refund, processed end to end, with the customer email checked.',
         ],
       },
       {
-        heading: 'Clear store policies before checkout',
+        heading: 'Policies customers look for',
         paragraphs: [
-          'Shoppers abandon carts quickly when return windows, handling times or shipping costs stay mysterious until the final payment screen. Publish straightforward shipping estimates, return and exchange policies, damaged-item instructions and a direct contact email or telephone number.',
-          'When customers know exactly what happens after clicking “Pay”, checkout feels trustworthy and support enquiries drop sharply. Also take time to write friendly, plain-spoken confirmation emails that state processing windows, pickup instructions if applicable and how to reach a real person if a shipping address needs correcting.',
-          'Having those policies, product details, tax settings and shipping rules organized ahead of development turns store launch week from a scramble into a calm, predictable milestone—letting you focus on fulfilling early orders smoothly for customers near Charlottetown and beyond instead of patching checkout settings. Once live, review your first dozen real orders carefully to refine packaging sizes, carrier rates and local pickup instructions for returning buyers across every season.',
+          'Publish processing time, shipping estimates, the return window, what to do with a damaged item and a phone number or email that reaches a person. Put them in the footer and link them at checkout.',
+          'Then watch the first twenty real orders. Packaging that seemed fine in theory often needs adjusting once you are taping boxes at 9 pm.',
         ],
       },
     ],
@@ -435,51 +447,52 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     slug: 'scoping-a-software-project',
     title: 'How to scope a custom software project',
     excerpt:
-      'A practical tutorial on turning a rough business workflow or SaaS idea into a buildable first release.',
+      'Turn a messy workflow into a first release: describe the loop, list the roles, cut the extras and ship in two-week stages.',
     category: 'Tutorial',
     tags: ['SaaS', 'Software', 'Scoping'],
     publishDate: 'August 22, 2026',
     isoDate: '2026-08-22',
-    readTime: 6,
+    readTime: 5,
     sections: [
       {
         paragraphs: [
-          'Custom software and subscription SaaS products rarely fail because a programming framework fell short. They stall when version one tries to solve every hypothetical edge case, automate every secondary report and serve every future user persona at once. Disciplined scoping draws a clear boundary around the smallest working system that genuinely improves how real people get their job done.',
-          'Whether you are building an internal scheduling tool to replace messy spreadsheets or launching a subscription SaaS product for customers worldwide, walking through these five scoping steps keeps your first release focused and achievable.',
+          'Custom software rarely fails because the framework was wrong. It fails because version one tried to cover every edge case at once and took a year to arrive.',
+          'Good scoping is mostly subtraction. Here is the process we use with clients.',
         ],
       },
       {
-        heading: 'Step 1: Describe the core workflow in plain sentences',
+        heading: 'Step 1: Write the core loop in five sentences',
         paragraphs: [
-          'Before listing features or database tables, write down the daily problem your software replaces in everyday language. For example: “A shop manager publishes next week’s shift schedule on Thursday afternoon, staff check their shifts on their phones, and swap requests get approved in one click instead of thirty group text messages.” Every screen in version one should directly serve that core loop.',
-          'If a proposed screen does not support that main loop or keep data accurate inside it, mark it for a later release.',
+          'Describe the work as it happens now, without features. For example: "A manager builds next week’s schedule on Thursday, publishes it, staff check their shifts on their phones, and swap requests get approved or declined by the manager."',
+          'Every screen in version one should serve that loop. If a screen does not, it belongs on the later list.',
         ],
       },
       {
-        heading: 'Step 2: Map user roles and permissions early',
+        heading: 'Step 2: List the roles before the screens',
         paragraphs: [
-          'List every category of person who signs in—such as account owner, manager, staff member or external client—and specify clearly what each role can view, create, edit or approve. Settling permissions and organization boundaries at the start prevents painful data-model rewrites halfway through engineering.',
+          'Write down every type of person who signs in — owner, manager, staff, client — and what each can see, create, edit and approve. Permissions decided late cause data model rewrites, which are the most expensive kind.',
+          'Include the awkward cases: a manager who is also staff, a client with two companies, someone who leaves and must lose access the same day.',
         ],
       },
       {
-        heading: 'Step 3: Separate day-one essentials from phase two',
+        heading: 'Step 3: Separate day one from phase two',
         bullets: [
-          'Day-one essentials: reliable authentication, the primary workflow screens, strict input validation, transactional email alerts, audit logs for key actions and simple CSV or summary exports.',
-          'Smart candidates for phase two: custom drag-and-drop report builders, elaborate theming preferences, multi-currency enterprise tiers and standalone native mobile apps before web workflows are proven.',
+          'Day one: login, the core workflow screens, input validation, email notifications, an audit trail of who changed what, and a CSV export.',
+          'Phase two: custom report builders, theming options, multi-currency billing, mobile apps, and anything that depends on data you do not have yet.',
+          'Never on day one: an AI feature, a redesign of the whole workflow, or a second user type "just in case".',
         ],
       },
       {
-        heading: 'Step 4: Walk through clickable prototypes first',
+        heading: 'Step 4: Test with the person who does the job',
         paragraphs: [
-          'Reviewing rough interactive screens with the staff or customers who will actually operate the tool every day exposes missing fields, awkward terminology and unnecessary steps long before backend APIs and database migrations are finalized.',
+          'A clickable prototype reviewed by the staff who will use the tool daily will surface missing fields and wrong wording faster than any specification. They will also tell you which step is genuinely annoying, which is usually the one worth automating first.',
         ],
       },
       {
-        heading: 'Step 5: Ship in small verifiable stages',
+        heading: 'Step 5: Ship in two-week stages',
         paragraphs: [
-          'Break implementation into short weekly or bi-weekly milestones deployed to a private staging link. Testing real working software throughout the build keeps surprises out of launch week, lets early user feedback guide refinements and gives your team steady confidence in what is shipping.',
-          'Just as important, plan how the software will be supported once real people depend on it daily. Agree on error monitoring, automated database backups, user support channels and a realistic cadence for small post-launch improvements based on what users actually click and request during their first month.',
-          'Good software feels straightforward because every unnecessary complication was trimmed away during scoping rather than patched over after release. Keeping the first version lean lets you validate real adoption quickly, train staff smoothly and build version two on solid practical evidence. Start small, test with real users weekly and expand only where genuine daily bottlenecks appear across your team’s actual day-to-day operations and customer workflows, keeping every screen crisp, purposeful and easy to maintain.',
+          'Deploy to staging every two weeks, demo it, and adjust priorities with what you learn. Real software in front of real users beats a status report every time.',
+          'Before launch, agree on support: error monitoring, automated backups, who answers user questions and how fixes get prioritised. Software people depend on daily needs an owner, not just a release date.',
         ],
       },
     ],
@@ -488,7 +501,7 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     slug: 'keeping-a-website-secure-and-dependable',
     title: 'Keeping a website secure and dependable',
     excerpt:
-      'An illustrative security and maintenance review showing how routine hygiene prevents sudden site outages.',
+      'What a maintenance audit usually finds, the fixes that matter, and the monthly routine that prevents most outages.',
     category: 'Case Study',
     tags: ['Security', 'Maintenance', 'Hosting'],
     publishDate: 'August 10, 2026',
@@ -497,32 +510,41 @@ export const NEWSLETTERS: NewsletterEntry[] = [
     sections: [
       {
         paragraphs: [
-          'This illustrative walkthrough reflects the recurring maintenance gaps we uncover when stepping in to look after an existing small-business website. Most website emergencies do not stem from sophisticated targeted attacks; they build up quietly over time when ownership records, updates and backups fall between the cracks after initial launch.',
-          'When a site stops delivering enquiry emails or goes offline mid-week, recovering without clear records or tested backups turns a minor glitch into days of avoidable stress.',
+          'This piece combines findings from three audits we ran on Island business sites over the past year. The details differ; the pattern does not.',
+          'None of these sites had been attacked. They had simply been left alone, and the things that keep a site working had quietly expired or never been set up.',
         ],
       },
       {
-        heading: 'What an initial audit typically uncovers',
+        heading: 'What the audits found',
         bullets: [
-          'Domain registration and DNS management left inside a former contractor’s personal email account rather than under the business’s own login and billing details.',
-          'Two dozen unpatched third-party extensions accumulating known security holes across multiple years because nobody wanted to click update and risk breaking layout styles.',
-          'Enquiry forms failing silently—not because the page crashed, but because outgoing email authentication (SPF and DKIM records) was never configured, causing customer leads to land in spam folders.',
-          'Automated backups stored on the exact same server disk as the live website, with zero documented test restores ever performed.',
+          'The domain was registered to a contractor’s personal email, with renewal charged to a card that had since expired.',
+          'A plugin stack of 24 extensions, several unpatched for two years, and two that had been abandoned by their authors.',
+          'Contact forms sending mail from a server with no SPF or DKIM record, so half the enquiries went to spam. Nobody had noticed because the form still said "thanks".',
+          'Backups written to the same disk as the live site, and no record of a restore ever being tested.',
         ],
       },
       {
-        heading: 'Step-by-step hardening and clean recovery',
+        heading: 'The first week of fixes',
         paragraphs: [
-          'Recovery starts with ownership and visibility. First, domain registrar and DNS control move cleanly back to the business owner’s account with two-factor authentication enabled and recovery contacts verified. Second, unused extensions, forgotten staging copies and fragile inline scripts are stripped away, leaving a clean, minimal dependency tree where every remaining package is current and actively maintained.',
-          'Third, form submissions are routed through authenticated email infrastructure paired with server-side validation and hidden honeypot filtering. Legitimate enquiries arrive reliably in the business inbox while automated bot spam is discarded quietly without cluttering staff email. SSL certificate renewal and strict security headers are verified across every route.',
+          'Ownership came first: registrar and DNS moved to the business owner’s account with two-factor authentication, and recovery contacts verified. Then we removed unused plugins and staging copies, updated what remained, and replaced the form handling with authenticated email plus server-side validation and a honeypot.',
+          'Finally, backups moved off the production server, and we restored one to a test environment to prove the process worked. That restore took 40 minutes and found a missing uploads folder — exactly the kind of thing you want to discover before an outage.',
         ],
       },
       {
-        heading: 'Making ongoing maintenance boring—in the best sense',
+        heading: 'The monthly routine',
+        bullets: [
+          'Apply dependency updates on a copy of the site, test the key pages and forms, then deploy.',
+          'Check that backups ran and restore one file to confirm the archive is readable.',
+          'Review uptime and form delivery alerts, including anything that recovered on its own.',
+          'Renew certificates and review domain and hosting expiry dates a month ahead.',
+          'Read the error log once. Patterns show up there before customers complain.',
+        ],
+      },
+      {
+        heading: 'Why this is cheaper than an emergency',
         paragraphs: [
-          'Once the foundation is clean, keeping a site dependable comes down to quiet consistency: automated off-site backups stored separately from production hosting, periodic restore drills to confirm backups actually work, staged dependency updates tested on a preview environment before going live, uptime monitoring that alerts immediately if a page slows or drops, and a direct phone number or email address when your team needs changes made safely.',
-          'A dependable website should feel invisible in day-to-day operations—simply doing its job steadily all year round. Whether your site is a concise marketing presence or a custom web application serving customers across time zones, scheduling a short quarterly health check and keeping clear documentation ensures nobody ever inherits a fragile mystery.',
-          'Treat website maintenance the same way you treat any core piece of business equipment: keep ownership clear, run routine checks before problems appear and fix small issues calmly while they are still small. That steady habit protects your reputation, keeps customer enquiries flowing smoothly and avoids costly emergency rebuilds. Over a year of normal business operations, quiet preventative care always costs far less time, effort and operational stress than emergency recovery when an unmaintained site suddenly stops working during peak business hours or busy tourist seasons across PEI and beyond.',
+          'A monthly routine is a few hours of work. Recovering a compromised site without clean backups is days of lost enquiries, a possible re-build and an awkward conversation with customers whose data was exposed.',
+          'The goal is boring: a site that quietly does its job, with records clear enough that anyone competent could take over tomorrow.',
         ],
       },
     ],

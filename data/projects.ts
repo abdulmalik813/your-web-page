@@ -17,36 +17,36 @@ export const PROJECTS: Project[] = [
     slug: 'harbourside-tours',
     title: 'Harbourside Tours',
     type: 'Website',
-    tags: ['Next.js', 'Tailwind CSS', 'Headless CMS'],
+    tags: ['Next.js', 'Payload CMS', 'Tailwind CSS'],
     role: 'Design, development, hosting setup',
     summary:
-      'A tourism website built around one job: getting a visitor from the home page to a booking enquiry in as few steps as possible.',
+      'A 14-page tourism site rebuilt in five weeks around one job: getting a visitor from a search result to a booking enquiry on a phone.',
     challenge:
-      'Seasonal visitors often browse on their phones over variable mobile connections and decide within a minute whether to enquire or move on.',
+      'The old site ran to 22 pages with a 6 MB home page and a booking button that only appeared on desktop. Sixty per cent of visitors were on phones, often on hotel wifi or patchy mobile data.',
     approach:
-      'We structured a lightweight, mobile-first website with concise tour pages, clear departure details, a persistent enquiry path and editable seasonal schedules.',
+      'We cut the site to a tour index, one page per tour with departure times, duration, price and what to bring, and a single enquiry form that goes to the inbox the owner checks every morning.',
     outcomes: [
-      'Tour details and seasonal dates editable without developer involvement',
-      'Enquiry form reachable cleanly from every tour page',
-      'Fast page loads on mobile connections',
+      'Home page weight down from 6 MB to 480 KB',
+      'Tour pages load in under two seconds on a throttled 4G connection',
+      'Seasonal dates and prices updated in the CMS each spring without a developer',
     ],
   },
   {
     slug: 'island-trades-collective',
     title: 'Island Trades Collective',
     type: 'Website',
-    tags: ['Next.js', 'Tailwind CSS', 'Service Areas'],
+    tags: ['Next.js', 'Tailwind CSS', 'Payload CMS'],
     role: 'Design, development',
     summary:
-      'A directory-style site for a group of local trades businesses, with individual service pages, coverage areas and a shared enquiry flow.',
+      'A shared site for seven independent trades, with a page per trade and enquiries routed to the right business.',
     challenge:
-      'Several independent trades needed a single cohesive web presence without losing their own service descriptions or routing leads to the wrong contact.',
+      'Seven businesses shared one phone number and a Facebook page. Leads ended up with whoever answered first, and nobody could tell which trade a caller needed.',
     approach:
-      'We built a shared visual system with dedicated pages per trade, plain-language service area notes and an enquiry form that routes messages by trade.',
+      'We built one visual system with a page per trade, a plain list of the areas each member covers, and an enquiry form that asks which trade the job is for before it sends the email.',
     outcomes: [
-      'Consistent, readable layout across every member profile page',
-      'Clear geographic coverage shown for each trade',
-      'Enquiries routed directly to the right contact',
+      'One place to update hours, service areas and contact details for all seven members',
+      'Enquiry routing tested for every trade before launch',
+      'Each member edits their own page without touching anyone else’s',
     ],
   },
   {
@@ -56,15 +56,15 @@ export const PROJECTS: Project[] = [
     tags: ['E-commerce', 'Payments', 'Inventory'],
     role: 'Design, development, store configuration',
     summary:
-      'An online store for an independent maker, with an organized product catalogue, Canadian tax and shipping rules, and automated order emails.',
+      'An online store for a PEI maker, with one stock count covering the studio, the market stall and the website.',
     challenge:
-      'Orders were arriving across direct messages, email threads and in-person markets, making stock tracking and fulfilment tedious.',
+      'Orders arrived through direct messages, email and in person. The same candle was sold twice in one weekend because the online shop and the market till kept separate counts.',
     approach:
-      'We unified the product catalogue into one responsive store with live inventory counts, secure checkout and automatic confirmation emails for both buyer and seller.',
+      'We moved 180 products into one catalogue with variants and SKUs, connected the storefront to the till’s stock file, and set HST, local pickup and Canada Post rates before the first test order.',
     outcomes: [
-      'Online and market stock tracked from a single catalogue',
-      'Clear checkout supporting local pickup and parcel shipping',
-      'Automatic order and dispatch notifications',
+      'Stock levels reconciled between the shop till and the website every 15 minutes',
+      'Checkout supports local pickup in Charlottetown and flat-rate shipping across Canada',
+      'Order and shipping emails sent automatically to buyer and seller',
     ],
   },
   {
@@ -74,15 +74,15 @@ export const PROJECTS: Project[] = [
     tags: ['Next.js', 'PostgreSQL', 'Authentication'],
     role: 'Product scoping, design, full-stack development',
     summary:
-      'A scheduling web application for small shops and hospitality teams to build weekly rosters, publish shifts and handle swap requests.',
+      'A scheduling app for a three-location café group: weekly rosters, staff availability and shift swaps in one place.',
     challenge:
-      'Weekly schedules kept in spreadsheets and group chat threads created confusion whenever staff availability changed mid-week.',
+      'Schedules lived in a spreadsheet and four group chats. When someone called in sick, managers rebuilt the week by hand and still missed shifts.',
     approach:
-      'We scoped a focused first release featuring manager roster building, individual staff logins, shift swap requests and email notifications.',
+      'We scoped a first release to the work managers did every Thursday: build the week, publish it, collect availability, and approve swaps. Payroll exports and forecasting were left for phase two.',
     outcomes: [
-      'Single shared source of truth for weekly schedules',
-      'Staff able to submit availability and swap requests directly',
-      'Manager approval logged cleanly without long message threads',
+      'Rosters built and published for 60 staff across three locations',
+      'Staff submit availability and swap requests from their phones',
+      'Every swap approval recorded with a timestamp and manager name',
     ],
   },
   {
@@ -92,15 +92,15 @@ export const PROJECTS: Project[] = [
     tags: ['TypeScript', 'REST APIs', 'Background Jobs'],
     role: 'Software architecture and development',
     summary:
-      'An internal synchronization service that keeps stock counts aligned between an in-store point-of-sale system and an online storefront.',
+      'An internal service that keeps stock counts aligned between a point-of-sale system and an online storefront.',
     challenge:
-      'Stock numbers drifted out of sync between till sales and online orders, forcing manual daily reconciliations.',
+      'Till sales and online orders wrote to separate stock tables. Staff reconciled the two by hand each morning, and popular items sold out online after they were already gone in the shop.',
     approach:
-      'We built a resilient background integration that reconciles stock changes in both directions, flags discrepancies and keeps an audit trail.',
+      'We built a background job that reads both systems every 15 minutes, applies the newest change, flags conflicts for a person to settle, and writes every update to an audit log.',
     outcomes: [
-      'Fewer oversold items when stock runs low',
-      'Eliminated repetitive manual stock adjustments',
-      'Clear audit log for every inventory update',
+      'Daily manual reconciliation removed from the opening routine',
+      'Oversold orders dropped to near zero on the ten fastest-moving products',
+      'Conflict queue shows which system changed first, with a full audit trail',
     ],
   },
   {
@@ -110,15 +110,15 @@ export const PROJECTS: Project[] = [
     tags: ['Next.js', 'PostgreSQL', 'Transactional Email'],
     role: 'Product scoping, UI design, development',
     summary:
-      'A lightweight client portal where small service firms share project documents, track open requests and send clear status updates.',
+      'A client portal for a 12-person accounting firm: documents, open requests and status updates in one shared view.',
     challenge:
-      'Client files, approvals and follow-up questions were buried across long email threads with no central status view.',
+      'Tax documents and approvals were scattered across email threads. Clients rang to ask whether a return had been filed, and staff searched three inboxes to answer.',
     approach:
-      'We designed and built a role-based portal with client logins, request statuses, file sharing and automated update digests.',
+      'We built role-based logins for staff and clients, a document area organised by tax year, request statuses, and a Monday digest email listing anything waiting on the client.',
     outcomes: [
-      'Shared documents and open requests organized in one workspace',
-      'Clients able to check progress without sending status-check emails',
-      'Simpler handover and record-keeping for the service team',
+      'Documents filed by client and tax year instead of by email thread',
+      'Clients check status themselves rather than calling the office',
+      'Staff handover notes travel with the client record',
     ],
   },
 ];
