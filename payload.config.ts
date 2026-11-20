@@ -9,7 +9,7 @@ import { searchPlugin } from '@payloadcms/plugin-search';
 import { seoPlugin } from '@payloadcms/plugin-seo';
 import { revalidatePath } from 'next/cache';
 import path from 'path';
-import { buildConfig, type Config, type Plugin } from 'payload';
+import { buildConfig, type Config, type Payload, type Plugin } from 'payload';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import Handlebars from 'handlebars';
@@ -38,6 +38,26 @@ const allowedOrigins = getAllowedOrigins();
 
 // ─── Handlebars helpers ───────────────────────────────────────────────────────
 type SubmissionField = { field: string; value: unknown };
+
+type FormEmailConfig = {
+  bcc?: string | null;
+  cc?: string | null;
+  emailFrom?: string | null;
+  emailTo?: string | null;
+  htmlMessage?: string | null;
+  message?: unknown;
+  messageType?: 'html' | 'rich_text' | null;
+  replyTo?: string | null;
+  subject?: string | null;
+};
+
+type FormEmailHookArgs = {
+  data?: {
+    form?: string | { id?: string };
+    submissionData?: SubmissionField[];
+  };
+  req?: { payload?: Payload };
+};
 
 Handlebars.registerHelper('now', () =>
   new Intl.DateTimeFormat('en-CA', {
@@ -235,25 +255,28 @@ export default buildConfig({
         },
       },
       beforeEmail: async (emailsToSend, params) => {
-        // params is the hook args object; fall back to raw emailsToSend if something is missing
-        const payload = (params as any)?.req?.payload ?? await getPayload({ config: (await import('@payload-config')).default });
-        const submissionData: SubmissionField[] = ((params as any)?.data?.submissionData ?? []) as SubmissionField[];
-        const formRef = (params as any)?.data?.form;
-        const formId = typeof formRef === 'string' ? formRef : (formRef as any)?.id;
+        const { data, req } = params as FormEmailHookArgs;
+        const formRef = data?.form;
+        const formId = typeof formRef === 'string' ? formRef : formRef?.id;
 
-        if (!formId) return emailsToSend;
+        if (!req?.payload || !formId) return emailsToSend;
 
-        let formDoc: any;
+        let formDoc: { emails?: FormEmailConfig[] | null };
         try {
           // `emails` is admin-only at field level, so a normal read returns it
           // empty here and the plugin would fall back to a blank message.
-          formDoc = await payload.findByID({ collection: 'forms', id: formId, overrideAccess: true, depth: 0 });
+          formDoc = (await req.payload.findByID({
+            collection: 'forms',
+            id: formId,
+            overrideAccess: true,
+            depth: 0,
+          })) as { emails?: FormEmailConfig[] | null };
         } catch {
           return emailsToSend;
         }
 
-        const emails: any[] = [];
-        for (const emailConfig of (formDoc?.emails ?? []) as any[]) {
+        const submissionData = data?.submissionData ?? [];
+        const emails = (formDoc.emails ?? []).map((emailConfig) => {
           let messageContent = '';
           if (emailConfig.messageType === 'html') {
             messageContent = String(emailConfig.htmlMessage ?? '');
@@ -266,7 +289,8 @@ export default buildConfig({
           } else if (typeof emailConfig.message === 'string') {
             messageContent = emailConfig.message;
           }
-          emails.push({
+
+          return {
             to: processWithHandlebars(String(emailConfig.emailTo ?? ''), submissionData),
             subject: processWithHandlebars(String(emailConfig.subject ?? ''), submissionData),
             from: processWithHandlebars(String(emailConfig.emailFrom ?? ''), submissionData),
@@ -274,8 +298,9 @@ export default buildConfig({
             bcc: processWithHandlebars(String(emailConfig.bcc ?? ''), submissionData),
             replyTo: processWithHandlebars(String(emailConfig.replyTo ?? ''), submissionData),
             html: processWithHandlebars(messageContent, submissionData),
-          });
-        }
+          };
+        });
+
         return emails.length ? emails : emailsToSend;
       },
       formOverrides: {
