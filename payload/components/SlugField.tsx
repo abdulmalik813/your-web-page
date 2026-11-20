@@ -34,7 +34,6 @@ export const SlugField: React.FC<SlugFieldProps> = ({
   // Start locked if a slug already exists, unlocked for new documents
   const [locked, setLocked] = useState(() => !!value);
 
-  // Watch the source field (e.g. title)
   const sourceField = useFormFields(([fields]) => fields[watchField]);
   const sourceValue = (sourceField?.value as string) || '';
 
@@ -48,7 +47,6 @@ export const SlugField: React.FC<SlugFieldProps> = ({
     }
   }, [sourceValue, generatedSlug, setValue]);
 
-  // Auto-generate only when unlocked and source changes
   useEffect(() => {
     if (!locked) {
       regenerate();

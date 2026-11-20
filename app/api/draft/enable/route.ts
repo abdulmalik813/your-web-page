@@ -11,14 +11,12 @@ export async function GET(request: NextRequest): Promise<Response> {
   const { searchParams } = request.nextUrl;
   const path = searchParams.get('path');
 
-  // Validate preview secret
   if (searchParams.get('previewSecret') !== getPreviewSecret()) {
     return new Response('You are not allowed to preview this page.', {
       status: 403,
     });
   }
 
-  // Validate preview path
   if (!path || !path.startsWith('/') || path.startsWith('//')) {
     return new Response('A valid preview path is required.', {
       status: 400,

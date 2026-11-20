@@ -18,7 +18,6 @@ test('getServerSideURL resolves NEXT_PUBLIC_SERVER_URL', () => {
 
   assert.equal(getServerSideURL(), 'https://yourwebpage.ca');
 
-  // Restore
   if (prevApp === undefined) {
     delete process.env.NEXT_PUBLIC_SERVER_URL;
   } else {

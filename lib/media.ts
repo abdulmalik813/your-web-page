@@ -101,7 +101,6 @@ export function resolveMediaForDisplay(
     }
   }
 
-  // Absolute fallback: original
   if (!url) {
     url = resolveImageUrl(media, candidates[0]);
     width = media.width ?? undefined;

@@ -23,7 +23,6 @@ export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
     ]);
 
     const params: { slug: string[] }[] = [
-      // Home page — empty slug array
       { slug: [] },
     ];
 

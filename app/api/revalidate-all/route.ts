@@ -23,23 +23,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Bust every collection tag
     const collectionSlugs = payload.config.collections.map((c) => c.slug);
     for (const slug of collectionSlugs) {
       revalidateTag(`collection-${slug}`, { expire: 0 });
     }
 
-    // Bust every global tag
     const globalSlugs = payload.config.globals.map((g) => g.slug);
     for (const slug of globalSlugs) {
       revalidateTag(`global-${slug}`, { expire: 0 });
     }
 
-    // Bust shared tags
     revalidateTag('site-sitemap', { expire: 0 });
     revalidateTag('redirects', { expire: 0 });
 
-    // Revalidate all layout paths
     revalidatePath('/', 'layout');
     revalidatePath('/sitemap.xml');
 

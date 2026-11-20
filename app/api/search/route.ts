@@ -59,7 +59,6 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     const where: Where = andConditions.length > 0 ? { and: andConditions } : {};
 
-    // 1. Query the Payload Search Plugin collection
     const searchResults = await payload.find({
       collection: 'search',
       where,
