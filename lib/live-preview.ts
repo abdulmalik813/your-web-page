@@ -1,5 +1,4 @@
 import { createHmac } from 'node:crypto';
-import { getServerSideURL } from './get-url';
 
 export function getPreviewSecret(): string {
   const payloadSecret = process.env.PAYLOAD_SECRET?.trim() || 'default-secret-fallback';
@@ -34,8 +33,8 @@ export const livePreviewUrl = (args: LivePreviewUrlArgs = {}) => {
       case 'projects':
         route = rawSlug ? `/our-work/${rawSlug}` : '/our-work';
         break;
-      case 'resources':
-        route = rawSlug ? `/resources/${rawSlug}` : '/resources';
+      case 'newsletter':
+        route = rawSlug ? `/newsletters/${rawSlug}` : '/newsletters';
         break;
       case 'faqs':
         route = '/faq';
@@ -68,7 +67,8 @@ export const livePreviewUrl = (args: LivePreviewUrlArgs = {}) => {
     previewSecret: getPreviewSecret(),
   });
 
-  return `${getServerSideURL()}/api/draft/enable?${params.toString()}`;
+  // Relative to the admin origin, so preview opens with the same session.
+  return `/api/draft/enable?${params.toString()}`;
 };
 
 export const livePreviewBreakpoints = [

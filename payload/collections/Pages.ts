@@ -3,6 +3,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { cmsCollectionCacheHooks } from '../../lib/cms-cache';
 import { livePreviewBreakpoints, livePreviewUrl } from '../../lib/live-preview';
 import { slugField, makeSlugHook } from '../fields/slug';
+import { linkField } from '../fields/link';
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -24,11 +25,11 @@ export const Pages: CollectionConfig = {
   },
   hooks: {
     ...cmsCollectionCacheHooks('pages'),
-    beforeValidate: [makeSlugHook('title')],
+    beforeValidate: [makeSlugHook('title', true)],
   },
   fields: [
     { name: 'title', type: 'text', required: true },
-    slugField('title'),
+    slugField('title', {}, true),
     {
       name: 'layout',
       type: 'blocks',
@@ -42,10 +43,8 @@ export const Pages: CollectionConfig = {
             { name: 'title', type: 'textarea', required: true },
             { name: 'highlight', type: 'text' },
             { name: 'lead', type: 'textarea' },
-            { name: 'primaryLabel', type: 'text' },
-            { name: 'primaryHref', type: 'text' },
-            { name: 'secondaryLabel', type: 'text' },
-            { name: 'secondaryHref', type: 'text' },
+            linkField({ name: 'primaryLink', label: 'Primary link' }),
+            linkField({ name: 'secondaryLink', label: 'Secondary link' }),
             {
               name: 'facts',
               type: 'array',
@@ -70,10 +69,8 @@ export const Pages: CollectionConfig = {
             { name: 'eyebrow', type: 'text' },
             { name: 'title', type: 'text', required: true },
             { name: 'text', type: 'textarea' },
-            { name: 'primaryLabel', type: 'text' },
-            { name: 'primaryHref', type: 'text' },
-            { name: 'secondaryLabel', type: 'text' },
-            { name: 'secondaryHref', type: 'text' },
+            linkField({ name: 'primaryLink', label: 'Primary link' }),
+            linkField({ name: 'secondaryLink', label: 'Secondary link' }),
           ],
         },
         {
@@ -82,7 +79,7 @@ export const Pages: CollectionConfig = {
           fields: [
             { name: 'eyebrow', type: 'text' },
             { name: 'heading', type: 'text' },
-            { name: 'source', type: 'select', required: true, options: ['services', 'projects', 'resources', 'faqs', 'testimonials', 'process', 'custom'] },
+            { name: 'source', type: 'select', required: true, options: ['services', 'projects', { label: 'Newsletters', value: 'newsletter' }, 'faqs', 'testimonials', 'process', 'custom'] },
             { name: 'limit', type: 'number', defaultValue: 6 },
             { name: 'notice', type: 'text' },
             {
@@ -93,7 +90,7 @@ export const Pages: CollectionConfig = {
                 { name: 'eyebrow', type: 'text' },
                 { name: 'title', type: 'text', required: true },
                 { name: 'description', type: 'textarea' },
-                { name: 'href', type: 'text' },
+                linkField({ name: 'link', label: 'Link', withLabel: false }),
                 { name: 'number', type: 'text' },
               ],
             },

@@ -1,15 +1,7 @@
 import type { GlobalConfig } from 'payload';
 import { cmsGlobalCacheHooks } from '../../lib/cms-cache';
 import { livePreviewBreakpoints, livePreviewUrl } from '../../lib/live-preview';
-
-const linkField = {
-  name: 'items',
-  type: 'array' as const,
-  fields: [
-    { name: 'label', type: 'text' as const, required: true },
-    { name: 'href', type: 'text' as const, required: true },
-  ],
-};
+import { linkField } from '../fields/link';
 
 export const Navigation: GlobalConfig = {
   slug: 'navigation',
@@ -19,11 +11,28 @@ export const Navigation: GlobalConfig = {
   admin: { livePreview: { url: () => livePreviewUrl({ data: {}, globalSlug: 'navigation' }), breakpoints: livePreviewBreakpoints } },
   versions: { drafts: { autosave: true } },
   fields: [
-    { name: 'homeLabel', type: 'text', defaultValue: 'Home' },
-    { name: 'contactLabel', type: 'text', defaultValue: 'Contact' },
-    { name: 'contactHref', type: 'text', defaultValue: '/contact' },
-    { name: 'projectLabel', type: 'text', defaultValue: 'Start a project' },
-    { name: 'projectHref', type: 'text', defaultValue: '/start-a-project' },
-    linkField,
+    {
+      name: 'items',
+      type: 'array',
+      fields: [
+        linkField({ name: 'link', label: 'Link' }),
+        {
+          name: 'children',
+          type: 'array',
+          label: 'Dropdown items',
+          labels: { singular: 'Dropdown item', plural: 'Dropdown items' },
+          admin: { description: 'Optional links shown in the right side of the dropdown.' },
+          fields: [linkField({ name: 'link', label: 'Link' })],
+        },
+        {
+          name: 'dropdownEyebrow',
+          type: 'text',
+          label: 'Dropdown eyebrow',
+          admin: { description: 'Text shown in the left panel when this item has dropdown items.' },
+        },
+        { name: 'dropdownHeading', type: 'textarea', label: 'Dropdown heading' },
+        { name: 'dropdownCtaLabel', type: 'text', label: 'Dropdown view-all label' },
+      ],
+    },
   ],
 };

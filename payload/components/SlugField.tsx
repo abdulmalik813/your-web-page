@@ -20,6 +20,7 @@ type SlugFieldProps = {
   watchField?: string;
   readOnly?: boolean;
   required?: boolean;
+  allowNested?: boolean;
 };
 
 export const SlugField: React.FC<SlugFieldProps> = ({
@@ -27,8 +28,9 @@ export const SlugField: React.FC<SlugFieldProps> = ({
   label = 'Slug',
   watchField = 'title',
   required,
+  allowNested = false,
 }) => {
-  const { value, setValue } = useField<string>({ path });
+  const { value, setValue, showError } = useField<string>({ path });
   // Start locked if a slug already exists, unlocked for new documents
   const [locked, setLocked] = useState(() => !!value);
 
@@ -36,11 +38,15 @@ export const SlugField: React.FC<SlugFieldProps> = ({
   const sourceField = useFormFields(([fields]) => fields[watchField]);
   const sourceValue = (sourceField?.value as string) || '';
 
+  const generatedSlug = allowNested
+    ? sourceValue.trim().replace(/^\/+|\/+$/g, '').split('/').map(toSlug).join('/')
+    : toSlug(sourceValue);
+
   const regenerate = useCallback(() => {
     if (sourceValue) {
-      setValue(toSlug(sourceValue));
+      setValue(generatedSlug);
     }
-  }, [sourceValue, setValue]);
+  }, [sourceValue, generatedSlug, setValue]);
 
   // Auto-generate only when unlocked and source changes
   useEffect(() => {
@@ -67,6 +73,7 @@ export const SlugField: React.FC<SlugFieldProps> = ({
               setLocked(true);
             }}
             value={value ?? ''}
+            showError={showError}
             readOnly={false}
           />
         </div>
@@ -93,9 +100,10 @@ export const SlugField: React.FC<SlugFieldProps> = ({
           {locked ? '🔒 Locked' : '✨ Auto'}
         </button>
       </div>
+      {allowNested && <p style={{ marginTop: '4px', fontSize: '12px' }}>For nested pages, enter a path such as <code>test/more</code>.</p>}
       {!locked && sourceValue && (
         <p style={{ marginTop: '4px', fontSize: '12px', color: 'var(--theme-elevation-500)' }}>
-          Will generate: <code>{toSlug(sourceValue)}</code>
+          Will generate: <code>{generatedSlug}</code>
         </p>
       )}
     </div>

@@ -3,6 +3,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  allowedDevOrigins: ['localhost', '127.0.0.1'],
   typescript: {
     ignoreBuildErrors: false,
   },
@@ -10,7 +11,6 @@ const nextConfig: NextConfig = {
     localPatterns: [
       {
         pathname: '/api/media/file/**',
-        search: '?prefix=media',
       },
     ],
     remotePatterns: [

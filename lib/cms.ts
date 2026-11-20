@@ -3,7 +3,7 @@ import config from '@payload-config';
 import { getPayload, type Payload } from 'payload';
 
 export type ProjectType = 'Website' | 'Software' | 'SaaS';
-export type ResourceCategory = 'Guide' | 'Checklist' | 'Tutorial' | 'Case Study' | 'Notes';
+export type NewsletterCategory = 'Guide' | 'Checklist' | 'Tutorial' | 'Case Study' | 'Notes';
 
 export interface MediaAsset {
   url: string;
@@ -40,20 +40,20 @@ export interface Project {
   updatedAt?: string;
 }
 
-export interface ResourceSection {
+export interface NewsletterSection {
   heading?: string;
   paragraphs?: string[];
   bullets?: string[];
 }
 
-export interface ResourceEntry {
+export interface NewsletterEntry {
   slug: string;
   title: string;
   image: MediaAsset | null;
   excerpt: string;
-  category: ResourceCategory;
+  category: NewsletterCategory;
   tags: string[];
-  sections?: ResourceSection[];
+  sections?: NewsletterSection[];
   publishDate: string;
   isoDate: string;
   readTime: number;
@@ -172,14 +172,14 @@ function toProject(value: unknown): Project {
   };
 }
 
-function toResource(value: unknown): ResourceEntry {
+function toNewsletter(value: unknown): NewsletterEntry {
   const doc = value as Record<string, unknown>;
   return {
     slug: String(doc.slug),
     title: String(doc.title),
     image: mediaAsset(doc.image),
     excerpt: String(doc.excerpt),
-    category: String(doc.category) as ResourceCategory,
+    category: String(doc.category) as NewsletterCategory,
     tags: tagRows(doc.tags),
     publishDate: String(doc.publishDate),
     isoDate: String(doc.isoDate),
@@ -272,44 +272,45 @@ export function getCmsProjectBySlug(slug: string, draft = false): Promise<Projec
   })();
 }
 
-async function queryResources(draft = false): Promise<ResourceEntry[]> {
+async function queryNewsletters(draft = false): Promise<NewsletterEntry[]> {
   const payload = await getPayloadClient();
   const result = await payload.find({
-    collection: 'resources',
+    collection: 'newsletter',
     draft,
-    depth: 1,
+    depth: 2,
+    where: draft ? undefined : { _status: { equals: 'published' } },
     sort: 'sortOrder',
     limit: 100,
     overrideAccess: draft,
   });
-  return result.docs.map(toResource);
+  return result.docs.map(toNewsletter);
 }
 
-const getCachedResources = unstable_cache(queryResources, ['cms-resources'], {
-  tags: ['collection-resources'],
+const getCachedNewsletters = unstable_cache(queryNewsletters, ['cms-newsletter'], {
+  tags: ['collection-newsletter'],
 });
 
-export function getCmsResources(draft = false): Promise<ResourceEntry[]> {
-  return draft ? queryResources(true) : getCachedResources();
+export function getCmsNewsletters(draft = false): Promise<NewsletterEntry[]> {
+  return draft ? queryNewsletters(true) : getCachedNewsletters();
 }
 
-async function queryResourceBySlug(slug: string, draft = false): Promise<ResourceEntry | undefined> {
+async function queryNewsletterBySlug(slug: string, draft = false): Promise<NewsletterEntry | undefined> {
   const payload = await getPayloadClient();
   const result = await payload.find({
-    collection: 'resources',
+    collection: 'newsletter',
     draft,
-    depth: 1,
-    where: { slug: { equals: slug } },
+    depth: 2,
+    where: draft ? { slug: { equals: slug } } : { and: [{ slug: { equals: slug } }, { _status: { equals: 'published' } }] },
     limit: 1,
     overrideAccess: draft,
   });
-  return result.docs[0] ? toResource(result.docs[0]) : undefined;
+  return result.docs[0] ? toNewsletter(result.docs[0]) : undefined;
 }
 
-export function getCmsResourceBySlug(slug: string, draft = false): Promise<ResourceEntry | undefined> {
-  if (draft) return queryResourceBySlug(slug, true);
-  return unstable_cache(() => queryResourceBySlug(slug), ['cms-resource', slug], {
-    tags: ['collection-resources'],
+export function getCmsNewsletterBySlug(slug: string, draft = false): Promise<NewsletterEntry | undefined> {
+  if (draft) return queryNewsletterBySlug(slug, true);
+  return unstable_cache(() => queryNewsletterBySlug(slug), ['cms-newsletter', slug], {
+    tags: ['collection-newsletter'],
   })();
 }
 

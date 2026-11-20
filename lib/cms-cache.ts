@@ -36,7 +36,7 @@ export function cmsMediaCacheHooks(): NonNullable<CollectionConfig['hooks']> {
   return {
     afterChange: [
       ({ doc }) => {
-        for (const slug of ['media', 'services', 'projects', 'resources']) {
+        for (const slug of ['media', 'services', 'projects', 'newsletter']) {
           revalidateCmsCollection(slug);
         }
         return doc;
@@ -44,7 +44,7 @@ export function cmsMediaCacheHooks(): NonNullable<CollectionConfig['hooks']> {
     ],
     afterDelete: [
       ({ doc }) => {
-        for (const slug of ['media', 'services', 'projects', 'resources']) {
+        for (const slug of ['media', 'services', 'projects', 'newsletter']) {
           revalidateCmsCollection(slug);
         }
         return doc;

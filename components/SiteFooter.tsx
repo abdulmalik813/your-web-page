@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { getSocialLinks } from '@/data/company';
+import { resolveLink } from '@/lib/links';
 
 interface SiteFooterProps {
   settings: any;
@@ -9,6 +11,7 @@ const footerLink = 'w-fit text-muted-foreground underline decoration-transparent
 
 export function SiteFooter({ settings, footer }: SiteFooterProps) {
   const year = new Date().getFullYear();
+  const socialLinks = getSocialLinks(settings.social);
 
   return (
     <footer className="relative z-10 border-t border-border bg-background/90 backdrop-blur-md text-foreground">
@@ -25,16 +28,32 @@ export function SiteFooter({ settings, footer }: SiteFooterProps) {
               <a className={footerLink} href={`mailto:${settings.email}`}>{settings.email}</a>
               <a className={footerLink} href={settings.phoneHref}>{settings.phone}</a>
             </address>
+            {socialLinks.length > 0 ? (
+              <nav aria-label="Social media" className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                {socialLinks.map(({ label, href }) => <a key={label} className={footerLink} href={href} target="_blank" rel="noopener noreferrer">{label}</a>)}
+              </nav>
+            ) : null}
           </div>
           {(footer.columns || []).map((column: any) => (
             <div className="min-w-0 border-t border-border/60 py-6 sm:py-7 lg:border-l lg:border-t-0 lg:pl-6" key={column.id || column.label}>
               <h2 className="mb-4 font-mono text-xs font-bold uppercase leading-5 tracking-[0.12em] text-primary">{column.label}</h2>
               <ul className="m-0 grid list-none gap-2 p-0">
-                {(column.items || []).map((item: any) => (
-                  <li key={item.id || item.href}>
-                    <Link className={footerLink} href={item.href}>{item.label}</Link>
-                  </li>
-                ))}
+                {(column.items || []).map((item: any) => {
+                  const link = resolveLink(item.link ?? item);
+                  if (!link) return null;
+                  return (
+                    <li key={item.id || link.href}>
+                      <Link
+                        className={footerLink}
+                        href={link.href}
+                        target={link.newTab ? '_blank' : undefined}
+                        rel={link.newTab ? 'noopener noreferrer' : undefined}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

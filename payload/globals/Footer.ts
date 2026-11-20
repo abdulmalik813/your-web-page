@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload';
 import { cmsGlobalCacheHooks } from '../../lib/cms-cache';
 import { livePreviewBreakpoints, livePreviewUrl } from '../../lib/live-preview';
+import { linkField } from '../fields/link';
 
 export const Footer: GlobalConfig = {
   slug: 'footer',
@@ -19,10 +20,7 @@ export const Footer: GlobalConfig = {
         {
           name: 'items',
           type: 'array',
-          fields: [
-            { name: 'label', type: 'text', required: true },
-            { name: 'href', type: 'text', required: true },
-          ],
+          fields: [linkField({ name: 'link', label: 'Link' })],
         },
       ],
     },

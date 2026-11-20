@@ -5,7 +5,7 @@ import { draftMode } from 'next/headers';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getPreviewSecret } from '@/lib/live-preview';
-import { getServerSideURL } from '@/lib/get-url';
+import { getRequestOrigin } from '@/lib/request-origin';
 
 export async function GET(request: NextRequest): Promise<Response> {
   const { searchParams } = request.nextUrl;
@@ -25,9 +25,9 @@ export async function GET(request: NextRequest): Promise<Response> {
     });
   }
 
-  // Build destination using the configured server URL
-  const serverURL = getServerSideURL();
-  const destination = new URL(path, serverURL);
+  // Keep the preview on the same origin as the request so the admin session
+  // cookie and CSRF checks match, regardless of localhost vs. 127.0.0.1.
+  const destination = new URL(path, getRequestOrigin(request));
 
   const payload = await getPayload({ config });
   const { user } = await payload.auth({

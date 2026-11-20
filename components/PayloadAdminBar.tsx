@@ -3,7 +3,6 @@ import { headers } from 'next/headers';
 import { getPayload } from 'payload';
 import { PayloadAdminBarClient } from '@/components/PayloadAdminBarClient';
 import { getPreviewSecret } from '@/lib/live-preview';
-import { getServerSideURL } from '@/lib/get-url';
 
 export async function PayloadAdminBar({ draftEnabled }: { draftEnabled: boolean }) {
   const payload = await getPayload({ config });
@@ -13,7 +12,7 @@ export async function PayloadAdminBar({ draftEnabled }: { draftEnabled: boolean 
 
   return (
     <PayloadAdminBarClient
-      adminUrl={getServerSideURL()}
+      adminUrl=""
       draftEnabled={draftEnabled}
       previewSecret={getPreviewSecret()}
     />

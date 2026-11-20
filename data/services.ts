@@ -73,7 +73,7 @@ export const SERVICES: Service[] = [
     overview: [
       'Too many small business sites are held together with dozens of overlapping plugins that slow pages down and break whenever an update runs. We take the opposite approach: clean semantic HTML, disciplined styling, well-structured components and only the dependencies the site genuinely needs.',
       'Performance matters in practical ways. Visitors on Prince Edward Island, rural highways or mobile data connections do not wait ten seconds for heavy scripts and oversized photographs to load. We optimize images, minimize client-side JavaScript, configure clean metadata and build mobile-first layouts that feel immediate on real phones and laptops.',
-      'You stay in control of your site after launch. Where your team edits pages, announcements or resources regularly, we connect a straightforward content workflow and show you how everything works. Where a site connects to booking tools, maps, CRMs or email systems, we wire those integrations cleanly and test every edge case before going live.',
+      'You stay in control of your site after launch. Where your team edits pages, announcements or newsletter regularly, we connect a straightforward content workflow and show you how everything works. Where a site connects to booking tools, maps, CRMs or email systems, we wire those integrations cleanly and test every edge case before going live.',
     ],
     included: [
       'Mobile-first, responsive engineering tested across real browsers and screen sizes',

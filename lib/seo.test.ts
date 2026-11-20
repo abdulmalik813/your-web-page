@@ -54,16 +54,10 @@ test('page metadata uses the Settings image as a fallback and prefers a page ima
   }
 });
 
-test('livePreviewUrl returns a full URL using the browser origin', () => {
-  const prev = process.env.NEXT_PUBLIC_SERVER_URL;
-  process.env.NEXT_PUBLIC_SERVER_URL = 'https://yourwebpage.ca';
-
+test('livePreviewUrl stays on the current origin', () => {
   const previewUrl = livePreviewUrl({ collectionSlug: 'pages', data: { slug: 'contact' } });
-  assert.ok(previewUrl.startsWith('https://yourwebpage.ca/api/draft/enable?'));
+  assert.ok(previewUrl.startsWith('/api/draft/enable?'));
   assert.ok(previewUrl.includes('path=%2Fcontact'));
-
-  if (prev === undefined) delete process.env.NEXT_PUBLIC_SERVER_URL;
-  else process.env.NEXT_PUBLIC_SERVER_URL = prev;
 });
 
 test('sitemap entries contain no blog or pricing routes', () => {

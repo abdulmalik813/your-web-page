@@ -7,7 +7,7 @@ import { PayloadLivePreview } from '@/components/PayloadLivePreview';
 import { PayloadAdminBar } from '@/components/PayloadAdminBar';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { SiteBackground } from '@/components/SiteBackground';
-import { getCmsFooter, getCmsNavigation, getCmsServices, getCmsSettings } from '@/lib/cms';
+import { getCmsFooter, getCmsNavigation, getCmsSettings } from '@/lib/cms';
 import { buildCanonicalUrl, getBaseUrl, resolveOgImageUrl } from '@/lib/seo';
 import { draftMode } from 'next/headers';
 import './globals.css';
@@ -40,6 +40,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(getBaseUrl()),
     title,
+    icons: {
+      apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+      other: [{ rel: 'mask-icon', url: '/brand/safari-pinned-tab.svg', color: '#f97316' }],
+    },
     description,
     alternates: {
       canonical: buildCanonicalUrl('/'),
@@ -64,11 +68,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled: draft } = await draftMode();
-  const [settings, navigation, footer, services] = await Promise.all([
+  const [settings, navigation, footer] = await Promise.all([
     getCmsSettings(draft),
     getCmsNavigation(draft),
     getCmsFooter(draft),
-    getCmsServices(draft),
   ]);
 
   const localBusiness = {
@@ -96,7 +99,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <SiteBackground />
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusiness) }} />
           <PayloadAdminBar draftEnabled={draft} />
-          <SiteHeader settings={settings} navigation={navigation} services={services} />
+          <SiteHeader settings={settings} navigation={navigation} />
           <main id="main" tabIndex={-1} className="relative z-10 w-full max-w-full overflow-x-clip outline-none">
             <MotionShell>{children}</MotionShell>
           </main>

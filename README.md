@@ -22,7 +22,7 @@ invalidate the related cache tags and routes.
 Live preview requires `NEXT_PUBLIC_SERVER_URL` to point to this site and an authenticated Payload
 session on the same origin. Preview links enable Next.js Draft Mode through
 `/api/draft/enable`; use `/api/draft/disable` to leave preview. Pages, services,
-projects, resources, FAQs, and testimonials support draft versions, so apply the
+projects, newsletter, FAQs, and testimonials support draft versions, so apply the
 corresponding Payload database schema changes before deploying.
 Authenticated editors see a site toolbar with links to Payload Admin and controls
 to enable or exit preview mode.
@@ -50,7 +50,7 @@ development uses Silo at `http://localhost:9000`; its console is available at
 `http://localhost:9001`.
 
 The Payload admin includes a shared Media collection. Upload an image there,
-then select it in the Image field on a service, project, or resource. Those
+then select it in the Image field on a service, project, or newsletter. Those
 images are used on listing cards and detail pages; no generated card patterns
 are used as substitutes.
 

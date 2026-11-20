@@ -1,14 +1,14 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-interface ResourceLinkBlockProps {
+interface NewsletterLinkBlockProps {
   label: string;
   href: string;
   style?: 'button' | 'link' | string | null;
   newTab?: boolean | null;
 }
 
-export function ResourceLinkBlock({ label, href, style, newTab }: ResourceLinkBlockProps) {
+export function NewsletterLinkBlock({ label, href, style, newTab }: NewsletterLinkBlockProps) {
   const target = newTab ? '_blank' : undefined;
   const rel = newTab ? 'noopener noreferrer' : undefined;
 

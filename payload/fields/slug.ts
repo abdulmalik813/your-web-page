@@ -1,4 +1,4 @@
-import type { CollectionBeforeValidateHook, TextField } from 'payload';
+import { ValidationError, type CollectionBeforeValidateHook, type TextField } from 'payload';
 
 type SingleTextField = Extract<TextField, { hasMany?: false }>;
 
@@ -13,27 +13,50 @@ export function toSlug(value: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+/** Normalize each segment separately so nested page paths retain their slashes. */
+export function toPageSlug(value: string): string {
+  return value.trim().replace(/^\/+|\/+$/g, '').split('/').map(toSlug).join('/');
+}
+
+export function validatePageSlug(slug: string): true | string {
+  if (!slug || slug.split('/').some((segment) => !segment)) {
+    return 'Enter a page slug with a non-empty name between each slash, such as test/more.';
+  }
+  const segments = slug.split('/');
+  if (['unsubscribe', 'admin', 'api', 'robotstxt', 'sitemapxml', '_next'].includes(segments[0])) {
+    return `/${slug} is reserved for an existing site route. Choose another page slug.`;
+  }
+  if (segments.length === 2 && ['services', 'our-work', 'newsletters'].includes(segments[0])) {
+    return `/${slug} is reserved for existing site content. Choose another page slug.`;
+  }
+  return true;
+}
+
 /**
  * A `beforeValidate` collection hook that auto-fills `slug` from `sourceField`
  * when the document is new (no existing slug) or when the slug is explicitly empty.
  *
  * Usage: add to `hooks.beforeValidate` on the collection.
  */
-export function makeSlugHook(sourceField = 'title'): CollectionBeforeValidateHook {
-  return ({ data, originalDoc }) => {
-    // If the slug is already set and not being cleared, leave it alone
+export function makeSlugHook(sourceField = 'title', allowNested = false): CollectionBeforeValidateHook {
+  return ({ data, originalDoc, req }) => {
     const incomingSlug = data?.slug;
-    if (incomingSlug && incomingSlug.trim() !== '') {
-      return { ...data, slug: toSlug(incomingSlug) };
-    }
-
-    // Auto-generate from source field (new doc or slug was cleared)
     const source = data?.[sourceField] ?? originalDoc?.[sourceField];
-    if (source && typeof source === 'string') {
-      return { ...data, slug: toSlug(source) };
-    }
+    const raw = typeof incomingSlug === 'string' && incomingSlug.trim()
+      ? incomingSlug
+      : incomingSlug === undefined && originalDoc?.slug
+        ? originalDoc.slug
+        : source;
 
-    return data;
+    if (typeof raw !== 'string') return data;
+    const slug = allowNested ? toPageSlug(raw) : toSlug(raw);
+    if (allowNested) {
+      const result = validatePageSlug(slug);
+      if (result !== true) {
+        throw new ValidationError({ collection: 'pages', errors: [{ path: 'slug', message: result }], req });
+      }
+    }
+    return { ...data, slug };
   };
 }
 
@@ -45,7 +68,7 @@ export function makeSlugHook(sourceField = 'title'): CollectionBeforeValidateHoo
  * @param watchField - The field name to watch/generate from (default: 'title')
  * @param overrides  - Any Field overrides to merge in
  */
-export function slugField(watchField = 'title', overrides: Partial<SingleTextField> = {}): SingleTextField {
+export function slugField(watchField = 'title', overrides: Partial<SingleTextField> = {}, allowNested = false): SingleTextField {
   return {
     name: 'slug',
     type: 'text',
@@ -59,6 +82,7 @@ export function slugField(watchField = 'title', overrides: Partial<SingleTextFie
           path: '@/payload/components/SlugField#SlugField',
           clientProps: {
             watchField,
+            allowNested,
           },
         },
       },

@@ -2,7 +2,7 @@ import { MediaFigure } from '@/components/MediaFigure';
 
 type BlockSize = 'full' | 'wide' | 'medium';
 
-interface ResourceMediaBlockProps {
+interface NewsletterMediaBlockProps {
   image: unknown;
   caption?: string | null;
   size?: BlockSize | string | null;
@@ -14,7 +14,7 @@ const sizeToAspect: Record<string, 'wide' | 'card'> = {
   medium: 'card',
 };
 
-export function ResourceMediaBlock({ image, caption, size }: ResourceMediaBlockProps) {
+export function NewsletterMediaBlock({ image, caption, size }: NewsletterMediaBlockProps) {
   const aspect = sizeToAspect[size ?? 'wide'] ?? 'wide';
   const wrapClass =
     size === 'medium'

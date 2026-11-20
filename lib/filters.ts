@@ -1,16 +1,16 @@
-import type { Project, ProjectType, ResourceCategory, ResourceEntry } from './cms';
+import type { Project, ProjectType, NewsletterCategory, NewsletterEntry } from './cms';
 
 export type ProjectFilter = 'All' | ProjectType;
-export type ResourceFilter = 'All' | ResourceCategory;
+export type NewsletterFilter = 'All' | NewsletterCategory;
 
 export function filterProjects(projects: Project[], type: ProjectFilter): Project[] {
   if (type === 'All') return projects;
   return projects.filter((project) => project.type === type);
 }
 
-export function filterResources(resources: ResourceEntry[], category: ResourceFilter, query: string): ResourceEntry[] {
+export function filterNewsletters(newsletter: NewsletterEntry[], category: NewsletterFilter, query: string): NewsletterEntry[] {
   const normalizedQuery = query.trim().toLowerCase();
-  return resources.filter((entry) => {
+  return newsletter.filter((entry) => {
     if (category !== 'All' && entry.category !== category) return false;
     if (!normalizedQuery) return true;
     const searchable = [

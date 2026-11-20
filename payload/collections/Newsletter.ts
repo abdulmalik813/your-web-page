@@ -24,28 +24,32 @@ import {
 import { cmsCollectionCacheHooks } from '../../lib/cms-cache';
 import { livePreviewBreakpoints, livePreviewUrl } from '../../lib/live-preview';
 import { slugField, makeSlugHook } from '../fields/slug';
+import { linkField } from '../fields/link';
 
-export const Resources: CollectionConfig = {
-  slug: 'resources',
+export const Newsletter: CollectionConfig = {
+  slug: 'newsletter',
+  dbName: 'newsletter',
+  labels: { singular: 'Newsletter', plural: 'Newsletters' },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', 'publishDate', 'readTime', 'sortOrder'],
     livePreview: {
-      url: ({ data }) => livePreviewUrl({ data, collectionSlug: 'resources' }),
+      url: ({ data }) => livePreviewUrl({ data, collectionSlug: 'newsletter' }),
       breakpoints: livePreviewBreakpoints,
     },
   },
   access: {
-    read: () => true,
+    read: ({ req }) => req.user ? true : { _status: { equals: 'published' } },
     create: ({ req }) => Boolean(req.user),
     update: ({ req }) => Boolean(req.user),
     delete: ({ req }) => Boolean(req.user),
   },
   hooks: {
-    ...cmsCollectionCacheHooks('resources'),
+    ...cmsCollectionCacheHooks('newsletter'),
     beforeValidate: [makeSlugHook('title')],
   },
   fields: [
+    { name: 'sendNewsletter', type: 'ui', admin: { components: { Field: '@/payload/components/admin/SendNewsletter#SendNewsletter' } } },
     slugField('title'),
     {
       name: 'sortOrder',
@@ -65,7 +69,7 @@ export const Resources: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
       admin: {
-        description: 'Optional image shown on resource cards and its detail page.',
+        description: 'Optional image shown on newsletter cards and its detail page.',
       },
     },
     {
@@ -130,7 +134,7 @@ export const Resources: CollectionConfig = {
           BlockquoteFeature(),
           HorizontalRuleFeature(),
           LinkFeature({
-            enabledCollections: ['pages', 'resources', 'services', 'projects'],
+            enabledCollections: ['pages', 'newsletter', 'services', 'projects'],
           }),
           UploadFeature({
             collections: {
@@ -146,7 +150,7 @@ export const Resources: CollectionConfig = {
             blocks: [
               {
                 slug: 'mediaBlock',
-                interfaceName: 'ResourceMediaBlock',
+                interfaceName: 'NewsletterMediaBlock',
                 labels: { singular: 'Media Block', plural: 'Media Blocks' },
                 fields: [
                   { name: 'image', type: 'upload', relationTo: 'media', required: true },
@@ -165,11 +169,10 @@ export const Resources: CollectionConfig = {
               },
               {
                 slug: 'linkBlock',
-                interfaceName: 'ResourceLinkBlock',
+                interfaceName: 'NewsletterLinkBlock',
                 labels: { singular: 'Link / Button Block', plural: 'Link / Button Blocks' },
                 fields: [
-                  { name: 'label', type: 'text', required: true },
-                  { name: 'href', type: 'text', required: true },
+                  linkField({ name: 'link', label: 'Link' }),
                   {
                     name: 'style',
                     type: 'select',
@@ -179,7 +182,6 @@ export const Resources: CollectionConfig = {
                     ],
                     defaultValue: 'button',
                   },
-                  { name: 'newTab', type: 'checkbox', defaultValue: false },
                 ],
               },
             ],

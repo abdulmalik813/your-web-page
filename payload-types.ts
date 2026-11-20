@@ -139,21 +139,22 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_83E8DF84".
+ * via the `definition` "LexicalNodes_B308E4E9".
  */
-export type LexicalNodes_83E8DF84 =
+export type LexicalNodes_B308E4E9 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_83E8DF84>
+  | SerializedParagraphNode<LexicalNodes_B308E4E9>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_83E8DF84>
+  | SerializedQuoteNode<LexicalNodes_B308E4E9>
   | SerializedRelationshipNode<
       | 'pages'
       | 'services'
       | 'projects'
-      | 'resources'
+      | 'newsletter'
+      | 'subscribers'
       | 'faqs'
       | 'testimonials'
       | 'users'
@@ -163,29 +164,29 @@ export type LexicalNodes_83E8DF84 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_83E8DF84, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_83E8DF84, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_83E8DF84>
-  | SerializedListItemNode<LexicalNodes_83E8DF84>
-  | SerializedHeadingNode<LexicalNodes_83E8DF84>;
+  | SerializedAutoLinkNode<LexicalNodes_B308E4E9, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_B308E4E9, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_B308E4E9>
+  | SerializedListItemNode<LexicalNodes_B308E4E9>
+  | SerializedHeadingNode<LexicalNodes_B308E4E9>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_48719D92".
+ * via the `definition` "LexicalNodes_CF7EE84F".
  */
-export type LexicalNodes_48719D92 =
+export type LexicalNodes_CF7EE84F =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_48719D92>
-  | SerializedBlockNode<ResourceMediaBlock | ResourceLinkBlock>
+  | SerializedParagraphNode<LexicalNodes_CF7EE84F>
+  | SerializedBlockNode<NewsletterMediaBlock | NewsletterLinkBlock>
   | SerializedUploadNode<'media', LexicalUploadFields_EDEBC1E9>
-  | SerializedAutoLinkNode<LexicalNodes_48719D92, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_48719D92, LexicalLinkFields>
+  | SerializedAutoLinkNode<LexicalNodes_CF7EE84F, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_CF7EE84F, LexicalLinkFields>
   | SerializedHorizontalRuleNode
-  | SerializedQuoteNode<LexicalNodes_48719D92>
-  | SerializedListNode<LexicalNodes_48719D92>
-  | SerializedListItemNode<LexicalNodes_48719D92>
-  | SerializedHeadingNode<LexicalNodes_48719D92, 'h2' | 'h3' | 'h4'>;
+  | SerializedQuoteNode<LexicalNodes_CF7EE84F>
+  | SerializedListNode<LexicalNodes_CF7EE84F>
+  | SerializedListItemNode<LexicalNodes_CF7EE84F>
+  | SerializedHeadingNode<LexicalNodes_CF7EE84F, 'h2' | 'h3' | 'h4'>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -208,7 +209,8 @@ export interface Config {
     pages: Page;
     services: Service;
     projects: Project;
-    resources: Resource;
+    newsletter: Newsletter;
+    subscribers: Subscriber;
     faqs: Faq;
     testimonials: Testimonial;
     media: Media;
@@ -228,7 +230,8 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
-    resources: ResourcesSelect<false> | ResourcesSelect<true>;
+    newsletter: NewsletterSelect<false> | NewsletterSelect<true>;
+    subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     faqs: FaqsSelect<false> | FaqsSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -327,10 +330,58 @@ export interface HeroBlock {
   title: string;
   highlight?: string | null;
   lead?: string | null;
-  primaryLabel?: string | null;
-  primaryHref?: string | null;
-  secondaryLabel?: string | null;
-  secondaryHref?: string | null;
+  primaryLink: {
+    /**
+     * Leave blank to use the linked document title.
+     */
+    label?: string | null;
+    type: 'internal' | 'external';
+    internal?:
+      | ({
+          relationTo: 'pages';
+          value: string | Page;
+        } | null)
+      | ({
+          relationTo: 'services';
+          value: string | Service;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: string | Project;
+        } | null)
+      | ({
+          relationTo: 'newsletter';
+          value: string | Newsletter;
+        } | null);
+    url?: string | null;
+    newTab?: boolean | null;
+  };
+  secondaryLink: {
+    /**
+     * Leave blank to use the linked document title.
+     */
+    label?: string | null;
+    type: 'internal' | 'external';
+    internal?:
+      | ({
+          relationTo: 'pages';
+          value: string | Page;
+        } | null)
+      | ({
+          relationTo: 'services';
+          value: string | Service;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: string | Project;
+        } | null)
+      | ({
+          relationTo: 'newsletter';
+          value: string | Newsletter;
+        } | null);
+    url?: string | null;
+    newTab?: boolean | null;
+  };
   facts?:
     | {
         text: string;
@@ -343,329 +394,56 @@ export interface HeroBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock".
+ * via the `definition` "services".
  */
-export interface ContentBlock {
-  eyebrow?: string | null;
-  heading?: string | null;
-  content?: LexicalRichText<LexicalNodes_83E8DF84> | null;
-  columns?: ('one' | 'two') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'content';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CtaBlock".
- */
-export interface CtaBlock {
-  eyebrow?: string | null;
-  title: string;
-  text?: string | null;
-  primaryLabel?: string | null;
-  primaryHref?: string | null;
-  secondaryLabel?: string | null;
-  secondaryHref?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'cta';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CardGridBlock".
- */
-export interface CardGridBlock {
-  eyebrow?: string | null;
-  heading?: string | null;
-  source: 'services' | 'projects' | 'resources' | 'faqs' | 'testimonials' | 'process' | 'custom';
-  limit?: number | null;
-  notice?: string | null;
-  cards?:
-    | {
-        eyebrow?: string | null;
-        title: string;
-        description?: string | null;
-        href?: string | null;
-        number?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'cardGrid';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TestimonialsBlock".
- */
-export interface TestimonialsBlock {
-  eyebrow?: string | null;
-  heading?: string | null;
-  limit?: number | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'testimonials';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock".
- */
-export interface FormBlock {
-  form: string | Form;
-  eyebrow?: string | null;
-  heading?: string | null;
-  description?: LexicalRichText<LexicalNodes_83E8DF84> | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'form';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "forms".
- */
-export interface Form {
+export interface Service {
   id: string;
+  slug: string;
+  sortOrder?: number | null;
   title: string;
-  fields?: (Checkbox | Country | Email | Message | Number | Select | Text | Textarea | Date)[] | null;
-  submitButtonLabel?: string | null;
-  confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: LexicalRichText<LexicalNodes_83E8DF84>;
-  redirect?: {
-    type?: ('reference' | 'custom') | null;
-    reference?: {
-      relationTo: 'pages';
-      value: string | Page;
-    } | null;
-    url?: string | null;
-  };
   /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. Handlebars expressions are supported.
+   * Optional image shown on service cards and its detail page.
    */
-  emails?:
-    | {
-        emailTo?: string | null;
-        cc?: string | null;
-        bcc?: string | null;
-        replyTo?: string | null;
-        emailFrom?: string | null;
-        subject: string;
-        messageType: 'rich_text' | 'html';
-        message?: LexicalRichText<LexicalNodes_83E8DF84> | null;
-        htmlMessage?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Checkbox".
- */
-export interface Checkbox {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  required?: boolean | null;
-  defaultValue?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'checkbox';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Country".
- */
-export interface Country {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'country';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Email".
- */
-export interface Email {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'email';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Message".
- */
-export interface Message {
-  message?: LexicalRichText<LexicalNodes_83E8DF84> | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'message';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Number".
- */
-export interface Number {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  defaultValue?: number | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'number';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Select".
- */
-export interface Select {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  defaultValue?: string | null;
-  placeholder?: string | null;
-  options?:
-    | {
-        label: string;
-        value: string;
-        id?: string | null;
-      }[]
-    | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'select';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Text".
- */
-export interface Text {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  defaultValue?: string | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'text';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Textarea".
- */
-export interface Textarea {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  defaultValue?: string | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'textarea';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Date".
- */
-export interface Date {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  required?: boolean | null;
-  defaultValue?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'date';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  name?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  resetPasswordRequestedAt?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-        refreshCount?: number | null;
-        refreshedAt?: string | null;
-        label?: string | null;
-        type?: string | null;
-        metadata?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LegalBlock".
- */
-export interface LegalBlock {
-  sections: {
-    heading: string;
-    paragraphs?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
-    bullets?:
-      | {
-          text: string;
-          id?: string | null;
-        }[]
-      | null;
+  image?: (string | null) | Media;
+  short: string;
+  metaDescription: string;
+  intro: string;
+  overview: {
+    text: string;
     id?: string | null;
   }[];
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'legal';
+  included: {
+    text: string;
+    id?: string | null;
+  }[];
+  forWho: {
+    text: string;
+    id?: string | null;
+  }[];
+  steps: {
+    title: string;
+    description: string;
+    id?: string | null;
+  }[];
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -796,45 +574,11 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services".
+ * via the `definition` "users".
  */
-export interface Service {
+export interface User {
   id: string;
-  slug: string;
-  sortOrder?: number | null;
-  title: string;
-  /**
-   * Optional image shown on service cards and its detail page.
-   */
-  image?: (string | null) | Media;
-  short: string;
-  metaDescription: string;
-  intro: string;
-  overview: {
-    text: string;
-    id?: string | null;
-  }[];
-  included: {
-    text: string;
-    id?: string | null;
-  }[];
-  forWho: {
-    text: string;
-    id?: string | null;
-  }[];
-  steps: {
-    title: string;
-    description: string;
-    id?: string | null;
-  }[];
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (string | null) | Media;
-  };
+  name?: string | null;
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -845,7 +589,36 @@ export interface Service {
   } | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+        refreshCount?: number | null;
+        refreshedAt?: string | null;
+        label?: string | null;
+        type?: string | null;
+        metadata?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -895,15 +668,15 @@ export interface Project {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "resources".
+ * via the `definition` "newsletter".
  */
-export interface Resource {
+export interface Newsletter {
   id: string;
   slug: string;
   sortOrder?: number | null;
   title: string;
   /**
-   * Optional image shown on resource cards and its detail page.
+   * Optional image shown on newsletter cards and its detail page.
    */
   image?: (string | null) | Media;
   excerpt: string;
@@ -915,7 +688,7 @@ export interface Resource {
   publishDate: string;
   isoDate: string;
   readTime: number;
-  content: LexicalRichText<LexicalNodes_48719D92>;
+  content: LexicalRichText<LexicalNodes_CF7EE84F>;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -935,6 +708,373 @@ export interface Resource {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock".
+ */
+export interface ContentBlock {
+  eyebrow?: string | null;
+  heading?: string | null;
+  content?: LexicalRichText<LexicalNodes_B308E4E9> | null;
+  columns?: ('one' | 'two') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CtaBlock".
+ */
+export interface CtaBlock {
+  eyebrow?: string | null;
+  title: string;
+  text?: string | null;
+  primaryLink: {
+    /**
+     * Leave blank to use the linked document title.
+     */
+    label?: string | null;
+    type: 'internal' | 'external';
+    internal?:
+      | ({
+          relationTo: 'pages';
+          value: string | Page;
+        } | null)
+      | ({
+          relationTo: 'services';
+          value: string | Service;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: string | Project;
+        } | null)
+      | ({
+          relationTo: 'newsletter';
+          value: string | Newsletter;
+        } | null);
+    url?: string | null;
+    newTab?: boolean | null;
+  };
+  secondaryLink: {
+    /**
+     * Leave blank to use the linked document title.
+     */
+    label?: string | null;
+    type: 'internal' | 'external';
+    internal?:
+      | ({
+          relationTo: 'pages';
+          value: string | Page;
+        } | null)
+      | ({
+          relationTo: 'services';
+          value: string | Service;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: string | Project;
+        } | null)
+      | ({
+          relationTo: 'newsletter';
+          value: string | Newsletter;
+        } | null);
+    url?: string | null;
+    newTab?: boolean | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CardGridBlock".
+ */
+export interface CardGridBlock {
+  eyebrow?: string | null;
+  heading?: string | null;
+  source: 'services' | 'projects' | 'newsletter' | 'faqs' | 'testimonials' | 'process' | 'custom';
+  limit?: number | null;
+  notice?: string | null;
+  cards?:
+    | {
+        eyebrow?: string | null;
+        title: string;
+        description?: string | null;
+        link: {
+          type: 'internal' | 'external';
+          internal?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: string | Service;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
+              } | null)
+            | ({
+                relationTo: 'newsletter';
+                value: string | Newsletter;
+              } | null);
+          url?: string | null;
+          newTab?: boolean | null;
+        };
+        number?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cardGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock".
+ */
+export interface TestimonialsBlock {
+  eyebrow?: string | null;
+  heading?: string | null;
+  limit?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testimonials';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormBlock".
+ */
+export interface FormBlock {
+  form: string | Form;
+  eyebrow?: string | null;
+  heading?: string | null;
+  description?: LexicalRichText<LexicalNodes_B308E4E9> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'form';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms".
+ */
+export interface Form {
+  id: string;
+  title: string;
+  fields?: (Checkbox | Country | Email | Message | Number | Select | Text | Textarea | Date)[] | null;
+  submitButtonLabel?: string | null;
+  confirmationType?: ('message' | 'redirect') | null;
+  confirmationMessage?: LexicalRichText<LexicalNodes_B308E4E9>;
+  redirect?: {
+    type?: ('reference' | 'custom') | null;
+    reference?: {
+      relationTo: 'pages';
+      value: string | Page;
+    } | null;
+    url?: string | null;
+  };
+  /**
+   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. Handlebars expressions are supported.
+   */
+  emails?:
+    | {
+        emailTo?: string | null;
+        cc?: string | null;
+        bcc?: string | null;
+        replyTo?: string | null;
+        emailFrom?: string | null;
+        subject: string;
+        messageType: 'rich_text' | 'html';
+        message?: LexicalRichText<LexicalNodes_B308E4E9> | null;
+        htmlMessage?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Checkbox".
+ */
+export interface Checkbox {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  defaultValue?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'checkbox';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Country".
+ */
+export interface Country {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'country';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Email".
+ */
+export interface Email {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'email';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Message".
+ */
+export interface Message {
+  message?: LexicalRichText<LexicalNodes_B308E4E9> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'message';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Number".
+ */
+export interface Number {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  defaultValue?: number | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'number';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Select".
+ */
+export interface Select {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  defaultValue?: string | null;
+  placeholder?: string | null;
+  options?:
+    | {
+        label: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'select';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Text".
+ */
+export interface Text {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  defaultValue?: string | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'text';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Textarea".
+ */
+export interface Textarea {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  defaultValue?: string | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textarea';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Date".
+ */
+export interface Date {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  defaultValue?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'date';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LegalBlock".
+ */
+export interface LegalBlock {
+  sections: {
+    heading: string;
+    paragraphs?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    bullets?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    id?: string | null;
+  }[];
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'legal';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers".
+ */
+export interface Subscriber {
+  id: string;
+  email: string;
+  status: 'subscribed' | 'unsubscribed';
+  unsubscribeToken: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1020,8 +1160,8 @@ export interface Redirect {
           value: string | Project;
         } | null)
       | ({
-          relationTo: 'resources';
-          value: string | Resource;
+          relationTo: 'newsletter';
+          value: string | Newsletter;
         } | null);
     url?: string | null;
   };
@@ -1060,8 +1200,8 @@ export interface Search {
         value: string | Project;
       }
     | {
-        relationTo: 'resources';
-        value: string | Resource;
+        relationTo: 'newsletter';
+        value: string | Newsletter;
       }
     | {
         relationTo: 'faqs';
@@ -1135,8 +1275,12 @@ export interface PayloadLockedDocument {
         value: string | Project;
       } | null)
     | ({
-        relationTo: 'resources';
-        value: string | Resource;
+        relationTo: 'newsletter';
+        value: string | Newsletter;
+      } | null)
+    | ({
+        relationTo: 'subscribers';
+        value: string | Subscriber;
       } | null)
     | ({
         relationTo: 'faqs';
@@ -1274,10 +1418,24 @@ export interface HeroBlockSelect<T extends boolean = true> {
   title?: T;
   highlight?: T;
   lead?: T;
-  primaryLabel?: T;
-  primaryHref?: T;
-  secondaryLabel?: T;
-  secondaryHref?: T;
+  primaryLink?:
+    | T
+    | {
+        label?: T;
+        type?: T;
+        internal?: T;
+        url?: T;
+        newTab?: T;
+      };
+  secondaryLink?:
+    | T
+    | {
+        label?: T;
+        type?: T;
+        internal?: T;
+        url?: T;
+        newTab?: T;
+      };
   facts?:
     | T
     | {
@@ -1307,10 +1465,24 @@ export interface CtaBlockSelect<T extends boolean = true> {
   eyebrow?: T;
   title?: T;
   text?: T;
-  primaryLabel?: T;
-  primaryHref?: T;
-  secondaryLabel?: T;
-  secondaryHref?: T;
+  primaryLink?:
+    | T
+    | {
+        label?: T;
+        type?: T;
+        internal?: T;
+        url?: T;
+        newTab?: T;
+      };
+  secondaryLink?:
+    | T
+    | {
+        label?: T;
+        type?: T;
+        internal?: T;
+        url?: T;
+        newTab?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -1330,7 +1502,14 @@ export interface CardGridBlockSelect<T extends boolean = true> {
         eyebrow?: T;
         title?: T;
         description?: T;
-        href?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              internal?: T;
+              url?: T;
+              newTab?: T;
+            };
         number?: T;
         id?: T;
       };
@@ -1477,9 +1656,9 @@ export interface ProjectsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "resources_select".
+ * via the `definition` "newsletter_select".
  */
-export interface ResourcesSelect<T extends boolean = true> {
+export interface NewsletterSelect<T extends boolean = true> {
   slug?: T;
   sortOrder?: T;
   title?: T;
@@ -1508,6 +1687,19 @@ export interface ResourcesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers_select".
+ */
+export interface SubscribersSelect<T extends boolean = true> {
+  email?: T;
+  status?: T;
+  unsubscribeToken?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2029,26 +2221,77 @@ export interface Setting {
  */
 export interface Navigation {
   id: string;
-  homeLabel?: string | null;
-  contactLabel?: string | null;
-  contactHref?: string | null;
-  projectLabel?: string | null;
-  projectHref?: string | null;
   items?:
     | {
-        label: string;
-        href: string;
+        link: {
+          /**
+           * Leave blank to use the linked document title.
+           */
+          label?: string | null;
+          type: 'internal' | 'external';
+          internal?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: string | Service;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
+              } | null)
+            | ({
+                relationTo: 'newsletter';
+                value: string | Newsletter;
+              } | null);
+          url?: string | null;
+          newTab?: boolean | null;
+        };
+        /**
+         * Optional links shown in the right side of the dropdown.
+         */
+        children?:
+          | {
+              link: {
+                /**
+                 * Leave blank to use the linked document title.
+                 */
+                label?: string | null;
+                type: 'internal' | 'external';
+                internal?:
+                  | ({
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'services';
+                      value: string | Service;
+                    } | null)
+                  | ({
+                      relationTo: 'projects';
+                      value: string | Project;
+                    } | null)
+                  | ({
+                      relationTo: 'newsletter';
+                      value: string | Newsletter;
+                    } | null);
+                url?: string | null;
+                newTab?: boolean | null;
+              };
+              id?: string | null;
+            }[]
+          | null;
+        /**
+         * Text shown in the left panel when this item has dropdown items.
+         */
+        dropdownEyebrow?: string | null;
+        dropdownHeading?: string | null;
+        dropdownCtaLabel?: string | null;
         id?: string | null;
       }[]
     | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (string | null) | Media;
-  };
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -2073,22 +2316,38 @@ export interface Footer {
         label: string;
         items?:
           | {
-              label: string;
-              href: string;
+              link: {
+                /**
+                 * Leave blank to use the linked document title.
+                 */
+                label?: string | null;
+                type: 'internal' | 'external';
+                internal?:
+                  | ({
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'services';
+                      value: string | Service;
+                    } | null)
+                  | ({
+                      relationTo: 'projects';
+                      value: string | Project;
+                    } | null)
+                  | ({
+                      relationTo: 'newsletter';
+                      value: string | Newsletter;
+                    } | null);
+                url?: string | null;
+                newTab?: boolean | null;
+              };
               id?: string | null;
             }[]
           | null;
         id?: string | null;
       }[]
     | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (string | null) | Media;
-  };
   createdBy?: {
     relationTo: 'users';
     value: string | User;
@@ -2163,24 +2422,36 @@ export interface SettingsSelect<T extends boolean = true> {
  * via the `definition` "navigation_select".
  */
 export interface NavigationSelect<T extends boolean = true> {
-  homeLabel?: T;
-  contactLabel?: T;
-  contactHref?: T;
-  projectLabel?: T;
-  projectHref?: T;
   items?:
     | T
     | {
-        label?: T;
-        href?: T;
+        link?:
+          | T
+          | {
+              label?: T;
+              type?: T;
+              internal?: T;
+              url?: T;
+              newTab?: T;
+            };
+        children?:
+          | T
+          | {
+              link?:
+                | T
+                | {
+                    label?: T;
+                    type?: T;
+                    internal?: T;
+                    url?: T;
+                    newTab?: T;
+                  };
+              id?: T;
+            };
+        dropdownEyebrow?: T;
+        dropdownHeading?: T;
+        dropdownCtaLabel?: T;
         id?: T;
-      };
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
       };
   createdBy?: T;
   updatedBy?: T;
@@ -2202,18 +2473,18 @@ export interface FooterSelect<T extends boolean = true> {
         items?:
           | T
           | {
-              label?: T;
-              href?: T;
+              link?:
+                | T
+                | {
+                    label?: T;
+                    type?: T;
+                    internal?: T;
+                    url?: T;
+                    newTab?: T;
+                  };
               id?: T;
             };
         id?: T;
-      };
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
       };
   createdBy?: T;
   updatedBy?: T;
@@ -2253,7 +2524,8 @@ export interface CollectionQueryWidget {
       | 'pages'
       | 'services'
       | 'projects'
-      | 'resources'
+      | 'newsletter'
+      | 'subscribers'
       | 'faqs'
       | 'testimonials'
       | 'media'
@@ -2288,7 +2560,8 @@ export interface ActivityWidget {
           | 'pages'
           | 'services'
           | 'projects'
-          | 'resources'
+          | 'newsletter'
+          | 'subscribers'
           | 'faqs'
           | 'testimonials'
           | 'media'
@@ -2314,9 +2587,9 @@ export interface UploadDropzoneWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ResourceMediaBlock".
+ * via the `definition` "NewsletterMediaBlock".
  */
-export interface ResourceMediaBlock {
+export interface NewsletterMediaBlock {
   id: string;
   blockType: 'mediaBlock';
   image: string | Media;
@@ -2326,15 +2599,38 @@ export interface ResourceMediaBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ResourceLinkBlock".
+ * via the `definition` "NewsletterLinkBlock".
  */
-export interface ResourceLinkBlock {
+export interface NewsletterLinkBlock {
   id: string;
   blockType: 'linkBlock';
-  label: string;
-  href: string;
+  link: {
+    /**
+     * Leave blank to use the linked document title.
+     */
+    label?: string | null;
+    type: 'internal' | 'external';
+    internal?:
+      | ({
+          relationTo: 'pages';
+          value: string | Page;
+        } | null)
+      | ({
+          relationTo: 'services';
+          value: string | Service;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: string | Project;
+        } | null)
+      | ({
+          relationTo: 'newsletter';
+          value: string | Newsletter;
+        } | null);
+    url?: string | null;
+    newTab?: boolean | null;
+  };
   style?: ('button' | 'link') | null;
-  newTab?: boolean | null;
   blockName?: string | null;
 }
 /**

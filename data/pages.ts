@@ -235,7 +235,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
   {
     heading: '2. Information we collect',
     bullets: [
-      'Information you provide directly: such as your name, business name, email address, telephone number, location, current website URL and project notes submitted through our Contact or Start a Project forms, or sent to us by email or phone.',
+      'Information you provide directly: such as your name, business name, email address, telephone number, location, current website URL and project notes submitted through our Contact form, or sent to us by email or phone.',
       'Technical and operational data: basic server logs (such as request timestamps, browser user-agent and requested paths) used strictly for security, reliability and spam prevention.',
       'Essential technical storage required for standard site security and form submission handling.',
     ],

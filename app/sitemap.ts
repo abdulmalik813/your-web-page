@@ -1,16 +1,16 @@
 import type { MetadataRoute } from 'next';
 import { unstable_cache } from 'next/cache';
-import { getCmsPages, getCmsProjects, getCmsResources, getCmsServices } from '@/lib/cms';
+import { getCmsPages, getCmsProjects, getCmsNewsletters, getCmsServices } from '@/lib/cms';
 import { getBaseUrl } from '@/lib/seo';
 
 const getCachedSitemap = unstable_cache(
   async (): Promise<MetadataRoute.Sitemap> => {
     const base = getBaseUrl();
-    const [pages, services, projects, resources] = await Promise.all([
+    const [pages, services, projects, newsletter] = await Promise.all([
       getCmsPages(),
       getCmsServices(),
       getCmsProjects(),
-      getCmsResources(),
+      getCmsNewsletters(),
     ]);
 
     const entries: MetadataRoute.Sitemap = pages.map((page) => {
@@ -41,10 +41,10 @@ const getCachedSitemap = unstable_cache(
       });
     }
 
-    for (const resource of resources) {
+    for (const entry of newsletter) {
       entries.push({
-        url: `${base}/resources/${resource.slug}`,
-        lastModified: resource.updatedAt ? new Date(resource.updatedAt) : undefined,
+        url: `${base}/newsletters/${entry.slug}`,
+        lastModified: entry.updatedAt ? new Date(entry.updatedAt) : undefined,
         changeFrequency: 'monthly',
         priority: 0.75,
       });

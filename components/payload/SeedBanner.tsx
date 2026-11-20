@@ -8,7 +8,7 @@ interface SeedStatusResponse {
   counts: {
     services: number;
     projects: number;
-    resources: number;
+    newsletter: number;
     faqs: number;
     testimonials: number;
     pages: number;
@@ -17,7 +17,7 @@ interface SeedStatusResponse {
   totals: {
     services: number;
     projects: number;
-    resources: number;
+    newsletter: number;
     faqs: number;
     testimonials: number;
     pages: number;
@@ -31,7 +31,7 @@ interface SeedPostResponse {
   report?: {
     services: { created: number; updated: number };
     projects: { created: number; updated: number };
-    resources: { created: number; updated: number };
+    newsletter: { created: number; updated: number };
     faqs: { created: number; updated: number };
     testimonials: { created: number; updated: number };
     pages: { created: number; updated: number };
@@ -111,7 +111,7 @@ export const SeedBanner: React.FC = () => {
 
       const r = data.report;
       setFeedback(
-        `Seed complete: Services (${r.services.created} created, ${r.services.updated} updated), Projects (${r.projects.created} created, ${r.projects.updated} updated), Resources (${r.resources.created} created, ${r.resources.updated} updated), FAQs (${r.faqs.created} created, ${r.faqs.updated} updated), Pages (${r.pages.created} created, ${r.pages.updated} updated), Forms (${r.forms.created} created, ${r.forms.updated} updated), Testimonials (${r.testimonials.created} created, ${r.testimonials.updated} updated).`
+        `Seed complete: Services (${r.services.created} created, ${r.services.updated} updated), Projects (${r.projects.created} created, ${r.projects.updated} updated), Newsletters (${r.newsletter.created} created, ${r.newsletter.updated} updated), FAQs (${r.faqs.created} created, ${r.faqs.updated} updated), Pages (${r.pages.created} created, ${r.pages.updated} updated), Forms (${r.forms.created} created, ${r.forms.updated} updated), Testimonials (${r.testimonials.created} created, ${r.testimonials.updated} updated).`
       );
       router.refresh();
     } catch {
@@ -125,7 +125,7 @@ export const SeedBanner: React.FC = () => {
     status &&
       status.counts.services >= status.totals.services &&
       status.counts.projects >= status.totals.projects &&
-      status.counts.resources >= status.totals.resources &&
+      status.counts.newsletter >= status.totals.newsletter &&
       status.counts.faqs >= status.totals.faqs &&
       status.counts.pages >= status.totals.pages
   );
@@ -165,7 +165,7 @@ export const SeedBanner: React.FC = () => {
             {allSeeded ? 'Payload CMS is seeded with current site data' : 'Seed current website data into Payload CMS'}
           </h2>
           <p style={{ margin: 0, fontSize: '14px', color: 'var(--theme-elevation-700)' }}>
-            Imports Pages, Forms, Services, Projects, Resources, FAQs, and Testimonials from the seed source without creating duplicates.
+            Imports Pages, Forms, Services, Projects, Newsletters, FAQs, and Testimonials from the seed source without creating duplicates.
           </p>
         </div>
 
@@ -204,7 +204,7 @@ export const SeedBanner: React.FC = () => {
             <strong>Projects:</strong> {status.counts.projects} / {status.totals.projects}
           </span>
           <span>
-            <strong>Resources:</strong> {status.counts.resources} / {status.totals.resources}
+            <strong>Newsletters:</strong> {status.counts.newsletter} / {status.totals.newsletter}
           </span>
           <span>
             <strong>FAQs:</strong> {status.counts.faqs} / {status.totals.faqs}

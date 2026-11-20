@@ -17,11 +17,12 @@ import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html';
 import { getPayload } from 'payload';
 import { getPayloadSeedStatus, seedAllPayloadData } from './lib/seed';
 import { livePreviewBreakpoints, livePreviewUrl } from './lib/live-preview';
-import { getServerSideURL } from './lib/get-url';
+import { getAllowedOrigins, getServerSideURL } from './lib/get-url';
 import { Faqs } from './payload/collections/Faqs';
 import { Pages } from './payload/collections/Pages';
 import { Projects } from './payload/collections/Projects';
-import { Resources } from './payload/collections/Resources';
+import { Newsletter } from './payload/collections/Newsletter';
+import { Subscribers } from './payload/collections/Subscribers';
 import { Services } from './payload/collections/Services';
 import { Testimonials } from './payload/collections/Testimonials';
 import { Users } from './payload/collections/Users';
@@ -33,6 +34,7 @@ import { sharpTransformer } from '@payloadcms/transformer-sharp';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
+const allowedOrigins = getAllowedOrigins();
 
 // ─── Handlebars helpers ───────────────────────────────────────────────────────
 type SubmissionField = { field: string; value: unknown };
@@ -135,9 +137,10 @@ export default buildConfig({
     },
   },
   serverURL: getServerSideURL(),
-  cors: [getServerSideURL()].filter(Boolean),
+  cors: allowedOrigins,
+  csrf: allowedOrigins,
   email,
-  collections: [Pages, Services, Projects, Resources, Faqs, Testimonials, Media, Users],
+  collections: [Pages, Services, Projects, Newsletter, Subscribers, Faqs, Testimonials, Media, Users],
   globals: [Settings, Navigation, Footer],
   editor: lexicalEditor(),
   secret: requireEnv('PAYLOAD_SECRET'),
@@ -166,10 +169,10 @@ export default buildConfig({
   },
   plugins: [
     getMediaStoragePlugin(),
-    redirectsPlugin({ collections: ['pages', 'services', 'projects', 'resources'] }),
+    redirectsPlugin({ collections: ['pages', 'services', 'projects', 'newsletter'] }),
     searchPlugin({
-      collections: ['pages', 'services', 'projects', 'resources', 'faqs'],
-      defaultPriorities: { pages: 20, services: 15, projects: 12, resources: 10, faqs: 8 },
+      collections: ['pages', 'services', 'projects', 'newsletter', 'faqs'],
+      defaultPriorities: { pages: 20, services: 15, projects: 12, newsletter: 10, faqs: 8 },
       beforeSync: ({ originalDoc, searchDoc }) => ({
         ...searchDoc,
         category: originalDoc?.category,
@@ -186,8 +189,8 @@ export default buildConfig({
       },
     }),
     seoPlugin({
-      collections: ['pages', 'services', 'projects', 'resources', 'testimonials'],
-      globals: ['settings', 'footer', 'navigation'],
+      collections: ['pages', 'services', 'projects', 'newsletter', 'testimonials'],
+      globals: ['settings'],
       uploadsCollection: 'media',
       tabbedUI: true,
       generateTitle: ({ doc }) => String(doc?.title || doc?.name || doc?.authorName || ''),
@@ -196,7 +199,7 @@ export default buildConfig({
       generateURL: ({ doc, collectionSlug }) => {
         if (!doc?.slug) return getServerSideURL();
         const prefixes: Record<string, string> = {
-          pages: '', services: '/services/', projects: '/our-work/', resources: '/resources/', testimonials: '/testimonials/',
+          pages: '', services: '/services/', projects: '/our-work/', newsletter: '/newsletters/', testimonials: '/testimonials/',
         };
         const prefix = collectionSlug ? prefixes[collectionSlug] : undefined;
         return `${getServerSideURL()}${prefix || '/'}${doc.slug}`;

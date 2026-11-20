@@ -5,6 +5,26 @@ export interface SocialLinks {
   x: string;
 }
 
+export function getSocialLinks(social?: Partial<{ [K in keyof SocialLinks]: string | null }> | null) {
+  const platforms: { key: keyof SocialLinks; label: string }[] = [
+    { key: 'linkedin', label: 'LinkedIn' },
+    { key: 'github', label: 'GitHub' },
+    { key: 'instagram', label: 'Instagram' },
+    { key: 'x', label: 'X' },
+  ];
+
+  return platforms.flatMap(({ key, label }) => {
+    const value = social?.[key]?.trim();
+    if (!value) return [];
+    try {
+      const url = new URL(value);
+      return url.protocol === 'http:' || url.protocol === 'https:' ? [{ label, href: url.href }] : [];
+    } catch {
+      return [];
+    }
+  });
+}
+
 export const COMPANY = {
   brand: 'Your Web Page',
   shortMark: 'YOUR WEB PAGE',

@@ -5,12 +5,31 @@ import { type NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest): Promise<Response> {
   const { searchParams } = request.nextUrl;
   const q = searchParams.get('q')?.trim() || '';
-  const collection = searchParams.get('collection')?.trim() || 'resources';
+  const collection = searchParams.get('collection')?.trim() || 'newsletter';
   const category = searchParams.get('category')?.trim() || '';
 
   const payload = await getPayload({ config });
 
   try {
+    if (collection === 'newsletter') {
+      const conditions: Where[] = [{ _status: { equals: 'published' } }];
+      if (q) conditions.push({ or: [
+        { title: { contains: q } }, { excerpt: { contains: q } },
+        { 'meta.title': { contains: q } }, { 'meta.description': { contains: q } },
+        { 'tags.tag': { contains: q } },
+      ] });
+      if (category && category !== 'All') conditions.push({ category: { equals: category } });
+      const result = await payload.find({
+        collection: 'newsletter', where: { and: conditions }, limit: 100,
+        depth: 1, sort: 'sortOrder', overrideAccess: false,
+      });
+      return NextResponse.json({
+        docs: result.docs.map((doc) => ({ ...doc, tags: (doc.tags || []).map((tag) => tag.tag) })),
+        totalDocs: result.totalDocs,
+        source: 'collection',
+      });
+    }
+
     const andConditions: Where[] = [];
 
     if (collection) {
@@ -72,37 +91,6 @@ export async function GET(request: NextRequest): Promise<Response> {
         docs,
         totalDocs: searchResults.totalDocs,
         source: 'payload-search-plugin',
-      });
-    }
-
-    // 2. Fallback to direct collection query if search index has not indexed docs yet
-    if (collection === 'resources') {
-      const fallbackAnd: Where[] = [];
-      if (q) {
-        fallbackAnd.push({
-          or: [
-            { title: { contains: q } },
-            { excerpt: { contains: q } },
-            { 'sections.paragraphs': { contains: q } },
-          ],
-        });
-      }
-      if (category && category !== 'All') {
-        fallbackAnd.push({ category: { equals: category } });
-      }
-      const fallbackWhere: Where = fallbackAnd.length > 0 ? { and: fallbackAnd } : {};
-
-      const fallback = await payload.find({
-        collection: 'resources',
-        where: fallbackWhere,
-        limit: 100,
-        overrideAccess: true,
-      });
-
-      return NextResponse.json({
-        docs: fallback.docs,
-        totalDocs: fallback.totalDocs,
-        source: 'collection-fallback',
       });
     }
 

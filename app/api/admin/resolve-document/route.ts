@@ -28,8 +28,8 @@ export async function GET(request: NextRequest): Promise<Response> {
     } else if (segments[0] === 'our-work') {
       targetCollection = 'projects';
       targetSlug = segments[1];
-    } else if (segments[0] === 'resources') {
-      targetCollection = 'resources';
+    } else if (segments[0] === 'newsletters') {
+      targetCollection = 'newsletter';
       targetSlug = segments[1];
     } else {
       targetCollection = 'pages';
@@ -44,6 +44,27 @@ export async function GET(request: NextRequest): Promise<Response> {
   }
 
   try {
+    // Match the catch-all renderer, which gives CMS pages precedence over detail routes.
+    if (targetCollection !== 'pages') {
+      const page = await payload.find({
+        collection: 'pages',
+        where: { slug: { equals: cleanPath } },
+        limit: 1,
+        draft: true,
+        overrideAccess: true,
+        pagination: false,
+      });
+      if (page.docs.length > 0) {
+        const doc = page.docs[0];
+        return NextResponse.json({
+          collection: 'pages',
+          id: String(doc.id),
+          title: String(doc.title || cleanPath),
+          editUrl: `/admin/collections/pages/${doc.id}`,
+        });
+      }
+    }
+
     const result = await payload.find({
       collection: targetCollection as any,
       where: { slug: { equals: targetSlug } },
@@ -61,28 +82,6 @@ export async function GET(request: NextRequest): Promise<Response> {
         title: String(doc.title || doc.name || targetSlug),
         editUrl: `/admin/collections/${targetCollection}/${doc.id}`,
       });
-    }
-
-    // Fallback search in pages
-    if (targetCollection !== 'pages') {
-      const pageFallback = await payload.find({
-        collection: 'pages',
-        where: { slug: { equals: cleanPath || 'home' } },
-        limit: 1,
-        draft: true,
-        overrideAccess: true,
-        pagination: false,
-      });
-
-      if (pageFallback.docs.length > 0) {
-        const doc = pageFallback.docs[0] as Record<string, any>;
-        return NextResponse.json({
-          collection: 'pages',
-          id: String(doc.id),
-          title: String(doc.title || cleanPath),
-          editUrl: `/admin/collections/pages/${doc.id}`,
-        });
-      }
     }
 
     return NextResponse.json({

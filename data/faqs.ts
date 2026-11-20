@@ -38,7 +38,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
         id: 'how-to-get-in-touch',
         question: 'How do I get in touch?',
         answer:
-          'You can send a message through our Contact or Start a Project pages, email hello@yourwebpage.ca, or call (902) 629-9691.',
+          'You can send a message through our Contact page, email hello@yourwebpage.ca, or call (902) 629-9691.',
       },
     ],
   },

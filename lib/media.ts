@@ -34,9 +34,21 @@ export function resolveImageUrl(
   const sizeUrl = media.sizes?.[size]?.url;
   const raw = sizeUrl ?? media.url;
   if (!raw) return null;
-  // Keep app-hosted media same-origin; external storage URLs pass through.
+
+  // Keep app-hosted media same-origin. Absolute loopback URLs can be left over
+  // from an earlier dev origin (localhost vs. 127.0.0.1), so strip those too.
   if (raw.startsWith('http://') || raw.startsWith('https://')) {
-    return base && raw.startsWith(`${base}/`) ? raw.slice(base.length) : raw;
+    try {
+      const parsed = new URL(raw);
+      const baseUrl = base ? new URL(base) : null;
+      const isLoopback = ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
+      if ((baseUrl && parsed.origin === baseUrl.origin) || (process.env.NODE_ENV !== 'production' && isLoopback)) {
+        return `${parsed.pathname}${parsed.search}`;
+      }
+    } catch {
+      // Fall through and keep the original URL if it cannot be parsed.
+    }
+    return raw;
   }
   if (raw.startsWith('/')) return raw;
   return base ? `${base}${raw}` : raw;

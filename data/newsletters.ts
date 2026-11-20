@@ -1,29 +1,29 @@
-export type ResourceCategory =
+export type NewsletterCategory =
   | 'Guide'
   | 'Checklist'
   | 'Tutorial'
   | 'Case Study'
   | 'Notes';
 
-export interface ResourceSection {
+export interface NewsletterSection {
   heading?: string;
   paragraphs?: string[];
   bullets?: string[];
 }
 
-export interface ResourceEntry {
+export interface NewsletterEntry {
   slug: string;
   title: string;
   excerpt: string;
-  category: ResourceCategory;
+  category: NewsletterCategory;
   tags: string[];
   publishDate: string;
   isoDate: string;
   readTime: number;
-  sections: ResourceSection[];
+  sections: NewsletterSection[];
 }
 
-export const RESOURCE_CATEGORIES: readonly ('All' | ResourceCategory)[] = [
+export const NEWSLETTER_CATEGORIES: readonly ('All' | NewsletterCategory)[] = [
   'All',
   'Guide',
   'Checklist',
@@ -32,7 +32,7 @@ export const RESOURCE_CATEGORIES: readonly ('All' | ResourceCategory)[] = [
   'Notes',
 ] as const;
 
-export const RESOURCES: ResourceEntry[] = [
+export const NEWSLETTERS: NewsletterEntry[] = [
   {
     slug: 'what-a-business-website-needs',
     title: 'What a business website actually needs',
@@ -111,7 +111,7 @@ export const RESOURCES: ResourceEntry[] = [
       {
         heading: 'Content management systems',
         paragraphs: [
-          'A dedicated content management system (CMS)—whether traditional or modern headless tooling—shines when your team updates pages, events, product catalogues or resource articles every week. Structured content fields, editorial drafts and role permissions keep regular publishing orderly for non-technical staff.',
+          'A dedicated content management system (CMS)—whether traditional or modern headless tooling—shines when your team updates pages, events, product catalogues or newsletter articles every week. Structured content fields, editorial drafts and role permissions keep regular publishing orderly for non-technical staff.',
           'Traditional plugin-heavy CMS setups require disciplined care, because unpatched extensions are a frequent source of sluggish performance and security vulnerabilities. A modern headless setup separates your editing interface from the fast public storefront, avoiding plugin sprawl while keeping editing simple.',
         ],
       },
@@ -316,7 +316,7 @@ export const RESOURCES: ResourceEntry[] = [
       {
         heading: 'Why phased launches often work best',
         paragraphs: [
-          'If you are working toward an immovable date—say, welcoming visitors ahead of the summer season or launching a new service line—consider breaking the build into two calm stages. Stage one puts your essential pages, clean mobile experience and enquiry path live on time. Stage two layers on secondary resources, expanded product lines or deeper integrations once the core site is already earning enquiries.',
+          'If you are working toward an immovable date—say, welcoming visitors ahead of the summer season or launching a new service line—consider breaking the build into two calm stages. Stage one puts your essential pages, clean mobile experience and enquiry path live on time. Stage two layers on secondary newsletter, expanded product lines or deeper integrations once the core site is already earning enquiries.',
         ],
       },
       {
@@ -529,16 +529,16 @@ export const RESOURCES: ResourceEntry[] = [
   },
 ];
 
-export function getResourceBySlug(slug: string): ResourceEntry | undefined {
-  return RESOURCES.find((r) => r.slug === slug);
+export function getNewsletterBySlug(slug: string): NewsletterEntry | undefined {
+  return NEWSLETTERS.find((r) => r.slug === slug);
 }
 
-export function getRelatedResources(currentSlug: string, count = 3): ResourceEntry[] {
-  const index = RESOURCES.findIndex((r) => r.slug === currentSlug);
-  if (index === -1) return RESOURCES.slice(0, count);
-  const next: ResourceEntry[] = [];
+export function getRelatedNewsletters(currentSlug: string, count = 3): NewsletterEntry[] {
+  const index = NEWSLETTERS.findIndex((r) => r.slug === currentSlug);
+  if (index === -1) return NEWSLETTERS.slice(0, count);
+  const next: NewsletterEntry[] = [];
   for (let i = 1; i <= count; i++) {
-    next.push(RESOURCES[(index + i) % RESOURCES.length]);
+    next.push(NEWSLETTERS[(index + i) % NEWSLETTERS.length]);
   }
   return next;
 }

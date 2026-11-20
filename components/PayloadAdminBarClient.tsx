@@ -26,8 +26,8 @@ function formatCollectionLabel(collection: string | null): string {
       return 'Service';
     case 'projects':
       return 'Project';
-    case 'resources':
-      return 'Resource';
+    case 'newsletter':
+      return 'Newsletter';
     case 'faqs':
       return 'FAQ';
     case 'testimonials':
