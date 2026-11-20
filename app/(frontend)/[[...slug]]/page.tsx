@@ -31,6 +31,7 @@ import {
   getCmsProjects,
   getCmsResourceBySlug,
   getCmsResources,
+  getCmsSettings,
   getCmsServiceBySlug,
   getCmsServices,
 } from '@/lib/cms';
@@ -116,7 +117,8 @@ export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }): Promise<Metadata> {
   const { slug = [] } = await params;
-  const page = await getCmsPage(slug.join('/'));
+  const [page, settings] = await Promise.all([getCmsPage(slug.join('/')), getCmsSettings()]);
+  const fallbackImage = settings?.meta?.image;
   if (!page && slug.length === 2) {
     if (slug[0] === 'services') {
       const service = await getCmsServiceBySlug(slug[1]);
@@ -125,6 +127,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
         description: service.meta?.description || service.metaDescription,
         path: `/services/${service.slug}`,
         image: service.image as { url?: string | null; sizes?: { og?: { url?: string | null } } } | null,
+        fallbackImage,
       });
     }
     if (slug[0] === 'our-work') {
@@ -134,6 +137,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
         description: project.meta?.description || project.summary,
         path: `/our-work/${project.slug}`,
         image: project.image as { url?: string | null; sizes?: { og?: { url?: string | null } } } | null,
+        fallbackImage,
       });
     }
     if (slug[0] === 'resources') {
@@ -143,6 +147,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
         description: resource.meta?.description || resource.excerpt,
         path: `/resources/${resource.slug}`,
         image: resource.image as { url?: string | null; sizes?: { og?: { url?: string | null } } } | null,
+        fallbackImage,
         type: 'article',
       });
     }
@@ -157,6 +162,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug?: st
     description: meta?.description || hero?.lead || '',
     path: slug.length ? `/${slug.join('/')}` : '/',
     image: meta?.image,
+    fallbackImage,
   });
 }
 

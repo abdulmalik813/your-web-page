@@ -188,6 +188,7 @@ export default buildConfig({
     seoPlugin({
       collections: ['pages', 'services', 'projects', 'resources', 'testimonials'],
       globals: ['settings', 'footer', 'navigation'],
+      uploadsCollection: 'media',
       tabbedUI: true,
       generateTitle: ({ doc }) => String(doc?.title || doc?.name || doc?.authorName || ''),
       generateDescription: ({ doc }) =>

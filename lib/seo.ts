@@ -32,16 +32,18 @@ export function buildPageMetadata({
   description,
   path,
   image,
+  fallbackImage,
   type = 'website',
 }: {
   title: string;
   description: string;
   path: string;
   image?: { url?: string | null; sizes?: { og?: { url?: string | null } } } | null;
+  fallbackImage?: { url?: string | null; sizes?: { og?: { url?: string | null } } } | null;
   type?: 'website' | 'article';
 }): Metadata {
   const url = buildCanonicalUrl(path);
-  const ogImage = resolveOgImageUrl(image);
+  const ogImage = resolveOgImageUrl(image ?? fallbackImage);
 
   return {
     title,

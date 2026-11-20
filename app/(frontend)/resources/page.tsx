@@ -1,12 +1,12 @@
 import { PageHeader } from '@/components/PageHeader';
 import { ResourcesBrowser } from '@/components/ResourcesBrowser';
-import { getCmsResources, getCmsPage } from '@/lib/cms';
+import { getCmsResources, getCmsPage, getCmsSettings } from '@/lib/cms';
 import { buildPageMetadata } from '@/lib/seo';
 import { draftMode } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 export async function generateMetadata() {
-  const page = await getCmsPage('resources');
+  const [page, settings] = await Promise.all([getCmsPage('resources'), getCmsSettings()]);
   if (!page) return {};
   const meta = page?.meta as { title?: string; description?: string; image?: { url?: string | null; sizes?: { og?: { url?: string | null } } } | null } | undefined;
   const hero = Array.isArray(page.layout)
@@ -17,6 +17,7 @@ export async function generateMetadata() {
     description: meta?.description || hero?.lead || '',
     path: '/resources',
     image: meta?.image,
+    fallbackImage: settings?.meta?.image,
   });
 }
 

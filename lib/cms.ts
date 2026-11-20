@@ -407,7 +407,7 @@ export function getCmsPage(slug: string, draft = false): Promise<any | null> {
 
 async function querySettings(draft = false): Promise<any> {
   const payload = await getPayloadClient();
-  return payload.findGlobal({ slug: 'settings', draft, overrideAccess: draft });
+  return payload.findGlobal({ slug: 'settings', draft, depth: 1, overrideAccess: draft });
 }
 
 const getCachedSettings = unstable_cache(() => querySettings(false), ['cms-global-settings'], {

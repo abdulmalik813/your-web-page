@@ -301,6 +301,10 @@ export interface Page {
   meta?: {
     title?: string | null;
     description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
   };
   createdBy?: {
     relationTo: 'users';
@@ -665,55 +669,6 @@ export interface LegalBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "services".
- */
-export interface Service {
-  id: string;
-  slug: string;
-  sortOrder?: number | null;
-  title: string;
-  /**
-   * Optional image shown on service cards and its detail page.
-   */
-  image?: (string | null) | Media;
-  short: string;
-  metaDescription: string;
-  intro: string;
-  overview: {
-    text: string;
-    id?: string | null;
-  }[];
-  included: {
-    text: string;
-    id?: string | null;
-  }[];
-  forWho: {
-    text: string;
-    id?: string | null;
-  }[];
-  steps: {
-    title: string;
-    description: string;
-    id?: string | null;
-  }[];
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-  };
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
@@ -841,6 +796,59 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: string;
+  slug: string;
+  sortOrder?: number | null;
+  title: string;
+  /**
+   * Optional image shown on service cards and its detail page.
+   */
+  image?: (string | null) | Media;
+  short: string;
+  metaDescription: string;
+  intro: string;
+  overview: {
+    text: string;
+    id?: string | null;
+  }[];
+  included: {
+    text: string;
+    id?: string | null;
+  }[];
+  forWho: {
+    text: string;
+    id?: string | null;
+  }[];
+  steps: {
+    title: string;
+    description: string;
+    id?: string | null;
+  }[];
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "projects".
  */
 export interface Project {
@@ -868,6 +876,10 @@ export interface Project {
   meta?: {
     title?: string | null;
     description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
   };
   createdBy?: {
     relationTo: 'users';
@@ -907,6 +919,10 @@ export interface Resource {
   meta?: {
     title?: string | null;
     description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
   };
   createdBy?: {
     relationTo: 'users';
@@ -964,6 +980,10 @@ export interface Testimonial {
   meta?: {
     title?: string | null;
     description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
   };
   createdBy?: {
     relationTo: 'users';
@@ -1237,6 +1257,7 @@ export interface PagesSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
       };
   createdBy?: T;
   updatedBy?: T;
@@ -1407,6 +1428,7 @@ export interface ServicesSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
       };
   createdBy?: T;
   updatedBy?: T;
@@ -1445,6 +1467,7 @@ export interface ProjectsSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
       };
   createdBy?: T;
   updatedBy?: T;
@@ -1478,6 +1501,7 @@ export interface ResourcesSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
       };
   createdBy?: T;
   updatedBy?: T;
@@ -1518,6 +1542,7 @@ export interface TestimonialsSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
       };
   createdBy?: T;
   updatedBy?: T;
@@ -1981,6 +2006,10 @@ export interface Setting {
   meta?: {
     title?: string | null;
     description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
   };
   createdBy?: {
     relationTo: 'users';
@@ -2015,6 +2044,10 @@ export interface Navigation {
   meta?: {
     title?: string | null;
     description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
   };
   createdBy?: {
     relationTo: 'users';
@@ -2051,6 +2084,10 @@ export interface Footer {
   meta?: {
     title?: string | null;
     description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
   };
   createdBy?: {
     relationTo: 'users';
@@ -2112,6 +2149,7 @@ export interface SettingsSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
       };
   createdBy?: T;
   updatedBy?: T;
@@ -2142,6 +2180,7 @@ export interface NavigationSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
       };
   createdBy?: T;
   updatedBy?: T;
@@ -2174,6 +2213,7 @@ export interface FooterSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        image?: T;
       };
   createdBy?: T;
   updatedBy?: T;

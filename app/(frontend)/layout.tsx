@@ -8,7 +8,7 @@ import { PayloadAdminBar } from '@/components/PayloadAdminBar';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { SiteBackground } from '@/components/SiteBackground';
 import { getCmsFooter, getCmsNavigation, getCmsServices, getCmsSettings } from '@/lib/cms';
-import { buildCanonicalUrl, getBaseUrl } from '@/lib/seo';
+import { buildCanonicalUrl, getBaseUrl, resolveOgImageUrl } from '@/lib/seo';
 import { draftMode } from 'next/headers';
 import './globals.css';
 
@@ -36,6 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const brand = settings?.brand || '';
   const description = settings?.meta?.description || '';
   const title = settings?.meta?.title || brand;
+  const image = resolveOgImageUrl(settings?.meta?.image);
   return {
     metadataBase: new URL(getBaseUrl()),
     title,
@@ -50,11 +51,13 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: 'en_CA',
       siteName: brand,
       url: buildCanonicalUrl('/'),
+      ...(image ? { images: [{ url: image, width: 1200, height: 630 }] } : {}),
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      ...(image ? { images: [image] } : {}),
     },
   };
 }
