@@ -32,13 +32,15 @@ to enable or exit preview mode.
 **Prerequisites:** Node.js 20.9 or newer, pnpm, and Docker Compose.
 
 1. If `.env` does not exist, copy `.env.example` to `.env`; otherwise merge its required values into your existing file.
-2. Start MongoDB and Silo:
-   `docker compose -f docker-compose.dev.yml up -d mongodb silo-s3-init`
+2. Start MongoDB, Silo, and the local Mailpit inbox:
+   `docker compose -f docker-compose.dev.yml up -d mongodb silo-s3-init mailpit`
 3. Install dependencies:
    `pnpm install`
 4. Start the development server:
    `pnpm dev`
 5. Open `http://localhost:3000`.
+
+All outgoing local email is captured by Mailpit at `http://localhost:8025`; no real mail is sent.
 
 ## Database
 

@@ -57,6 +57,8 @@ const contactCustomerHtml = `<!doctype html>
 </td></tr></table>
 </body></html>`;
 
+const inboxMailbox = `"${COMPANY.brand}" <${process.env.EMAIL_TO || COMPANY.email}>`;
+
 const FORM_DEFINITIONS = [
   {
     title: 'Contact',
@@ -105,17 +107,17 @@ export async function seedForms(
       fields: form.fields,
       emails: [
         {
-          emailTo: '"Your Web Page" <hello@yourwebpage.ca>',
+          emailTo: inboxMailbox,
           replyTo: '"{{name}}" <{{email}}>',
-          emailFrom: '"Your Web Page" <noreply@yourwebpage.ca>',
+          emailFrom: '',
           subject: `New website enquiry — {{name}}`,
           messageType: 'html',
           htmlMessage: contactAdminHtml,
         },
         {
           emailTo: '"{{name}}" <{{email}}>',
-          replyTo: '"Your Web Page" <hello@yourwebpage.ca>',
-          emailFrom: '"Your Web Page" <noreply@yourwebpage.ca>',
+          replyTo: inboxMailbox,
+          emailFrom: '',
           subject: `Thanks for getting in touch — ${COMPANY.brand}`,
           messageType: 'html',
           htmlMessage: contactCustomerHtml,

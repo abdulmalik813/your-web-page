@@ -69,6 +69,15 @@ services:
         policy="{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"PublicReadImages\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::$$S3_BUCKET/*\"}]}"
         aws --endpoint-url http://silo:9000 s3api put-bucket-policy --bucket "$$S3_BUCKET" --policy "$$policy"
 
+  # Local catch-all SMTP inbox (web UI: http://localhost:8025)
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: your-web-page-mailpit
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+
 volumes:
   mongodb_data:
     driver: local
